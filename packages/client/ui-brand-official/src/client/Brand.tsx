@@ -1,15 +1,11 @@
 import type { SidebarBrandMarkOwnerProps } from '@deepseek-ai/dsh-client-ui-sidebar/client'
+import { BrandWordmark } from '@deepseek-ai/dsh-client-ui-primitives'
 
-/** 品牌展示名。改这里即可全局替换侧栏文字。 */
+/** 品牌展示名。 */
 const BRAND_NAME = 'Xiaoxiao'
 
-/** 品牌主色。 */
-const BRAND_COLOR = '#2F6FEB'
-
 /**
- * 渲染品牌图标（侧栏 mark 插槽）。
- *
- * 不继承上游的鲸鱼标识，改用自有 SVG，避免携带上游商标视觉。
+ * 渲染品牌图标（侧栏 mark 插槽）：三层同心环 + 实心核心。
  * viewBox 固定 0 0 24 24 以适配宿主给出的任意 size。
  * @param props - 宿主提供的 mark 展示参数。
  */
@@ -25,27 +21,19 @@ export function OfficialBrandMark({ size }: SidebarBrandMarkOwnerProps) {
       aria-label={BRAND_NAME}
       style={{ flex: '0 0 auto' }}
     >
-      <circle cx="12" cy="12" r="9" stroke={BRAND_COLOR} strokeWidth="2" />
-      <circle cx="12" cy="12" r="3.5" fill={BRAND_COLOR} />
+      <circle cx="12" cy="12" r="9.5" stroke="currentColor" strokeWidth="1.9" />
+      <circle cx="12" cy="12" r="5.2" stroke="currentColor" strokeWidth="1.2" opacity="0.5" />
+      <circle cx="12" cy="12" r="2.1" fill="currentColor" />
     </svg>
   )
 }
 
 /**
- * 渲染品牌文字标识（不含 mark，mark 由独立插槽承担）。
+ * 渲染品牌名字标识（侧栏 name 插槽）。
+ *
+ * 复用 BrandWordmark 以带上 HARNESS 品类徽章；mark 由独立插槽承担，
+ * 所以这里关掉它自己的前置图标。
  */
 export function OfficialBrandName() {
-  return (
-    <span
-      style={{
-        fontWeight: 600,
-        fontSize: '0.9375rem',
-        letterSpacing: '0.01em',
-        color: 'inherit',
-        whiteSpace: 'nowrap',
-      }}
-    >
-      {BRAND_NAME}
-    </span>
-  )
+  return <BrandWordmark includeMark={false} size={22} />
 }
