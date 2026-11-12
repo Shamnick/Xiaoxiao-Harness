@@ -9,8 +9,11 @@ export interface BrandWordmarkProps extends IconProps {
 /** Product name rendered by the wordmark. */
 const BRAND_NAME = 'Xiaoxiao'
 
+/** Product category badge rendered in a filled pill after the name. */
+const BRAND_BADGE = 'HARNESS'
+
 /**
- * Render the brand wordmark.
+ * Render the brand wordmark: mark, name, and the product-category badge.
  * @param props.size - height in px (default 24; width follows the selected artwork).
  * @param props.className - extra class for layout placement.
  * @param props.includeMark - whether to include the leading mark.
@@ -18,6 +21,7 @@ const BRAND_NAME = 'Xiaoxiao'
  */
 export function BrandWordmark({ size = 24, className, includeMark = true }: BrandWordmarkProps) {
   const width = includeMark ? 182 : 156
+  const startX = includeMark ? 34 : 26
   return (
     <svg
       width={(size * width) / 24}
@@ -38,16 +42,33 @@ export function BrandWordmark({ size = 24, className, includeMark = true }: Bran
         </g>
       )}
       <text
-        x={includeMark ? 34 : 26}
+        x={startX}
         y="17"
         fill="currentColor"
         fontFamily="-apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif"
-        fontSize="18"
+        fontSize="17"
         fontWeight="600"
-        letterSpacing="0.2"
+        letterSpacing="0.1"
       >
         {BRAND_NAME}
       </text>
+      {/* Category badge: a filled pill in the current colour with inverted text,
+          mirroring how the upstream wordmark marks the product family. */}
+      <g transform={`translate(${startX + 78} 5)`}>
+        <rect width="52" height="14" rx="3" fill="currentColor" />
+        <text
+          x="26"
+          y="10.4"
+          textAnchor="middle"
+          fill="var(--dsw-alias-label-primary-inverted, #111)"
+          fontFamily="-apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif"
+          fontSize="9"
+          fontWeight="700"
+          letterSpacing="0.6"
+        >
+          {BRAND_BADGE}
+        </text>
+      </g>
     </svg>
   )
 }

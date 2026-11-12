@@ -1,16 +1,20 @@
 import type { IconProps } from './icons/props.ts'
 
-/** Native viewBox of {@link FISH_LOGO_PATH} (width and height in user units). */
+/** Native viewBox of the brand mark (width and height in user units). */
 export const FISH_LOGO_VIEWBOX = { width: 23.16, height: 17.04 }
 
 /**
- * Brand mark path data: a ring with a solid core, drawn inside the historical
- * 23.16 x 17.04 viewBox so consumers composing their own svg (entrance effects,
- * masks) keep working unchanged.
+ * Brand mark geometry: a concentric two-ring mark with a solid core.
+ *
+ * The name is kept for consumers that compose their own svg around the same
+ * geometry (entrance effects, masks), so they keep working unchanged.
  */
 export const FISH_LOGO_PATH = [
-  'M11.58 0.77a8.52 8.52 0 1 0 0 17.04 8.52 8.52 0 0 0 0-17.04Z',
-  'm11.58 4.14a5.15 5.15 0 1 1 0 10.3 5.15 5.15 0 0 1 0-10.3Z',
+  // Outer ring
+  'M11.58 1.02a7.5 7.5 0 1 0 0 15 7.5 7.5 0 0 0 0-15Z',
+  'm11.58 2.62a5.9 5.9 0 1 1 0 11.8 5.9 5.9 0 0 1 0-11.8Z',
+  // Core
+  'M11.58 6.72a1.8 1.8 0 1 0 0 3.6 1.8 1.8 0 0 0 0-3.6Z',
 ].join(' ')
 
 /**
@@ -29,7 +33,10 @@ export function FishLogo({ size = 24, className }: IconProps) {
       fill="none"
       aria-hidden="true"
     >
+      {/* Outer ring solid, inner ring softened, core solid — gives the mark
+          depth without gradients that would clash across render contexts. */}
       <path d={FISH_LOGO_PATH} fill="currentColor" fillRule="evenodd" clipRule="evenodd" />
+      <circle cx="11.58" cy="8.52" r="4.5" stroke="currentColor" strokeWidth="1.1" opacity="0.45" />
     </svg>
   )
 }
