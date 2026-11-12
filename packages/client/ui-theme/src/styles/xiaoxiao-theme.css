@@ -1,0 +1,113 @@
+/*
+ * Xiaoxiao Harness — visual theme layer.
+ *
+ * Loaded after the upstream sheets so it wins the cascade without editing them.
+ * Everything is expressed through the existing --dsw-static-* / --dsw-alias-*
+ * token contract, so component CSS keeps working unchanged.
+ *
+ * Direction: cooler and deeper than the upstream neutral ramp, one saturated
+ * indigo accent, generous corner radii, faster motion, and low-contrast
+ * hairlines that read as edges rather than lines.
+ */
+
+/* ── Base primitives (shared by both appearances) ─────────────────────── */
+
+:root {
+  /* Motion: snappier than upstream's 0.2s; interfaces should feel immediate. */
+  --ds-transition-duration: 0.15s;
+  --ds-transition-duration-fast: 0.08s;
+  --ds-transition-duration-slow: 0.24s;
+  --ds-ease-in-out: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Radii: slightly larger across the board for a softer, more modern read. */
+  --dsw-radius-xs: 6px;
+  --dsw-radius-sm: 10px;
+  --dsw-radius-md: 14px;
+  --dsw-radius-lg: 20px;
+  --dsw-radius-xl: 24px;
+  --dsw-radius-panel: 32px;
+
+  /* Accent: indigo instead of the upstream blue. */
+  --dsw-static-deepseek-450: #7c7cf5;
+  --dsw-static-blue-500: #6e6ef0;
+}
+
+/* ── Dark appearance ──────────────────────────────────────────────────── */
+
+body[data-ds-dark-theme] {
+  /* Neutral ramp: colder and darker, with a wider gap between layers so
+     panels separate by luminance instead of by borders alone. */
+  --dsw-static-neutral-bluish-1000: #ffffff;
+  --dsw-static-neutral-bluish-950: #07080b;
+  --dsw-static-neutral-bluish-900: #0b0d11;
+  --dsw-static-neutral-bluish-875: #11141a;
+  --dsw-static-neutral-bluish-850: #171b22;
+  --dsw-static-neutral-bluish-800: #1e232b;
+  --dsw-static-neutral-bluish-750: #262c36;
+  --dsw-static-neutral-bluish-700: #313845;
+
+  /* Type ramp: near-white primary, cool grey secondaries. */
+  --dsw-static-neutral-bluish-50: #f4f6fa;
+  --dsw-static-neutral-bluish-55: #eef1f7;
+  --dsw-static-neutral-bluish-75: #dfe4ec;
+  --dsw-static-neutral-bluish-90: #cdd4df;
+  --dsw-static-neutral-bluish-100: #e4e8ef;
+  --dsw-static-neutral-bluish-200: #c3cad6;
+  --dsw-static-neutral-bluish-300: #9aa4b2;
+  --dsw-static-neutral-bluish-310: #949eac;
+  --dsw-static-neutral-bluish-400: #757f8e;
+  --dsw-static-neutral-bluish-500: #667080;
+  --dsw-static-neutral-bluish-600: #566071;
+
+  /* Hairlines: dimmer, so surfaces read as continuous. */
+  --dsw-alias-border-l1: rgba(255, 255, 255, 0.055);
+  --dsw-alias-border-l2: rgba(255, 255, 255, 0.10);
+  --dsw-alias-border-l3: rgba(255, 255, 255, 0.14);
+  --dsw-alias-border-l4: rgba(255, 255, 255, 0.18);
+
+  /* Masks sit on an almost-black base. */
+  --dsw-alias-bg-mask-1: rgba(3, 4, 6, 0.62);
+  --dsw-alias-bg-mask-2: rgba(3, 4, 6, 0.32);
+  --dsw-alias-bg-mask-3: rgba(3, 4, 6, 0.56);
+  --dsw-alias-bg-skeleton: rgba(255, 255, 255, 0.06);
+}
+
+/* ── Light appearance ─────────────────────────────────────────────────── */
+
+/* Light is the default appearance upstream: there is no data-ds-light-theme
+   attribute, only the absence of data-ds-dark-theme. */
+body:not([data-ds-dark-theme]) {
+  --dsw-static-neutral-bluish-50: #f7f8fb;
+  --dsw-static-neutral-bluish-55: #f2f4f8;
+  --dsw-static-neutral-bluish-75: #e9ecf2;
+  --dsw-static-neutral-bluish-90: #dde2ea;
+  --dsw-alias-border-l1: rgba(12, 16, 24, 0.07);
+  --dsw-alias-border-l2: rgba(12, 16, 24, 0.11);
+  --dsw-alias-border-l3: rgba(12, 16, 24, 0.16);
+  --dsw-alias-border-l4: rgba(12, 16, 24, 0.22);
+}
+
+/* ── Interaction polish ───────────────────────────────────────────────── */
+
+/* Focus rings follow the accent and stay hairline-thin. */
+:focus-visible {
+  outline: 2px solid var(--dsw-alias-brand-primary, #7c7cf5);
+  outline-offset: 2px;
+}
+
+/* Scrollbars: invisible until the surface is hovered. */
+body[data-ds-dark-theme] ::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.10);
+}
+body[data-ds-dark-theme] ::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.20);
+}
+
+/* Respect the system motion preference regardless of component defaults. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --ds-transition-duration: 0.001s;
+    --ds-transition-duration-fast: 0.001s;
+    --ds-transition-duration-slow: 0.001s;
+  }
+}
