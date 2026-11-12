@@ -89,14 +89,14 @@ function rejectElectronProfile(program: Command, profile: string): void {
 /** The launcher's own help text; each app prints its own. */
 const HELP_EXAMPLES = `
 Examples:
-  dsh web                                   boot the web profile (same as: dsh --profile web)
-  dsh rescue --from-default-profile web
+  xxh web                                   boot the web profile (same as: dsh --profile web)
+  xxh rescue --from-default-profile web
                                             recreate rescue from the shipped web template, then boot it
-  dsh headless "run the tests"              answer one task, print the result, and exit
-  dsh tui --patch ./extra.yml               boot a custom profile with one extra overlay
-  dsh tui --resume <session>                arguments after the launcher flags reach the app
-  dsh web --help                            the web app's own flags and help
-  dsh plugin --profile tui add <package>    install a plugin into the tui profile
+  xxh headless "run the tests"              answer one task, print the result, and exit
+  xxh tui --patch ./extra.yml               boot a custom profile with one extra overlay
+  xxh tui --resume <session>                arguments after the launcher flags reach the app
+  xxh web --help                            the web app's own flags and help
+  xxh plugin --profile tui add <package>    install a plugin into the tui profile
 `
 
 /**
@@ -150,9 +150,9 @@ export function parseDshArgs(argv: readonly string[], version: string, manageDes
   // inferred type would be circular through its own chain.
   const program: Command = new Command()
   program
-    .name('dsh')
+    .name('xxh')
     .version(version, '-V, --version', 'output the version number')
-    .usage('[--profile] <name> [options] [app-args...]\n       dsh plugin --profile <name> <pnpm-args...>')
+    .usage('[--profile] <name> [options] [app-args...]\n       xxh plugin --profile <name> <pnpm-args...>')
     .description('xxh: boot a Xiaoxiao Harness profile — an ordered stack of plugin-bundle patch layers under your own overrides.')
     .addHelpText('after', HELP_EXAMPLES)
     .exitOverride()
