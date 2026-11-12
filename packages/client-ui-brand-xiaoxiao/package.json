@@ -1,0 +1,33 @@
+{
+  "name": "@xiaoxiao/dsh-client-ui-brand-xiaoxiao",
+  "version": "0.1.0",
+  "description": "Xiaoxiao brand occupants for the dsh Web client's sidebar slots",
+  "license": "MIT",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": {
+      "types": "./lib/types/index.d.ts",
+      "default": "./lib/index.js"
+    },
+    "./client": {
+      "types": "./lib/types/client/index.d.ts",
+      "default": "./lib/client.js"
+    },
+    "./package.json": "./package.json",
+    "./locale/*.json": "./locale/*.json"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/dsh-client-ui-primitives": "*",
+    "react": "^18 || ^19"
+  },
+  "peerDependenciesMeta": {
+    "@deepseek-ai/dsh-client-ui-primitives": {
+      "optional": true
+    }
+  },
+  "files": [
+    "lib",
+    "locale"
+  ]
+}
