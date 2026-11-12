@@ -108,7 +108,9 @@ export function createElectronBuilderConfig(
   const packaged = resolveDesktopBuildCommit(env)
   return {
     appId,
-    protocols: [{ name: 'Xiaoxiao Harness', schemes: ['dsh', 'xxh'] }],
+    // Only own scheme: sharing `dsh` with DeepSeek Harness and other forks made
+    // LaunchServices open the wrong app when a .dsh deep link or the Dock icon was used.
+    protocols: [{ name: 'Xiaoxiao Harness', schemes: ['xxh'] }],
     extraMetadata: {
       dshDesktopAppId: appId,
       dshDesktopUpdateChannel: update?.channel ?? 'nightly',
