@@ -819,3 +819,103 @@
     animation: none;
   }
 }
+
+/* ── Xiaoxiao refinement layer ──────────────────────────────────────────
+   Appended after the upstream rules. Sidebar rows gain a considered hover and
+   selection treatment, and the brand row settles in on load. */
+
+@keyframes xx-sidebar-in {
+  from { opacity: 0; transform: translateX(-6px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.logoRow {
+  animation: xx-sidebar-in 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.brandMark {
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.logoRow:hover .brandMark {
+  transform: rotate(-8deg) scale(1.06);
+}
+
+/* Session rows: hover raises the row almost imperceptibly and warms the text;
+   selection uses a soft accent wash plus a left inset marker rather than a
+   full-bleed fill, so long lists stay calm. */
+.panelList [role='treeitem'],
+.panelList [role='option'],
+.panelList li > button {
+  position: relative;
+  border-radius: var(--dsw-radius-sm);
+  transition:
+    background-color 0.13s ease,
+    color 0.13s ease,
+    transform 0.13s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (hover: hover) {
+  .panelList [role='treeitem']:hover,
+  .panelList [role='option']:hover,
+  .panelList li > button:hover {
+    background-color: color-mix(in srgb, var(--dsw-alias-bg-layer-2) 70%, transparent);
+    transform: translateX(1px);
+  }
+}
+
+.panelList [aria-selected='true']::before,
+.panelList [data-selected='true']::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 50%;
+  width: 2px;
+  height: 60%;
+  transform: translateY(-50%);
+  border-radius: 1px;
+  background: var(--dsw-alias-brand-primary);
+  opacity: 0.9;
+}
+
+/* The new-session action is the primary action in this column: it gets a
+   visible resting edge and a real press state. */
+.newSession {
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.12s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.15s ease;
+}
+
+@media (hover: hover) {
+  .newSession:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+  }
+}
+
+.newSession:active {
+  transform: translateY(0) scale(0.99);
+  transition-duration: 0.06s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logoRow,
+  .brandMark,
+  .newSession,
+  .panelList [role='treeitem'],
+  .panelList [role='option'],
+  .panelList li > button {
+    animation: none;
+    transition: none;
+  }
+  .logoRow:hover .brandMark,
+  .newSession:hover,
+  .newSession:active,
+  .panelList [role='treeitem']:hover,
+  .panelList [role='option']:hover,
+  .panelList li > button:hover {
+    transform: none;
+  }
+}

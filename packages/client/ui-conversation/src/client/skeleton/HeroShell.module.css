@@ -235,3 +235,89 @@
   line-height: 18px;
   color: var(--dsw-alias-state-error-primary);
 }
+
+/* ── Xiaoxiao refinement layer ──────────────────────────────────────────
+   Appended after the upstream rules so it wins the cascade without editing
+   them. Adds depth, motion, and typographic weight to the empty-session hero. */
+
+/* Entrance: the hero assembles rather than appearing. Staged so the title
+   lands first and the chip follows, giving the eye an order to follow. */
+@keyframes xx-hero-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+@keyframes xx-mark-pulse {
+  0%, 100% { opacity: 0.55; transform: scale(1); }
+  50% { opacity: 0.9; transform: scale(1.06); }
+}
+
+.root {
+  position: relative;
+  /* A soft radial wash behind the composer keeps the centre of the window from
+     reading as flat canvas without competing with the content. */
+  background:
+    radial-gradient(60% 50% at 50% 42%, rgba(124, 124, 245, 0.055), transparent 70%);
+}
+
+.headline {
+  font-size: 30px;
+  line-height: 38px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  animation: xx-hero-rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Title carries a subtle top-lit gradient instead of a flat fill. */
+.titleGroup > :first-child {
+  background: linear-gradient(180deg, #ffffff 0%, #aab3c4 130%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.previewBadge {
+  border-color: rgba(124, 124, 245, 0.45);
+  background: rgba(124, 124, 245, 0.12);
+  color: #b9b9fb;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.previewBadge:hover {
+  background: rgba(124, 124, 245, 0.2);
+  border-color: rgba(124, 124, 245, 0.7);
+}
+
+/* Workspace chip and the composer card trail the headline. */
+.stack > :nth-child(2) {
+  animation: xx-hero-rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.08s both;
+}
+
+.stack > :nth-child(3) {
+  animation: xx-hero-rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.14s both;
+}
+
+/* The mark breathes very slowly; motion at this scale reads as "alive" rather
+   than distracting, and it stops entirely under reduced-motion. */
+.fish {
+  animation: xx-mark-pulse 4.5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .headline,
+  .stack > :nth-child(2),
+  .stack > :nth-child(3),
+  .fish {
+    animation: none;
+  }
+}

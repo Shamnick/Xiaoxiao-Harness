@@ -470,3 +470,76 @@
 .activity { display: flex; align-items: center; flex: none; }
 .activity:empty { display: none; }
 .activityExpanded { flex: 1; min-width: 0; }
+
+/* ── Xiaoxiao refinement layer ──────────────────────────────────────────
+   Appended after the upstream rules. The composer becomes a glass surface that
+   lifts on focus instead of a flat bordered box. */
+
+@keyframes xx-card-arrive {
+  from { opacity: 0; transform: translateY(8px) scale(0.995); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.card {
+  background: color-mix(in srgb, var(--dsw-alias-bg-layer-1) 82%, transparent);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  border: 1px solid var(--dsw-alias-border-l2);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.28),
+    0 8px 24px rgba(0, 0, 0, 0.20);
+  transition:
+    border-color 0.18s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.18s cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 0.18s ease;
+}
+
+/* Focus is the most important state in the app: the surface lifts, the edge
+   warms to the accent, and a soft ring appears. */
+.card:focus-within {
+  border-color: color-mix(in srgb, var(--dsw-alias-brand-primary) 55%, transparent);
+  background: color-mix(in srgb, var(--dsw-alias-bg-layer-1) 94%, transparent);
+  box-shadow:
+    0 0 0 3px rgba(124, 124, 245, 0.13),
+    0 2px 4px rgba(0, 0, 0, 0.24),
+    0 12px 36px rgba(0, 0, 0, 0.30);
+}
+
+/* Hero card rises with the headline. */
+.hero .card {
+  animation: xx-card-arrive 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.18s both;
+}
+
+.placeholder {
+  color: var(--dsw-alias-label-tertiary);
+  transition: opacity 0.15s ease;
+}
+
+.card:focus-within .placeholder {
+  opacity: 0.65;
+}
+
+/* Every control inside the composer gets a consistent, quick hover lift. */
+@media (hover: hover) {
+  .card button:not(:disabled) {
+    transition:
+      transform 0.12s cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 0.12s ease,
+      background-color 0.12s ease;
+  }
+
+  .card button:not(:disabled):hover {
+    transform: translateY(-1px);
+  }
+
+  .card button:not(:disabled):active {
+    transform: translateY(0) scale(0.97);
+    transition-duration: 0.06s;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero .card { animation: none; }
+  .card button:not(:disabled):hover,
+  .card button:not(:disabled):active { transform: none; }
+}
