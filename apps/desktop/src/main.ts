@@ -1169,7 +1169,6 @@ async function main(): Promise<void> {
   // its standard menus and application hide commands declared explicitly.
   // Xiaoxiao Harness owns its own userData root instead of inheriting the
   // package name's default (dsh-desktop), which old installs already occupy.
-  app.setPath('userData', join(app.getPath('appData'), 'Xiaoxiao Harness'))
   // Keep app.name stable: Electron derives its default userData directory from it.
   const darwin = process.platform === 'darwin'
   // A copy of Electron 44's macOS Edit menu that binds Paste and Match Style to Shift+Command+V
@@ -1603,6 +1602,11 @@ async function main(): Promise<void> {
   }
   publishUpdate(updateState)
 }
+
+// Must precede the single-instance lock: Electron derives that lock from
+// userData, and inheriting the dsh-desktop path made this app and DeepSeek
+// Harness mutually exclusive (opening one blocked the other).
+app.setPath('userData', join(app.getPath('appData'), 'Xiaoxiao Harness'))
 
 const ownsDesktopInstance = claimDesktopSingleInstance(app, () => { focusPrimaryWindow() })
 
