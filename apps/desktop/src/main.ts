@@ -1167,6 +1167,9 @@ async function main(): Promise<void> {
   })
   // A custom application menu replaces Electron's default menu, so macOS needs
   // its standard menus and application hide commands declared explicitly.
+  // Xiaoxiao Harness owns its own userData root instead of inheriting the
+  // package name's default (dsh-desktop), which old installs already occupy.
+  app.setPath('userData', join(app.getPath('appData'), 'Xiaoxiao Harness'))
   // Keep app.name stable: Electron derives its default userData directory from it.
   const darwin = process.platform === 'darwin'
   // A copy of Electron 44's macOS Edit menu that binds Paste and Match Style to Shift+Command+V
