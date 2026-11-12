@@ -174,7 +174,9 @@ export function createElectronBuilderConfig(
       // Ad-hoc signing keeps the modified Electron executable runnable without a Developer ID.
       identity: unsigned ? '-' : macOSSigning?.signingIdentity,
       forceCodeSigning: !unsigned,
-      hardenedRuntime: true,
+      // Unsigned local builds must not use hardened runtime: ad-hoc signing plus
+      // runtime enforcement makes macOS reject the app at launch (library validation).
+      hardenedRuntime: !unsigned,
       entitlements: fileURLToPath(new URL('./macos-entitlements.plist', import.meta.url)),
       entitlementsInherit: fileURLToPath(new URL('./macos-entitlements.plist', import.meta.url)),
       // Prepared runtime files retain their signatures; PAK resources are sealed by their enclosing bundle.
