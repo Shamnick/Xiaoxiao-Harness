@@ -17,7 +17,9 @@ type Page = 'entry' | 'key' | 'account'
 export function Welcome({ api }: { api: WelcomeApi }) {
   const { messages: m } = api
   const [expiryNotice, setExpiryNotice] = useState(false)
-  const [page, setPage] = useState<Page>('entry')
+  // Xiaoxiao Harness opens on API-key entry: models are configured with a key
+  // (and optional base URL in Settings) instead of the DeepSeek account sign-in.
+  const [page, setPage] = useState<Page>('key')
   const pageRef = useRef<Page>('entry')
   const visiblePage = useRef<Page>('entry')
   const [attempt, setAttempt] = useState<AccountView['attempt']>(null)
