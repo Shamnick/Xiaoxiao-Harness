@@ -1,5 +1,6 @@
 import type { Context } from '@deepseek-ai/cordis'
 import base from '../styles/base.css?inline'
+import brandFont from '../styles/brand-font-web.css?inline'
 import cornerShape from '../styles/corner-shape.css?inline'
 import designPlatform from '../styles/design-platform.css?inline'
 import focus from '../styles/focus.css?inline'
@@ -14,6 +15,7 @@ const HAIRLINE_WIDTH = '--dsh-hairline-width'
 
 const STYLES = [
   ['base.css', base],
+  ['brand-font-web.css', brandFont],
   ['corner-shape.css', cornerShape],
   ['design-platform.css', designPlatform],
   ['focus.css', focus],

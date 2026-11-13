@@ -51,10 +51,10 @@ export function BrandWordmark({ size = 24, className, includeMark = true }: Bran
         x={startX}
         y="17.4"
         fill="url(#xx-wordmark-fill)"
-        fontFamily="-apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif"
+        fontFamily="Montserrat, -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif"
         fontSize="17.5"
-        fontWeight="650"
-        letterSpacing="-0.35"
+        fontWeight="700"
+        letterSpacing="-0.2"
       >
         {BRAND_NAME}
       </text>
@@ -66,10 +66,10 @@ export function BrandWordmark({ size = 24, className, includeMark = true }: Bran
           y="9.9"
           textAnchor="middle"
           fill="var(--dsw-alias-label-primary-inverted, #111)"
-          fontFamily="-apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif"
+          fontFamily="Montserrat, -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif"
           fontSize="8.2"
           fontWeight="700"
-          letterSpacing="0.75"
+          letterSpacing="0.8"
         >
           {BRAND_BADGE}
         </text>
