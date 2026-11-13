@@ -35,5 +35,5 @@ export function OfficialBrandMark({ size }: SidebarBrandMarkOwnerProps) {
  * 所以这里关掉它自己的前置图标。
  */
 export function OfficialBrandName() {
-  return <BrandWordmark includeMark={false} size={22} />
+  return <BrandWordmark includeMark={false} size={26} />
 }

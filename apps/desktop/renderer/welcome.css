@@ -97,7 +97,8 @@ body {
   display: block;
   flex: none;
   width: 100%;
-  height: 40px;
+  /* Enlarged from 40px: the mark is the first thing the window shows. */
+  height: 64px;
   user-select: none;
   -webkit-user-drag: none;
 }
@@ -341,3 +342,119 @@ body {
 .actions .welcome-loading { color: inherit; }
 
 .auth-waiting .copy-link:disabled { cursor: default; }
+
+/* ── Xiaoxiao welcome refinement ─────────────────────────────────────────
+   Appended after the upstream rules. The welcome window is the first surface a
+   user sees, so it gets deliberate staging, a lit brand block, and a composer
+   that matches the main window. */
+
+@keyframes xx-welcome-in {
+  from { opacity: 0; transform: translateY(16px); filter: blur(8px); }
+  to { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+
+@keyframes xx-brand-bloom {
+  from { opacity: 0; transform: scale(0.94); filter: blur(14px); }
+  to { opacity: 1; transform: scale(1); filter: blur(0); }
+}
+
+/* Ambient wash: the window stops being a flat sheet. */
+body {
+  background-image:
+    radial-gradient(52% 38% at 50% 18%, rgba(124, 124, 245, 0.10), transparent 72%),
+    radial-gradient(40% 30% at 78% 78%, rgba(34, 211, 238, 0.06), transparent 70%);
+  background-repeat: no-repeat;
+}
+
+/* Brand block: lit, spaced, and it arrives first. */
+.brand {
+  animation: xx-brand-bloom 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+  filter: drop-shadow(0 6px 24px rgba(124, 124, 245, 0.16));
+}
+
+/* Secondary copy under the brand: quieter and letter-spaced. */
+.key-description,
+p#key-description {
+  letter-spacing: 0.01em;
+  opacity: 0.82;
+}
+
+/* Staged entrance for the form and the actions. */
+.key-form,
+#entry-actions,
+#key-actions {
+  animation: xx-welcome-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.12s both;
+}
+
+#entry-actions,
+#key-actions {
+  animation-delay: 0.2s;
+}
+
+/* The key field is a glass surface that lights up on focus, matching the main
+   composer instead of the upstream flat outlined box. */
+.key-form input {
+  background: color-mix(in srgb, var(--dsw-alias-bg-layer-1) 70%, transparent);
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 14px;
+  transition:
+    border-color 0.18s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.18s cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 0.18s ease;
+}
+
+.key-form input:focus {
+  border-color: color-mix(in srgb, #7c7cf5 60%, transparent);
+  background: color-mix(in srgb, var(--dsw-alias-bg-layer-1) 92%, transparent);
+  box-shadow:
+    0 0 0 3px rgba(124, 124, 245, 0.14),
+    0 10px 30px rgba(0, 0, 0, 0.14);
+  outline: none;
+}
+
+/* Primary action: accent fill, real lift, decisive press. */
+.actions button {
+  border-radius: 14px;
+  transition:
+    transform 0.13s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.16s ease,
+    opacity 0.13s ease,
+    background-color 0.16s ease;
+}
+
+@media (hover: hover) {
+  .actions button:not(:disabled):hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.16);
+  }
+}
+
+.actions button:not(:disabled):active {
+  transform: translateY(0) scale(0.985);
+  transition-duration: 0.06s;
+}
+
+/* Tertiary link at the bottom stays quiet until hovered. */
+#back-to-login,
+button.back {
+  transition: opacity 0.14s ease, color 0.14s ease;
+  opacity: 0.6;
+}
+
+#back-to-login:hover,
+button.back:hover {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand,
+  .key-form,
+  #entry-actions,
+  #key-actions {
+    animation: none;
+  }
+  .actions button:not(:disabled):hover,
+  .actions button:not(:disabled):active {
+    transform: none;
+  }
+}
