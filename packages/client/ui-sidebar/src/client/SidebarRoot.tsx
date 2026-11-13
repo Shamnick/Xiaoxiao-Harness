@@ -32,6 +32,8 @@ import type {
 } from './contract/slots.ts'
 import { FIXED_PANEL_ID } from './panel-pins.ts'
 import { createScrollHandoff } from './scroll-handoff.ts'
+import type { MainPanelId } from '@deepseek-ai/dsh-client-ui-layout/client'
+import { CommandPalette } from './CommandPalette.tsx'
 import css from './SidebarRoot.module.css'
 
 /** Wide-content unmount delay; matches the 150ms wide-content fade-out. */
@@ -324,6 +326,16 @@ export function SidebarRoot({
       }}
       onPointerLeave={() => { armLinger() }}
     >
+      {/* Global command palette: ⌘K everywhere, independent of the sidebar's
+          collapsed state. Entries are the mounted global panels. */}
+      <CommandPalette
+        title={t('palette.title')}
+        placeholder={t('palette.placeholder')}
+        emptyLabel={t('palette.empty')}
+        closeLabel={t('palette.close')}
+        entries={panels.map(({ id, label }) => ({ id, title: label }))}
+        onSelect={(id) => { selectPanel(id as MainPanelId) }}
+      />
       {/* macOS hiddenInset titlebar: the strip shares the row with the
           traffic lights and keeps the toggle at the sidebar's top-right. */}
       {darwinDesktop && <div className={css.topStrip} data-window-drag>{toggle}</div>}
