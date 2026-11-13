@@ -470,6 +470,8 @@ export type ConvViewProps = PropsRuntime<'conversation.view'>
 export interface ConversationInjected {
   /** Connect and open a blank Session in the selected Workspace. */
   selectWorkspace: (workspaceId: WorkspaceId) => Promise<void>
+  /** Select an existing Session and reveal its Conversation. */
+  openSession: (sessionId: string) => void
   /** Session-addressed composer block source, or the stable absent source. */
   hooks: { composerBlock: ObservableSnapshot<ComposerBlock | undefined> }
 }
@@ -677,6 +679,8 @@ export interface HeroFrameOwnerProps {
    * store, so frame layers must treat it as optional.
    */
   recentSessions?: readonly RecentSessionEntry[] | undefined
+  /** Reveal an existing Session; the blank home uses it for its recent list. */
+  openSession?: ((sessionId: string) => void) | undefined
 }
 
 /** Brand-mark presentation selected by the blank home. */

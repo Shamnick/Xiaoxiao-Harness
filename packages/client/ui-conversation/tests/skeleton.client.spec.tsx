@@ -378,6 +378,7 @@ function mount(
       renderSlotChain,
       renderFactorySlot,
       selectWorkspace: retargetWorkspace,
+      openSession: vi.fn(),
       t,
     }
     const useFactorySlot = ((name: string, fallback: (props: never) => ReactNode) => (

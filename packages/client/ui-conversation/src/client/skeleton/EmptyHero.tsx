@@ -91,6 +91,8 @@ export interface HeroShellProps {
   children?: ReactNode
   /** Recently updated Sessions, newest first; the blank home renders them as cards. */
   recentSessions?: readonly RecentSessionEntry[] | undefined
+  /** Reveal a Session from the recent list; cards render inert without it. */
+  openSession?: ((sessionId: string) => void) | undefined
 }
 
 /* Hover swim morph targets: the resting FISH_LOGO_PATH with weighted
@@ -151,7 +153,7 @@ function HeroFish({ hovering }: { hovering: boolean }) {
  * @param props - see {@link HeroShellProps}.
  * @returns the centered hero element tree.
  */
-export function HeroShell({ t, renderSlot, children, recentSessions }: HeroShellProps) {
+export function HeroShell({ t, renderSlot, children, recentSessions, openSession }: HeroShellProps) {
   const [hovering, setHovering] = useState(false)
   return (
     <div className={css.root}>
@@ -173,9 +175,7 @@ export function HeroShell({ t, renderSlot, children, recentSessions }: HeroShell
             })}
           </span>
           <span className={css.titleGroup}>
-            {/* Own element: keeps the headline text addressable apart from the badge. */}
             <span>{t('hero.headline')}</span>
-            <span className={css.previewBadge}>{t('hero.preview')}</span>
           </span>
         </div>
         <div className={css.body}>
@@ -196,9 +196,16 @@ export function HeroShell({ t, renderSlot, children, recentSessions }: HeroShell
             <h2 className={css.recentTitle}>{t('hero.recent.title')}</h2>
             <ul className={css.recentList}>
               {recentSessions.map(session => (
-                <li key={session.id} className={css.recentItem}>
-                  <span className={css.recentName}>{session.title}</span>
-                  <span className={css.recentTime}>{relativeTime(session.updatedAt)}</span>
+                <li key={session.id}>
+                  <button
+                    type="button"
+                    className={css.recentItem}
+                    disabled={openSession === undefined}
+                    onClick={() => { openSession?.(session.id) }}
+                  >
+                    <span className={css.recentName}>{session.title}</span>
+                    <span className={css.recentTime}>{relativeTime(session.updatedAt)}</span>
+                  </button>
                 </li>
               ))}
             </ul>

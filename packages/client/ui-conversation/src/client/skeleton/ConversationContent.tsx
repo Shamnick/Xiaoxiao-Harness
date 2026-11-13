@@ -23,7 +23,7 @@ export function ConversationContent(props: ConversationContentProps) {
   const {
     sessionId, phase, hero, useSession, useSessions, useSessionStatus,
     useWorkspaces, useInput, useComposerBlock, renderSlot, renderSlotChain,
-    selectWorkspace, t, useFactorySlot,
+    selectWorkspace, openSession, t, useFactorySlot,
   } = props
   const session = useSession(snapshot => snapshot)
   const Views = useFactorySlot('views', ConversationSessionView)
@@ -211,6 +211,7 @@ export function ConversationContent(props: ConversationContentProps) {
       {renderSlot('conversation.hero.frame', {
         hero: hero && props.variant !== 'embedded',
         recentSessions,
+        openSession,
       }, {
         children: (
           <div className={css.scrollBody} data-conversation-scroll="">
