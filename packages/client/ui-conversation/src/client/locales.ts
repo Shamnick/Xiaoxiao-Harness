@@ -78,6 +78,8 @@ export const zh = {
   'settings.enter.steer': '插话发送',
   'hero.headline': '从一个想法开始',
 
+  'hero.recent.title': '最近会话',
+
   'hero.capability.plugins': '一切皆插件',
 
   'hero.capability.sandbox': '沙箱执行',
@@ -483,6 +485,8 @@ export const en = {
   'settings.enter.steer': 'Steer',
   'hero.headline': 'Start with a thought',
 
+  'hero.recent.title': 'Recent sessions',
+
   'hero.capability.plugins': 'Plugin-first',
 
   'hero.capability.sandbox': 'Sandboxed',
@@ -887,6 +891,8 @@ export const ja = {
   'settings.enter.steer': '指示を変更',
   'hero.headline': 'ひとつの着想から',
 
+  'hero.recent.title': '最近のセッション',
+
   'hero.capability.plugins': 'すべてプラグイン',
 
   'hero.capability.sandbox': 'サンドボックス実行',
@@ -1288,6 +1294,8 @@ export const es = {
   'settings.enter.queue': 'cola',
   'settings.enter.steer': 'Redirigir',
   'hero.headline': 'Empieza con una idea',
+
+  'hero.recent.title': 'Sesiones recientes',
 
   'hero.capability.plugins': 'Todo son plugins',
 
@@ -1693,6 +1701,8 @@ export const fr = {
   'settings.enter.steer': 'Guider',
   'hero.headline': "À partir d'une idée",
 
+  'hero.recent.title': 'Sessions récentes',
+
   'hero.capability.plugins': 'Tout est plugin',
 
   'hero.capability.sandbox': 'Exécution isolée',
@@ -2096,6 +2106,8 @@ export const de = {
   'settings.enter.queue': 'Warteschlange',
   'settings.enter.steer': 'Lenken',
   'hero.headline': 'Aus einem Gedanken',
+
+  'hero.recent.title': 'Letzte Sitzungen',
 
   'hero.capability.plugins': 'Alles ein Plugin',
 
@@ -2501,6 +2513,8 @@ export const ru = {
   'settings.enter.steer': 'Направить',
   'hero.headline': 'Начните с мысли',
 
+  'hero.recent.title': 'Недавние сеансы',
+
   'hero.capability.plugins': 'Всё — плагин',
 
   'hero.capability.sandbox': 'Изолированное выполнение',
@@ -2904,6 +2918,8 @@ export const pt = {
   'settings.enter.queue': 'Fila',
   'settings.enter.steer': 'Orientar',
   'hero.headline': 'Comece com uma ideia',
+
+  'hero.recent.title': 'Sessões recentes',
 
   'hero.capability.plugins': 'Tudo é plugin',
 

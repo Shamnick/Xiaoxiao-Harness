@@ -7,7 +7,7 @@ import {
   FISH_LOGO_PATH, FISH_LOGO_VIEWBOX, IconChevronDownOutlineRegular, IconFolderCloseRegular, IconFolderOpenRegular,
 } from '@deepseek-ai/dsh-client-ui-primitives'
 import { workspaceTitleOf } from '@deepseek-ai/dsh-util-workspace-path'
-import type { ConversationContentProps } from '../contract/slots.ts'
+import type { ConversationContentProps, RecentSessionEntry } from '../contract/slots.ts'
 import css from './HeroShell.module.css'
 
 /** The owner's locale seat type, passed to hero chrome as a plain prop. */
@@ -22,6 +22,26 @@ type HeroTranslate = ConversationContentProps['t']
 export function workspaceLabel(cwd: string): string {
   const base = workspaceTitleOf(cwd)
   return base !== '' ? base : cwd
+}
+
+/**
+ * Localized relative label for an epoch timestamp ("3 分钟前").
+ * Uses the runtime locale so the blank home needs no extra copy per language.
+ * @param timestamp - epoch milliseconds of the last update.
+ * @returns a relative phrase such as "5 minutes ago".
+ */
+function relativeTime(timestamp: number): string {
+  const diffMs = timestamp - Date.now()
+  const magnitude = Math.abs(diffMs)
+  const format = new Intl.RelativeTimeFormat(undefined, { numeric: 'auto' })
+  const units: readonly (readonly [Intl.RelativeTimeFormatUnit, number])[] = [
+    ['year', 31_536_000_000], ['month', 2_592_000_000], ['week', 604_800_000],
+    ['day', 86_400_000], ['hour', 3_600_000], ['minute', 60_000],
+  ]
+  for (const [unit, size] of units) {
+    if (magnitude >= size) return format.format(Math.round(diffMs / size), unit)
+  }
+  return format.format(Math.round(diffMs / 1000), 'second')
 }
 
 /**
@@ -69,6 +89,8 @@ export interface HeroShellProps {
   renderSlot: ConversationContentProps['renderSlot']
   /** Overlay content after the stack (modals). */
   children?: ReactNode
+  /** Recently updated Sessions, newest first; the blank home renders them as cards. */
+  recentSessions?: readonly RecentSessionEntry[] | undefined
 }
 
 /* Hover swim morph targets: the resting FISH_LOGO_PATH with weighted
@@ -129,7 +151,7 @@ function HeroFish({ hovering }: { hovering: boolean }) {
  * @param props - see {@link HeroShellProps}.
  * @returns the centered hero element tree.
  */
-export function HeroShell({ t, renderSlot, children }: HeroShellProps) {
+export function HeroShell({ t, renderSlot, children, recentSessions }: HeroShellProps) {
   const [hovering, setHovering] = useState(false)
   return (
     <div className={css.root}>
@@ -166,6 +188,22 @@ export function HeroShell({ t, renderSlot, children }: HeroShellProps) {
           <li className={css.capability}>{t('hero.capability.sandbox')}</li>
           <li className={css.capability}>{t('hero.capability.surfaces')}</li>
         </ul>
+        {/* Recent sessions: the blank home doubles as a re-entry point. Kept
+            read-only for now — opening one needs a Session action the frame
+            layer does not receive yet. */}
+        {recentSessions !== undefined && recentSessions.length > 0 && (
+          <section className={css.recent} aria-label={t('hero.recent.title')}>
+            <h2 className={css.recentTitle}>{t('hero.recent.title')}</h2>
+            <ul className={css.recentList}>
+              {recentSessions.map(session => (
+                <li key={session.id} className={css.recentItem}>
+                  <span className={css.recentName}>{session.title}</span>
+                  <span className={css.recentTime}>{relativeTime(session.updatedAt)}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
       </div>
       {children}
     </div>

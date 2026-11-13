@@ -658,10 +658,25 @@ export interface ComposerChainProps {
   pendingInteraction: SessionPendingInteraction | undefined
 }
 
+/** One recently touched Session, flattened for blank-home presentation. */
+export interface RecentSessionEntry {
+  /** Session identifier; opaque to the frame layer. */
+  id: string
+  /** Human-facing label already resolved by the object layer. */
+  title: string
+  /** Epoch milliseconds of the last update, used for relative ordering display. */
+  updatedAt: number
+}
+
 /** Conversation state exposed to scroll-body frame layers. */
 export interface HeroFrameOwnerProps {
   /** Whether the body shows the blank home of a standalone, non-embedded Conversation. */
   hero: boolean
+  /**
+   * Recently updated non-blank Sessions, newest first. Absent without a Session
+   * store, so frame layers must treat it as optional.
+   */
+  recentSessions?: readonly RecentSessionEntry[] | undefined
 }
 
 /** Brand-mark presentation selected by the blank home. */

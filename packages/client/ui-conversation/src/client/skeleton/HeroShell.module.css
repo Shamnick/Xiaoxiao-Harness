@@ -358,3 +358,73 @@
 @media (prefers-reduced-motion: reduce) {
   .capabilities { animation: none; }
 }
+
+/* ── Recent sessions ─────────────────────────────────────────────────────
+   The blank home is also a re-entry point: the last few sessions sit under the
+   composer so a returning user does not have to hunt in the sidebar. */
+
+.recent {
+  margin-top: 20px;
+  animation: xx-hero-rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.26s both;
+}
+
+.recentTitle {
+  margin: 0 0 10px;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-align: center;
+}
+
+.recentList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.recentItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 12px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: var(--dsw-radius-md);
+  background: color-mix(in srgb, var(--dsw-alias-bg-layer-1) 55%, transparent);
+  cursor: default;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease,
+    transform 0.13s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (hover: hover) {
+  .recentItem:hover {
+    border-color: var(--dsw-alias-border-l3);
+    background: color-mix(in srgb, var(--dsw-alias-bg-layer-2) 70%, transparent);
+    transform: translateY(-1px);
+  }
+}
+
+.recentName {
+  overflow: hidden;
+  color: var(--dsw-alias-label-primary);
+  font-size: 13px;
+  line-height: 18px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recentTime {
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 11px;
+  line-height: 16px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .recent { animation: none; }
+  .recentItem:hover { transform: none; }
+}

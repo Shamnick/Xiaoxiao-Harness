@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import clsx from 'clsx'
 import type { WorkspaceId } from '@deepseek-ai/dsh-workspace/types'
 import { workspaceDisplayTitle } from '@deepseek-ai/dsh-api-workspace-controller/default-workspace'
@@ -33,6 +33,17 @@ export function ConversationContent(props: ConversationContentProps) {
     sessionId === undefined ? undefined : snapshot.get(sessionId)?.pendingInteraction)
   const inputState = useInput(s => s)
   const cwd = useSessions(s => sessionId === undefined ? undefined : s.byId[sessionId]?.cwd)
+  // Recent non-blank Sessions for the blank-home dashboard. Subscribing to the
+  // whole store and deriving through useMemo keeps the array identity stable;
+  // a selector that builds an array inline would re-render on every store tick.
+  const sessionsStore = useSessions(s => s)
+  const recentSessions = useMemo(() => {
+    const rows = Object.values(sessionsStore.byId)
+      .filter(row => !row.blank && row.origin !== 'subagent')
+      .sort((a, b) => b.updatedAt - a.updatedAt)
+      .slice(0, 4)
+    return rows.map(row => ({ id: String(row.id), title: row.displayTitle, updatedAt: row.updatedAt }))
+  }, [sessionsStore])
   const workspaces = useWorkspaces(s => s)
   // A plugin this package cannot import (ui-model-selection) says this session cannot
   // send; its reason is already localized by whoever raised it.
@@ -197,7 +208,10 @@ export function ConversationContent(props: ConversationContentProps) {
       data-content-phase={phase}
     >
       {/* The frame wraps the scroll body in every phase, so leaving the home keeps the composer mounted. */}
-      {renderSlot('conversation.hero.frame', { hero: hero && props.variant !== 'embedded' }, {
+      {renderSlot('conversation.hero.frame', {
+        hero: hero && props.variant !== 'embedded',
+        recentSessions,
+      }, {
         children: (
           <div className={css.scrollBody} data-conversation-scroll="">
             {sessionId === undefined ? null : <Views />}
