@@ -159,6 +159,13 @@ export function HeroShell({ t, renderSlot, children }: HeroShellProps) {
         <div className={css.body}>
           {/* The composer remains mounted outside this component. */}
         </div>
+        {/* Capability strip: gives the empty session a sense of what the product
+            does instead of leaving a large blank region under the composer. */}
+        <ul className={css.capabilities}>
+          <li className={css.capability}>{t('hero.capability.plugins')}</li>
+          <li className={css.capability}>{t('hero.capability.sandbox')}</li>
+          <li className={css.capability}>{t('hero.capability.surfaces')}</li>
+        </ul>
       </div>
       {children}
     </div>

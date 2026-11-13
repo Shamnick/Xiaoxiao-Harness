@@ -77,6 +77,12 @@ export const zh = {
   'settings.enter.queue': '排队发送',
   'settings.enter.steer': '插话发送',
   'hero.headline': '从一个想法开始',
+
+  'hero.capability.plugins': '一切皆插件',
+
+  'hero.capability.sandbox': '沙箱执行',
+
+  'hero.capability.surfaces': '多端一致',
   'hero.preview': '内测',
   'hero.chooseWorkspace': '选择工作区',
   'header.more': '更多操作',
@@ -476,6 +482,12 @@ export const en = {
   'settings.enter.queue': 'Queue',
   'settings.enter.steer': 'Steer',
   'hero.headline': 'Start with a thought',
+
+  'hero.capability.plugins': 'Plugin-first',
+
+  'hero.capability.sandbox': 'Sandboxed',
+
+  'hero.capability.surfaces': 'One core, every surface',
   'hero.preview': 'Preview',
   'hero.chooseWorkspace': 'Choose workspace',
   'header.more': 'More actions',
@@ -874,6 +886,12 @@ export const ja = {
   'settings.enter.queue': 'キュー',
   'settings.enter.steer': '指示を変更',
   'hero.headline': 'ひとつの着想から',
+
+  'hero.capability.plugins': 'すべてプラグイン',
+
+  'hero.capability.sandbox': 'サンドボックス実行',
+
+  'hero.capability.surfaces': '複数サーフェス',
   'hero.preview': 'プレビュー',
   'hero.chooseWorkspace': 'ワークスペースを選択',
   'header.more': 'その他の操作',
@@ -1270,6 +1288,12 @@ export const es = {
   'settings.enter.queue': 'cola',
   'settings.enter.steer': 'Redirigir',
   'hero.headline': 'Empieza con una idea',
+
+  'hero.capability.plugins': 'Todo son plugins',
+
+  'hero.capability.sandbox': 'Ejecución en sandbox',
+
+  'hero.capability.surfaces': 'Un núcleo, varias caras',
   'hero.preview': 'Vista previa',
   'hero.chooseWorkspace': 'Elige espacio de trabajo',
   'header.more': 'Más acciones',
@@ -1668,6 +1692,12 @@ export const fr = {
   'settings.enter.queue': "File d'attente",
   'settings.enter.steer': 'Guider',
   'hero.headline': "À partir d'une idée",
+
+  'hero.capability.plugins': 'Tout est plugin',
+
+  'hero.capability.sandbox': 'Exécution isolée',
+
+  'hero.capability.surfaces': 'Un cœur, plusieurs surfaces',
   'hero.preview': 'Aperçu',
   'hero.chooseWorkspace': 'Choisir un espace de travail',
   'header.more': 'Autres actions',
@@ -2066,6 +2096,12 @@ export const de = {
   'settings.enter.queue': 'Warteschlange',
   'settings.enter.steer': 'Lenken',
   'hero.headline': 'Aus einem Gedanken',
+
+  'hero.capability.plugins': 'Alles ein Plugin',
+
+  'hero.capability.sandbox': 'Sandbox-Ausführung',
+
+  'hero.capability.surfaces': 'Ein Kern, viele Oberflächen',
   'hero.preview': 'Vorschau',
   'hero.chooseWorkspace': 'Wählen Sie einen Arbeitsbereich',
   'header.more': 'Weitere Aktionen',
@@ -2464,6 +2500,12 @@ export const ru = {
   'settings.enter.queue': 'Очередь',
   'settings.enter.steer': 'Направить',
   'hero.headline': 'Начните с мысли',
+
+  'hero.capability.plugins': 'Всё — плагин',
+
+  'hero.capability.sandbox': 'Изолированное выполнение',
+
+  'hero.capability.surfaces': 'Одно ядро, все поверхности',
   'hero.preview': 'Предварительный просмотр',
   'hero.chooseWorkspace': 'Выберите рабочее пространство',
   'header.more': 'Другие действия',
@@ -2862,6 +2904,12 @@ export const pt = {
   'settings.enter.queue': 'Fila',
   'settings.enter.steer': 'Orientar',
   'hero.headline': 'Comece com uma ideia',
+
+  'hero.capability.plugins': 'Tudo é plugin',
+
+  'hero.capability.sandbox': 'Execução isolada',
+
+  'hero.capability.surfaces': 'Um núcleo, várias telas',
   'hero.preview': 'Visualização',
   'hero.chooseWorkspace': 'Escolha o espaço de trabalho',
   'header.more': 'Mais ações',

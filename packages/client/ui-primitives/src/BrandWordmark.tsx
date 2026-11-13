@@ -55,11 +55,13 @@ export function BrandWordmark({ size = 24, className, includeMark = true }: Bran
         fontSize="17.5"
         fontWeight="700"
         letterSpacing="-0.2"
+        textLength="82"
+        lengthAdjust="spacing"
       >
         {BRAND_NAME}
       </text>
       {/* Category badge: filled pill in the current colour, inverted label. */}
-      <g transform={`translate(${startX + 76} 5.5)`}>
+      <g transform={`translate(${startX + 88} 5.5)`}>
         <rect width="50" height="13" rx="3.2" fill="currentColor" />
         <text
           x="25"

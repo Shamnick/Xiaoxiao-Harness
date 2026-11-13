@@ -321,3 +321,40 @@
     animation: none;
   }
 }
+
+/* ── Capability strip ────────────────────────────────────────────────────
+   Three quiet facts under the composer. Not buttons: the empty session should
+   explain the product without implying actions that do not exist yet. */
+
+.capabilities {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+  animation: xx-hero-rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.22s both;
+}
+
+.capability {
+  padding: 3px 10px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 999px;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 12px;
+  line-height: 18px;
+  white-space: nowrap;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+@media (hover: hover) {
+  .capability:hover {
+    border-color: var(--dsw-alias-border-l3);
+    color: var(--dsw-alias-label-secondary);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .capabilities { animation: none; }
+}
