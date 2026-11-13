@@ -543,3 +543,139 @@
   .card button:not(:disabled):hover,
   .card button:not(:disabled):active { transform: none; }
 }
+
+/* ── Composer signature: travelling light on focus ───────────────────────
+   The composer is the one surface users look at most, so it gets the product's
+   signature motion: while focused, a highlight travels around the card edge.
+   Built from a masked conic gradient rather than border-image so the ring keeps
+   the card's own radius and theme colors. */
+
+@property --xx-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes xx-edge-travel {
+  to { --xx-angle: 360deg; }
+}
+
+/* Breathing halo under the send button while a draft is worth sending. */
+@keyframes xx-send-halo {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(124, 124, 245, 0.32); }
+  50% { box-shadow: 0 0 0 6px rgba(124, 124, 245, 0); }
+}
+
+.card {
+  position: relative;
+}
+
+.card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  padding: 1px;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  background: conic-gradient(
+    from var(--xx-angle),
+    transparent 0deg,
+    transparent 210deg,
+    rgba(124, 124, 245, 0.85) 250deg,
+    rgba(34, 211, 238, 0.85) 275deg,
+    transparent 310deg,
+    transparent 360deg
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+}
+
+/* Focus is the moment the composer becomes the protagonist. */
+.card:focus-within::after {
+  opacity: 1;
+  animation: xx-edge-travel 4s linear infinite;
+}
+
+/* Idle cards keep a whisper of the same treatment: a static corner glint, so
+   the surface reads as designed rather than default. */
+.card:not(:focus-within)::after {
+  opacity: 0.35;
+  background: linear-gradient(
+    135deg,
+    transparent 0%,
+    transparent 42%,
+    color-mix(in srgb, var(--dsw-alias-brand-primary) 30%, transparent) 50%,
+    transparent 58%,
+    transparent 100%
+  );
+}
+
+/* ── Send button: three states, one shape ──────────────────────────────── */
+
+.primary:not(:disabled) {
+  transition:
+    transform 0.14s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.2s ease,
+    filter 0.2s ease;
+}
+
+@media (hover: hover) {
+  .primary:not(:disabled):hover {
+    transform: scale(1.06);
+    filter: brightness(1.08);
+  }
+}
+
+.primary:not(:disabled):active {
+  transform: scale(0.94);
+  transition-duration: 0.06s;
+}
+
+/* While composing, the button advertises itself with a slow halo instead of
+   sitting inert at the edge of the card. */
+.card:focus-within .primary:not(:disabled) {
+  animation: xx-send-halo 2.4s ease-out infinite;
+}
+
+/* ── Secondary controls recede until needed ──────────────────────────────
+   Model/mode pickers are reference material, not primary actions: they hold
+  70% opacity at rest and resolve fully on hover or focus. */
+
+.modes,
+.standardControls {
+  transition: opacity 0.2s ease;
+}
+
+@media (hover: hover) {
+  .card:not(:focus-within) .modes,
+  .card:not(:focus-within) .standardControls {
+    opacity: 0.72;
+  }
+
+  .card:hover .modes,
+  .card:hover .standardControls,
+  .modes:focus-within,
+  .standardControls:focus-within {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card:focus-within::after,
+  .card:focus-within .primary:not(:disabled) {
+    animation: none;
+  }
+  .primary:not(:disabled):hover,
+  .primary:not(:disabled):active {
+    transform: none;
+  }
+}
