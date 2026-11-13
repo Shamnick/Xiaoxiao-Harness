@@ -45,7 +45,8 @@ function makeHeaderProps(): HeaderLeadingControlsProps {
     usePanelInfo, useResource, useWorkspaces: neverHook, ...allowAllAccess,
     usePanels: selector => selector([]), useShortcuts: selector => selector([]),
     useEntryPins: selector => selector([]), useEntryActions: selector => selector(false),
-    selectPanel: vi.fn(), setPinned: vi.fn(), toggleSidebar: vi.fn(),
+    selectPanel: vi.fn(), openSession: vi.fn(),
+    setPinned: vi.fn(), toggleSidebar: vi.fn(),
     startSession: vi.fn(), trackEntryClick: vi.fn(), t,
   }
 }

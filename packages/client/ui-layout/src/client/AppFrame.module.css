@@ -370,3 +370,27 @@
 .overlayLayer > * {
   pointer-events: auto;
 }
+
+/* ── Right panel: a drawer rather than a permanent third column ─────────
+   The frame already animates grid tracks; this adds the visual separation that
+   makes the panel read as an overlay surface sliding over the conversation
+   instead of another column competing with it. */
+
+.frame[data-rightbar-collapsed='false'] {
+  /* A single soft edge is enough: the panel is a sibling column, not a card. */
+  box-shadow: inset -1px 0 0 var(--dsw-alias-border-l1);
+}
+
+/* While the panel is opening or closing, lift it slightly so the motion reads
+   as an arrival rather than a layout reflow. */
+.frame[data-animating][data-rightbar-collapsed='false'] {
+  box-shadow:
+    inset -1px 0 0 var(--dsw-alias-border-l2),
+    inset -12px 0 24px -20px rgba(0, 0, 0, 0.35);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .frame[data-animating] {
+    transition: none;
+  }
+}

@@ -157,6 +157,7 @@ export function SidebarRoot({
   startSession,
   toggleSidebar,
   selectPanel,
+  openSession,
   setPinned,
   trackEntryClick,
   useRemoteAccess,
@@ -165,6 +166,7 @@ export function SidebarRoot({
   useEntryActions,
   useShortcuts,
   usePanelInfo,
+  useSessions,
   t,
   renderSlot,
   renderFactorySlot,
@@ -173,6 +175,21 @@ export function SidebarRoot({
   const unpinned = useEntryPins(ids => ids)
   const activePanelId = usePanelInfo(info => info.activePanelId)
   const hasEntryActions = useEntryActions(registered => registered)
+  const sessions = useSessions === undefined ? undefined : useSessions(snapshot => snapshot)
+  // The palette searches these; derived here so the array identity stays stable
+  // across renders (a selector building an array would defeat that).
+  const recentSessions = useMemo(() => {
+    if (sessions === undefined) return []
+    return Object.values(sessions.byId)
+      .filter(row => !row.blank && row.origin !== 'subagent')
+      .sort((a, b) => b.updatedAt - a.updatedAt)
+      .slice(0, 30)
+      .map(row => ({
+        id: String(row.id),
+        title: row.displayTitle,
+        detail: new Date(row.updatedAt).toLocaleString(),
+      }))
+  }, [sessions])
   const shortcut = useShortcuts(rows => rows.find(row => row.id === 'sidebar.left.toggle'))
   const newShortcut = useShortcuts(rows => rows.find(row => row.id === 'session.new'))
   // A page whose access snapshot excludes starting a Session offers no New Session affordance.
@@ -333,8 +350,14 @@ export function SidebarRoot({
         placeholder={t('palette.placeholder')}
         emptyLabel={t('palette.empty')}
         closeLabel={t('palette.close')}
-        entries={panels.map(({ id, label }) => ({ id, title: label }))}
-        onSelect={(id) => { selectPanel(id as MainPanelId) }}
+        entries={[
+          ...panels.map(({ id, label }) => ({ id: `panel:${id}`, title: label })),
+          ...recentSessions.map(row => ({ id: `session:${row.id}`, title: row.title, detail: row.detail })),
+        ]}
+        onSelect={(id) => {
+          if (id.startsWith('session:')) openSession?.(id.slice('session:'.length))
+          else selectPanel(id.slice('panel:'.length) as MainPanelId)
+        }}
       />
       {/* macOS hiddenInset titlebar: the strip shares the row with the
           traffic lights and keeps the toggle at the sidebar's top-right. */}

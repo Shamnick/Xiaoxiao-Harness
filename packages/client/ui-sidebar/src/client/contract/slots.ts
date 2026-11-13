@@ -7,6 +7,7 @@
  * `sidebar.settings` registrant's (ui-settings), followed by optional footer
  * actions in `sidebar.footer.action`.
  */
+import type { SessionListState } from '@deepseek-ai/dsh-api-session-controller/client'
 import type { RefCallback } from 'react'
 import type {
   InjectFace, PropsLocale, PropsRenderFactories, PropsRenderSlots, PropsRuntime, SlotHookFactory,
@@ -204,6 +205,8 @@ export type SidebarRootInjected = {
   toggleSidebar: () => void
   /** Select the global panel addressed by a sidebar row. */
   selectPanel: (id: MainPanelId) => void
+  /** Select an existing Session and reveal its Conversation; absent in tests. */
+  openSession?: ((sessionId: string) => void) | undefined
   /**
    * Show or unpin one panel launcher; Plugins is ignored.
    * @param id - Panel id.
@@ -220,6 +223,8 @@ export type SidebarRootInjected = {
     entryPins: ObservableSnapshot<readonly string[]>
     /** Whether `sidebar.panellist.actions` has registrations. */
     entryActions: ObservableSnapshot<boolean>
+    /** Session catalog and per-Session summaries; the palette searches these. */
+    sessions: ObservableSnapshot<SessionListState>
   }
 }
 
