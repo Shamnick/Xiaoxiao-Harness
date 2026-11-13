@@ -16,7 +16,6 @@ import type { Commands } from '../infra/commands.ts'
 import type { PromptVersion, Prompts } from './prompts.ts'
 import type { Sessions } from './sessions.ts'
 import type { Settings } from './settings.ts'
-import { KV } from '../kv.ts'
 import type { Store } from './store.ts'
 import type { TextCache } from './cache.ts'
 
@@ -112,7 +111,14 @@ const THREAD_DECISIONS = 5
 const triggerLine = (trigger: Trigger) => ({ trigger_id: trigger.id, actor: trigger.actor.id, human: trigger.human, at: trigger.at,
   preview: preview(trigger.text), chars: trigger.text.length, read: `trigger/${trigger.id}` })
 async function transcript(host: ResourceHost, ticketId: string) {
-  return (await host.context.sessionController.inspect(workerSessionId(ticketId) as SessionId)).events
+  // Current Session API replaced inspect(id).events with events(request, signal);
+  // a page carries `records` instead of a flat `events` array.
+  const page = await host.context.sessionController.events(
+    { address: { kind: 'session', sessionId: workerSessionId(ticketId) as SessionId } },
+    AbortSignal.timeout(30_000),
+  )
+  // records wrap each durable event in { type: 'event', event }.
+  return page.records.map(record => record.event)
 }
 
 const ROUTES: readonly Route[] = [

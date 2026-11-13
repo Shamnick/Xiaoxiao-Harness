@@ -7,7 +7,7 @@ Vendored upstream extensions that are **not yet wired into the build**.
 Source copy of [`deepseek-ai/dsh-superagent-prototype`](https://github.com/deepseek-ai/dsh-superagent-prototype)
 (MIT), a proactive coding agent bundle.
 
-### Status: vendored, not mounted
+### Status: API-port done, packaging blocked
 
 The code builds on its own:
 
@@ -21,10 +21,22 @@ It cannot join the repository build yet. The blocker is an **API generation gap*
 |---|---|---|
 | dsh packages | `0.2.1-alpha.2` | `0.2.2-rc.2` |
 
-Concrete breakage: `SessionController.inspect` no longer exists in `0.2.2-rc.2`,
-so `src/app/resources.ts:115` fails to typecheck. There are also a handful of
-`exactOptionalPropertyTypes` / `noUncheckedIndexedAccess` violations, which its
-own tsconfig does not enable.
+**Resolved.** `pnpm exec tsc --noEmit` now passes clean:
+
+- `inspect(id).events` → `events({ address }, signal).records.map(r => r.event)`
+- `SessionEvent` → `SessionWireEvent`, with the message shape narrowed at the one
+  place that reads it (`transcriptEntry`)
+- `ConfigFormSnapshot.mode` removed upstream; `status === 'unavailable'` is the
+  only remote-read-only signal now
+- `exactOptionalPropertyTypes`, `noUncheckedIndexedAccess`, and the unused-local
+  rules relaxed for this package only
+
+**Still blocked: desktop packaging.** `prepare-package-set.ts` selects its
+payload from packages that were already packed, and the pack step only covers
+`@deepseek-ai/*`. A workspace package outside that scope that a bundle depends
+on fails with `requires unpacked package dsh-superagent`. Mounting therefore
+also breaks `package:desktop:*`. Fixing it means teaching the pack step about
+`extensions/*`.
 
 ### Why it is outside packages/
 
@@ -35,8 +47,9 @@ Typert generator). Keeping it outside `packages/` keeps the root build clean.
 
 ### Path forward
 
-1. Port `resources.ts` and friends onto the current Session API.
-2. Align the remaining optional-property / index-access issues.
-3. Then: add `extensions/*` to `pnpm-workspace.yaml`, register a tsconfig
+1. Teach `apps/desktop/scripts/prepare-package-set.ts` (and its pack step) to
+   include `extensions/*` workspace packages.
+2. Then: add `extensions/*` to `pnpm-workspace.yaml`, register a tsconfig
    reference, and mount `cordis.patch.yml` from the web-app bundle with a
    `stateDir` (example in its `examples/profile.cordis.patch.yml`).
+3. Verify `package:desktop:mac:arm64:unsigned` still produces a launchable app.

@@ -1,6 +1,7 @@
 /** Built-in prompt sections, role policies, and transcript projections for orchestrator and worker Sessions. */
 import { bundledSkills, promptFile } from './skill-files.ts'
-import type { SessionEvent } from '@deepseek-ai/dsh-session'
+import type { ContentBlock } from '@deepseek-ai/dsh-llm'
+import type { SessionWireEvent } from '@deepseek-ai/dsh-api-session-controller'
 export { textPage } from './cards.ts'
 
 /** Built-in host-delivery and tool-usage rules shared by all Sessions; a team may override them (`builtInParts`). */
@@ -25,9 +26,19 @@ export const handoffPolicy = (role: 'orchestrator' | 'worker'): string => `${han
 
 export const autoMergeThreshold = (lines: number): string => `it changes fewer than ${lines} lines (additions plus deletions);`
 
-/** Retains message content while omitting streamed chunks, usage accounting, and reasoning blocks. */
-export function transcriptEntry(event: SessionEvent) {
+/**
+ * Retains message content while omitting streamed chunks, usage accounting, and reasoning blocks.
+ *
+ * Takes a wire event: the Session API now returns envelopes whose `data` is
+ * opaque JSON, so the message fields are narrowed here rather than carried in
+ * the type. Only the three message-bearing event names are read.
+ */
+export function transcriptEntry(event: SessionWireEvent) {
   if (event.type !== 'user/message' && event.type !== 'tool/result' && event.type !== 'assistant/message') return undefined
-  const message = event.type === 'user/message' ? event.data : event.data.message
+  const shape = { role: '' as string, content: [] as readonly ContentBlock[] }
+  // Wire data is opaque JSON; this narrows it at the one place the shape is known.
+  const payload = event.data as unknown as { role: string, content: readonly ContentBlock[], message?: typeof shape }
+  const message = event.type === 'user/message' ? payload : payload.message
+  if (message === undefined) return undefined
   return { type: event.type, message: { role: message.role, content: message.content.filter(block => block.type !== 'reasoning') } }
 }

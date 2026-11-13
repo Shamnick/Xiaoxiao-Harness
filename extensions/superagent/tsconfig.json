@@ -5,7 +5,9 @@
     "outDir": "lib/types",
     "jsx": "react-jsx",
     "exactOptionalPropertyTypes": false,
-    "noUncheckedIndexedAccess": false
+    "noUncheckedIndexedAccess": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false
   },
   "include": [
     "src"
