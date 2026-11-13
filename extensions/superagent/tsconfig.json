@@ -1,0 +1,90 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "lib/types",
+    "jsx": "react-jsx",
+    "exactOptionalPropertyTypes": false,
+    "noUncheckedIndexedAccess": false
+  },
+  "include": [
+    "src"
+  ],
+  "references": [
+    {
+      "path": "../../packages/../vendor/cordis/tsconfig.json"
+    },
+    {
+      "path": "../../packages/core/agent/tsconfig.json"
+    },
+    {
+      "path": "../../packages/api/session-controller/tsconfig.client.json"
+    },
+    {
+      "path": "../../packages/attachment/attachment/tsconfig.json"
+    },
+    {
+      "path": "../../packages/client/locale/tsconfig.client.json"
+    },
+    {
+      "path": "../../packages/client/ui-layout/tsconfig.json"
+    },
+    {
+      "path": "../../packages/client/ui-plugin-manager/tsconfig.client.json"
+    },
+    {
+      "path": "../../packages/client/ui-renderer/tsconfig.json"
+    },
+    {
+      "path": "../../packages/client/ui-settings/tsconfig.client.json"
+    },
+    {
+      "path": "../../packages/client/ui-sidebar/tsconfig.json"
+    },
+    {
+      "path": "../../packages/client/ui-slots/tsconfig.json"
+    },
+    {
+      "path": "../../packages/client/ui-workspace/tsconfig.json"
+    },
+    {
+      "path": "../../packages/host/webserver/tsconfig.json"
+    },
+    {
+      "path": "../../packages/llm/llm/tsconfig.json"
+    },
+    {
+      "path": "../../packages/interaction/permission-presets/tsconfig.json"
+    },
+    {
+      "path": "../../packages/core/scope/tsconfig.json"
+    },
+    {
+      "path": "../../packages/core/session/tsconfig.json"
+    },
+    {
+      "path": "../../packages/session/session-persistence/tsconfig.json"
+    },
+    {
+      "path": "../../packages/settings/settings/tsconfig.json"
+    },
+    {
+      "path": "../../packages/skill/skill/tsconfig.json"
+    },
+    {
+      "path": "../../packages/subprocess/subprocess/tsconfig.json"
+    },
+    {
+      "path": "../../packages/core/system-prompt/tsconfig.json"
+    },
+    {
+      "path": "../../packages/core/tools/tsconfig.json"
+    },
+    {
+      "path": "../../packages/workspace/workspace/tsconfig.json"
+    },
+    {
+      "path": "../../packages/../vendor/schemastery/tsconfig.json"
+    }
+  ]
+}
