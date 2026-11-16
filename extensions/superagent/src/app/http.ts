@@ -228,7 +228,12 @@ function match(table: Routes, method: string, segments: string[]) {
   return undefined
 }
 export function registerHttp(ctx: Context, runtime: HttpHost): () => void {
-  if (ctx.webServer.host !== '127.0.0.1') throw new Error('Orchestrator management requires a loopback Web server')
+  // Loopback has several spellings; accept any of them rather than only '127.0.0.1',
+  // because the host comes from the deployment's --host flag.
+  const host = ctx.webServer.host
+  if (host !== '127.0.0.1' && host !== 'localhost' && host !== '::1') {
+    throw new Error('Orchestrator management requires a loopback Web server')
+  }
   const table = routes(runtime)
   const disposers = [
     ctx.webServer.register({ kind: 'prefix', path: '/orchestrator', handler: async (req, res) => {
