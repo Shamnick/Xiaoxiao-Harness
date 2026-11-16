@@ -88,3 +88,9 @@
 @media (prefers-reduced-motion: reduce) {
   .row { transition: none; }
 }
+
+/* The shared state block sits inside the palette's own padding. */
+.emptyState {
+  min-height: 96px;
+  padding: 16px 12px;
+}

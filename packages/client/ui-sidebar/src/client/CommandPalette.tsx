@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Modal } from '@deepseek-ai/dsh-client-ui-primitives'
+import { Modal, StateDisplay } from '@deepseek-ai/dsh-client-ui-primitives'
 import css from './CommandPalette.module.css'
 
 /** One selectable row in the palette. */
@@ -115,7 +115,11 @@ export function CommandPalette({
           onChange={(event) => { setQuery(event.target.value); setActive(0) }}
         />
         <ul className={css.list} role="listbox" aria-label={title}>
-          {matches.length === 0 && <li className={css.empty}>{emptyLabel}</li>}
+          {matches.length === 0 && (
+            <li>
+              <StateDisplay title={emptyLabel} className={css.emptyState} />
+            </li>
+          )}
           {matches.map((entry, index) => (
             <li key={entry.id} role="presentation">
               <button
