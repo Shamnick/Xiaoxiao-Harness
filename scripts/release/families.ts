@@ -349,6 +349,9 @@ class DshFamily extends ReleaseFamily {
   readonly patterns = [
     'packages/*/*/package.json',
     'apps/*/package.json',
+    // Vendored upstream bundles mounted by a profile: they ship as part of the
+    // Desktop payload, so they belong to this family's version and pack set.
+    'extensions/*/package.json',
   ] as const
   readonly tagPrefix = 'dsh-v'
 
