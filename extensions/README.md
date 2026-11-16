@@ -7,7 +7,7 @@ Vendored upstream extensions that are **not yet wired into the build**.
 Source copy of [`deepseek-ai/dsh-superagent-prototype`](https://github.com/deepseek-ai/dsh-superagent-prototype)
 (MIT), a proactive coding agent bundle.
 
-### Status: API-port done, packaging blocked
+### Status: API-port done, pack unblocked, boot blocked
 
 The code builds on its own:
 
@@ -31,12 +31,22 @@ It cannot join the repository build yet. The blocker is an **API generation gap*
 - `exactOptionalPropertyTypes`, `noUncheckedIndexedAccess`, and the unused-local
   rules relaxed for this package only
 
-**Still blocked: desktop packaging.** `prepare-package-set.ts` selects its
-payload from packages that were already packed, and the pack step only covers
-`@deepseek-ai/*`. A workspace package outside that scope that a bundle depends
-on fails with `requires unpacked package dsh-superagent`. Mounting therefore
-also breaks `package:desktop:*`. Fixing it means teaching the pack step about
-`extensions/*`.
+**Pack stage: resolved.** Three blockers, in the order they surfaced:
+
+1. `scripts/release/families.ts` — the `dsh` family globs did not include
+   `extensions/*`, so `prepare-package-set` rejected the dependency.
+2. `DshFamily.members` requires every member name to start with
+   `@deepseek-ai/`, so the package became `@deepseek-ai/dsh-superagent` and the
+   three `name:` rows in its `cordis.patch.yml` followed.
+3. `verifyVersions` requires one version per family: `0.1.0` → `0.2.2-rc.2`.
+
+**Still blocked: boot.** With the plugin mounted, `prepare:dsh` fails with
+`Cannot read properties of undefined (reading 'authenticatedUrl')`, thrown from
+`packages/client/connection/lib/types/rpc-host.js` where it calls
+`this.browserAuth.authenticatedUrl(...)`. `browserAuth` is unset at that point.
+Unmounting restores a clean package run, so the plugin's `webServer` route
+registration is implicated in the initialization order. Next step is to look at
+how `browserAuth` is wired relative to `webServer.register`.
 
 ### Why it is outside packages/
 
@@ -47,9 +57,8 @@ Typert generator). Keeping it outside `packages/` keeps the root build clean.
 
 ### Path forward
 
-1. Teach `apps/desktop/scripts/prepare-package-set.ts` (and its pack step) to
-   include `extensions/*` workspace packages.
-2. Then: add `extensions/*` to `pnpm-workspace.yaml`, register a tsconfig
-   reference, and mount `cordis.patch.yml` from the web-app bundle with a
+1. Trace `browserAuth` initialization versus the plugin's `webServer.register`
+   call, and find the ordering or config the plugin needs.
+2. Once boot succeeds, mount `cordis.patch.yml` from the web-app bundle with a
    `stateDir` (example in its `examples/profile.cordis.patch.yml`).
 3. Verify `package:desktop:mac:arm64:unsigned` still produces a launchable app.
