@@ -1,8 +1,10 @@
 Xiaoxiao Harness
 Xiaoxiao Harness
-添加一个 API Key 开始使用
-填入 API Key 即可开始；自定义端点与模型在设置中配置
+接入模型
+选择协议、填写地址，拉取并启用你要用的模型
 输入 API 密钥 [password]
+高级配置›
 获取模型
 保存并继续 [disabled]
+重置
 稍后配置

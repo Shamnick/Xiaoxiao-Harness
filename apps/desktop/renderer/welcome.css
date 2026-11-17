@@ -529,3 +529,68 @@ button.back:hover {
   outline: none;
   border-color: var(--dsw-alias-brand-primary);
 }
+
+/* Label row: the endpoint label and the full-URL toggle share one line. */
+.field-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 12px 0 6px;
+}
+
+.field-label-row .field-label {
+  margin: 0;
+}
+
+.toggle-inline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 12px;
+  line-height: 18px;
+  cursor: pointer;
+}
+
+.toggle-inline input {
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  accent-color: var(--dsw-alias-brand-primary);
+}
+
+/* Advanced disclosure: quiet until opened. */
+.advanced-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 12px;
+  padding: 8px 0;
+  border: 0;
+  background: transparent;
+  color: var(--dsw-alias-label-secondary);
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 18px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.advanced-toggle .chevron {
+  display: inline-block;
+  transition: transform 0.15s ease;
+}
+
+.advanced-toggle .chevron.open {
+  transform: rotate(90deg);
+}
+
+.advanced-fields {
+  padding: 0 0 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .advanced-toggle .chevron { transition: none; }
+}

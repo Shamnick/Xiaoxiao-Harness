@@ -26,6 +26,10 @@ export function Welcome({ api }: { api: WelcomeApi }) {
   const [protocol, setProtocol] = useState('openai-completions')
   const [baseUrl, setBaseUrl] = useState('')
   const [displayName, setDisplayName] = useState('')
+  const [fullUrl, setFullUrl] = useState(false)
+  const [contextWindow, setContextWindow] = useState('')
+  const [maxTokens, setMaxTokens] = useState('')
+  const [advanced, setAdvanced] = useState(false)
   const [models, setModels] = useState<readonly string[]>([])
   const [selected, setSelected] = useState<readonly string[]>([])
   const [probing, setProbing] = useState(false)
@@ -96,6 +100,12 @@ export function Welcome({ api }: { api: WelcomeApi }) {
     }
   }
 
+  function reset(): void {
+    setDraft(''); setBaseUrl(''); setDisplayName('')
+    setModels([]); setSelected([]); setContextWindow(''); setMaxTokens('')
+    setProtocol('openai-completions'); setFullUrl(false); setError('')
+  }
+
   async function saveKey(event: FormEvent) {
     event.preventDefault()
     if (busyRef.current) return
@@ -116,7 +126,14 @@ export function Welcome({ api }: { api: WelcomeApi }) {
         baseURL: baseUrl.trim() === '' ? undefined : baseUrl.trim(),
         api: protocol,
         displayName: displayName.trim() === '' ? undefined : displayName.trim(),
-        models: selected.length > 0 ? selected.map(id => ({ id })) : undefined,
+        models: selected.length > 0
+          ? selected.map((id) => {
+            const entry: { id: string; contextWindow?: number; maxTokens?: number } = { id }
+            if (contextWindow.trim() !== '' && Number.isFinite(Number(contextWindow))) entry.contextWindow = Number(contextWindow)
+            if (maxTokens.trim() !== '' && Number.isFinite(Number(maxTokens))) entry.maxTokens = Number(maxTokens)
+            return entry
+          })
+          : undefined,
       })
       if (!mounted.current) return
       if (result.ok) setDraft('')
@@ -165,9 +182,15 @@ export function Welcome({ api }: { api: WelcomeApi }) {
             <option value="anthropic-messages">{m.welcomeProtocolAnthropic}</option>
           </select>
 
-          <label className="field-label" htmlFor="base-url-input">{m.welcomeBaseUrlLabel}</label>
+          <div className="field-label-row">
+            <label className="field-label" htmlFor="base-url-input">{m.welcomeBaseUrlLabel}</label>
+            <label className="toggle-inline">
+              <input type="checkbox" checked={fullUrl} disabled={busy} onChange={(event) => { setFullUrl(event.target.checked) }} />
+              <span>{m.welcomeFullUrlLabel}</span>
+            </label>
+          </div>
           <input id="base-url-input" type="url" inputMode="url" autoComplete="off" autoCapitalize="off" spellCheck={false}
-            placeholder={m.welcomeBaseUrlPlaceholder}
+            placeholder={fullUrl ? m.welcomeFullUrlPlaceholder : m.welcomeBaseUrlPlaceholder}
             value={baseUrl} disabled={busy} onChange={(event) => { setBaseUrl(event.target.value); setError('') }} />
 
           <label className="field-label" htmlFor="key-input">{m.welcomeKeyPlaceholder}</label>
@@ -179,6 +202,22 @@ export function Welcome({ api }: { api: WelcomeApi }) {
           <input id="display-name-input" type="text" autoComplete="off" spellCheck={false}
             placeholder={m.welcomeDisplayNamePlaceholder}
             value={displayName} disabled={busy} onChange={(event) => { setDisplayName(event.target.value) }} />
+
+          <button type="button" className="advanced-toggle" aria-expanded={advanced}
+            onClick={() => { setAdvanced(value => !value) }}>
+            <span>{m.welcomeAdvancedLabel}</span>
+            <span className={advanced ? 'chevron open' : 'chevron'} aria-hidden="true">›</span>
+          </button>
+          {advanced && (
+            <div className="advanced-fields">
+              <label className="field-label" htmlFor="ctx-input">{m.welcomeContextWindowLabel}</label>
+              <input id="ctx-input" type="number" min={1} inputMode="numeric" placeholder={m.welcomeContextWindowPlaceholder}
+                value={contextWindow} disabled={busy} onChange={(event) => { setContextWindow(event.target.value) }} />
+              <label className="field-label" htmlFor="max-tokens-input">{m.welcomeMaxTokensLabel}</label>
+              <input id="max-tokens-input" type="number" min={1} inputMode="numeric" placeholder={m.welcomeMaxTokensPlaceholder}
+                value={maxTokens} disabled={busy} onChange={(event) => { setMaxTokens(event.target.value) }} />
+            </div>
+          )}
 
           <button id="probe-models" className="probe-button" type="button" disabled={busy || probing} onClick={() => { void probe() }}>
             {probing ? m.welcomeModelsLoading : m.welcomeModelsFetch}
@@ -208,6 +247,7 @@ export function Welcome({ api }: { api: WelcomeApi }) {
       </div>
       <div id="key-actions" className="actions" hidden={page !== 'key'}>
         <button id="save-key" className="primary" type="submit" form="key-form" disabled={busy || draft.trim() === ''}>{m.welcomeKeySave}</button>
+        <button id="reset-key" className="secondary" type="button" disabled={busy} onClick={reset}>{m.welcomeReset}</button>
         <button id="skip-key" className="secondary" type="button" disabled={busy} onClick={() => { void skip() }}>{m.welcomeKeyLater}</button>
       </div>
     </main>
