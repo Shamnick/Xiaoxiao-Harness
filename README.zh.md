@@ -8,6 +8,20 @@ Xiaoxiao Harness（`xxh`）是一个开源的 **agent harness**（智能体框�
 
 > Xiaoxiao Harness 基于 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 构建，依 MIT 许可证授权。详见[许可与致谢](#许可与致谢)。
 
+## 安装（macOS）
+
+从 [Releases](https://github.com/Shamnick/Xiaoxiao-Harness/releases) 下载 DMG，把应用拖进 `Applications`，首次启动时**右键 → 打开**。
+
+这一步是因为构建产物是 **ad-hoc 签名**，没有经过 Apple 公证：未购买 Developer ID 的应用都会被 Gatekeeper 拦下。如果系统完全不让启动，清一次隔离标记即可：
+
+```sh
+xattr -cr "/Applications/Xiaoxiao Harness.app"
+```
+
+首次启动会要求填写 API 地址、密钥，并选择要启用的模型。不需要账号，不需要登录。
+
+> Windows 版本暂未构建。
+
 ## 为什么是 harness
 
 大多数人把 agent 当成"套在模型外面的一层循环"。真到生产环境，循环只是最短的那一截，剩下全是：

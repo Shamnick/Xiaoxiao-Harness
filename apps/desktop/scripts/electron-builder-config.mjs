@@ -195,6 +195,13 @@ export function createElectronBuilderConfig(
       format: 'ULMO',
       sign: !unsigned,
       writeUpdateInfo: false,
+      // A sized window with the two icons side by side makes the drag-to-install
+      // gesture obvious; the default layout leaves them unlabelled and apart.
+      window: { width: 540, height: 400 },
+      contents: [
+        { x: 140, y: 200, type: 'file' },
+        { x: 400, y: 200, type: 'link', path: '/Applications' },
+      ],
     },
     beforePack: async context => {
       const office = await officePackageDirectories(buildPaths.dsh, { platform: resolvedPlatform, arch: resolvedArch })

@@ -8,6 +8,20 @@ It is built on an **everything-is-a-plugin** architecture, powered by [Cordis](h
 
 > Xiaoxiao Harness is built on [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) and is distributed under the MIT License. See [License & Acknowledgments](#license--acknowledgments).
 
+## Install (macOS)
+
+Download the DMG from [Releases](https://github.com/Shamnick/Xiaoxiao-Harness/releases), drag the app to `Applications`, then **right-click → Open** the first time.
+
+That extra step is required because the build is **ad-hoc signed**, not notarized by Apple: Gatekeeper blocks any app whose developer has not paid for a Developer ID. If macOS refuses to launch it at all, clear the quarantine flag once:
+
+```sh
+xattr -cr "/Applications/Xiaoxiao Harness.app"
+```
+
+On first launch the welcome window asks for an API endpoint, a key, and which models to enable. Nothing else is required — no account, no sign-in.
+
+> Windows builds are not produced yet.
+
 ## Why a harness
 
 Most people think of an agent as "a loop wrapped around a model." In production, the loop is the shortest part. The rest is:
