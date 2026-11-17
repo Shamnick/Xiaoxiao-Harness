@@ -48,7 +48,8 @@ export function Welcome({ api }: { api: WelcomeApi }) {
     setAttempt(state.attempt)
     setStarting(false)
     setCopyFeedback({ status: 'idle' })
-    navigate(state.attempt === null || state.attempt.phase === 'cancelled' ? 'entry' : 'account')
+    // Account sign-in is not part of this product: keep the visible page as-is.
+    navigate('key')
   }
 
   useEffect(() => {
@@ -127,19 +128,6 @@ export function Welcome({ api }: { api: WelcomeApi }) {
       if (mounted.current) setBusy(false)
     }
   }
-  async function start() {
-    navigate('account')
-    setStarting(true)
-    setAttempt(null)
-    attemptRef.current = null
-    const current = ++revision.current
-    try {
-      const state = await api.startSignIn()
-      if (mounted.current && revision.current === current) showAccount(state)
-    } catch {
-      if (mounted.current && revision.current === current) setStarting(false)
-    }
-  }
   async function cancel() {
     if (cancelling || attemptRef.current === null) return
     setCancelling(true)
@@ -204,23 +192,17 @@ export function Welcome({ api }: { api: WelcomeApi }) {
         <button id="auth-loading" className="primary" type="button" hidden={failed} disabled aria-label={m.welcomeAuthExchanging}>
           <StateDot state="ongoing" size={16} className="welcome-loading" />
         </button>
-        <button id="auth-retry" className="primary" type="button" hidden={!failed} onClick={() => { void api.analytics?.('auth_page_click', { button_name: 'sign_in' }); void start() }}>{m.welcomeAuthRetry}</button>
         <button id="auth-api-key" className="secondary" type="button" hidden={!failed} onClick={() => { void api.analytics?.('auth_page_click', { button_name: 'api-key' }); navigate('key') }}>{m.welcomeApiKey}</button>
         <button id="auth-cancel" className="secondary" type="button" hidden={failed}
           disabled={cancelling || phase === 'committing' || phase === 'succeeded' || (phase === 'initializing' && !attempt?.id)}
           onClick={() => { void cancel() }}>{m.welcomeAuthCancel}</button>
       </div>
       <div id="entry-actions" className="actions" hidden={page !== 'entry'}>
-        <button id="sign-in" className="primary" type="button" onClick={() => { void api.analytics?.('auth_page_click', { button_name: 'sign_in' }); void start() }}>{m.welcomeSignIn}</button>
-        <button ref={keyButton} id="api-key" className="secondary" type="button" onClick={() => { void api.analytics?.('auth_page_click', { button_name: 'api-key' }); navigate('key') }}>{m.welcomeApiKey}</button>
+        <button ref={keyButton} id="api-key" className="primary" type="button" onClick={() => { void api.analytics?.('auth_page_click', { button_name: 'api-key' }); navigate('key') }}>{m.welcomeApiKey}</button>
       </div>
       <div id="key-actions" className="actions" hidden={page !== 'key'}>
         <button id="save-key" className="primary" type="submit" form="key-form" disabled={busy || draft.trim() === ''}>{m.welcomeKeySave}</button>
         <button id="skip-key" className="secondary" type="button" disabled={busy} onClick={() => { void skip() }}>{m.welcomeKeyLater}</button>
-        <button id="back-to-login" className="back" type="button" disabled={busy} onClick={() => {
-          if (busyRef.current) return
-          setDraft(''); setError(''); focusEntry.current = true; navigate('entry')
-        }}>{m.welcomeKeyBack}</button>
       </div>
     </main>
   </>
