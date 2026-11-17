@@ -95,8 +95,24 @@ export async function openWelcomeWindow(locale: DesktopLocale, operations: Welco
   ipcMain.handle(WELCOME_IPC.takeNotice, async (event) => { assertSender(event); return operations.takeNotice() })
   ipcMain.handle(WELCOME_IPC.saveApiKey, async (event, value: unknown) => {
     assertSender(event)
-    if (typeof value !== 'string' || !/^[\x21-\x7e]+$/.test(value)) return { ok: false }
-    return operations.saveApiKey(value)
+    if (typeof value !== 'object' || value === null) return { ok: false }
+    const input = value as { apiKey?: unknown; baseURL?: unknown; models?: unknown }
+    if (typeof input.apiKey !== 'string' || !/^[\x21-\x7e]+$/.test(input.apiKey)) return { ok: false }
+    return operations.saveApiKey({
+      apiKey: input.apiKey,
+      baseURL: typeof input.baseURL === 'string' ? input.baseURL : undefined,
+      models: Array.isArray(input.models) ? input.models.filter((id): id is string => typeof id === 'string') : undefined,
+    })
+  })
+  ipcMain.handle(WELCOME_IPC.probeModels, async (event, value: unknown) => {
+    assertSender(event)
+    if (typeof value !== 'object' || value === null) return { ok: false, models: [] }
+    const input = value as { apiKey?: unknown; baseURL?: unknown }
+    if (typeof input.apiKey !== 'string') return { ok: false, models: [] }
+    return operations.probeModels({
+      apiKey: input.apiKey,
+      baseURL: typeof input.baseURL === 'string' ? input.baseURL : undefined,
+    })
   })
   ipcMain.handle(WELCOME_IPC.skip, async (event) => {
     assertSender(event)

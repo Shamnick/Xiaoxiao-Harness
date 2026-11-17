@@ -46,6 +46,7 @@ const operations = {
   cancelSignIn: async () => ({ links: { usageUrl: 'http://localhost/usage', topUpUrl: 'http://localhost/top_up' }, status: 'signed-out' as const, attempt: null }),
   copySignInLink: async () => undefined,
   saveApiKey: () => Promise.resolve({ ok: true as const }),
+  probeModels: () => Promise.resolve({ ok: true as const, models: [] as string[] }),
   skip: () => Promise.resolve(),
 }
 

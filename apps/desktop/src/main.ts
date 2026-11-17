@@ -1425,12 +1425,16 @@ async function main(): Promise<void> {
           }
           await clipboard.writeText(platformLoginUrl(state.attempt.authorizeUrl))
         },
-        saveApiKey: async (apiKey) => {
+        saveApiKey: async (input) => {
           if (backend.host === undefined || welcomeBackend === undefined) return { ok: false }
-          const saved = await welcomeBackend.save(apiKey)
+          const saved = await welcomeBackend.save(input)
           if (!saved.ok) return saved
           await enterWorkspace()
           return { ok: true }
+        },
+        probeModels: async (input) => {
+          if (welcomeBackend === undefined) return { ok: false, models: [] }
+          return welcomeBackend.probeModels(input)
         },
         skip: enterWorkspace,
       })

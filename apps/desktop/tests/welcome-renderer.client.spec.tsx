@@ -23,11 +23,12 @@ function mount(language = 'zh-CN', takeNotice = vi.fn<() => Promise<WelcomeNotic
     cancelSignIn: vi.fn(async (): Promise<AccountView> => ({ links: { usageUrl: 'http://localhost/usage', topUpUrl: 'http://localhost/top_up' }, status: 'signed-out', attempt: null })),
     copySignInLink: vi.fn(async () => undefined),
     ...resolveDesktopLocale(language),
-    saveApiKey: vi.fn<(value: string) => Promise<WelcomeSaveResult>>().mockResolvedValue({ ok: true }),
+    saveApiKey: vi.fn<(value: import('../src/welcome-api.ts').WelcomeProviderInput) => Promise<WelcomeSaveResult>>().mockResolvedValue({ ok: true }),
+    probeModels: vi.fn().mockResolvedValue({ ok: true, models: ['model-a', 'model-b'] }),
     skip: vi.fn<() => Promise<void>>().mockResolvedValue(undefined),
   }
   const mounted = render(<Welcome api={api} />)
-  const input = document.querySelector('input')!
+  const input = document.querySelector('#key-input') as HTMLInputElement
   const button = (id: string) => document.querySelector<HTMLButtonElement>(id)!
   const enterKey = (value: string) => {
     fireEvent.change(input, { target: { value } })
@@ -68,7 +69,7 @@ describe('desktop welcome presentation', () => {
     view.submit()
     view.submit()
     fireEvent.click(view.button('#skip-key'))
-    expect(view.api.saveApiKey).toHaveBeenCalledExactlyOnceWith('sk-desktop-example')
+    expect(view.api.saveApiKey).toHaveBeenCalledExactlyOnceWith({ apiKey: 'sk-desktop-example', baseURL: undefined, models: undefined })
     expect(view.api.skip).not.toHaveBeenCalled()
     expect(view.button('#save-key').disabled).toBe(true)
     expect(view.button('#save-key').textContent).toBe(view.api.messages.welcomeKeySave)

@@ -4,9 +4,33 @@ import type { AccountView, SignInAttemptId } from '@deepseek-ai/dsh-deepseek-acc
 import type { ProductEventMap } from '@deepseek-ai/dsh-client-product-analytics/types'
 import type { DesktopLocale } from './locale.ts'
 
+
+/** Provider connection entered before the workspace opens. */
+export interface WelcomeProviderInput {
+  /** Credential value written to the provider's referenced entry. */
+  apiKey: string
+  /** Endpoint override; absent keeps the provider default. */
+  baseURL?: string | undefined
+  /** Model ids to enable; absent keeps the provider catalog. */
+  models?: readonly string[] | undefined
+}
+
+/** Credentials and endpoint used for one listing request. */
+export interface WelcomeProbeInput {
+  apiKey: string
+  baseURL?: string | undefined
+}
+
+/** Outcome of a listing request; failures carry no provider text. */
+export interface WelcomeProbeResult {
+  ok: boolean
+  models: readonly string[]
+}
+
 /** Private native welcome channels, installed only while its window exists. */
 export const WELCOME_IPC = {
   saveApiKey: 'dsh-welcome:save-api-key',
+  probeModels: 'dsh-welcome:probe-models',
   analytics: 'dsh-welcome:analytics',
   analyticsEnabled: 'dsh-welcome:analytics-enabled',
   skip: 'dsh-welcome:skip',
@@ -45,7 +69,9 @@ export interface WelcomeOperations {
    * @param value - validated, trimmed API key.
    * @returns whether the write completed, without private error details.
    */
-  saveApiKey(value: string): Promise<WelcomeSaveResult>
+  saveApiKey(value: WelcomeProviderInput): Promise<WelcomeSaveResult>
+  /** List models offered by an endpoint for these credentials. */
+  probeModels(value: WelcomeProbeInput): Promise<WelcomeProbeResult>
   /**
    * Enter the workspace without writing an onboarding-completion setting.
    * @returns completion after the workspace opens.

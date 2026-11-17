@@ -3,5 +3,6 @@ Xiaoxiao Harness
 Add an API key to get started
 Add an API key to start; custom endpoints and models live in Settings
 Enter API key [password]
+Fetch models
 Save and continue [disabled]
 Set up later

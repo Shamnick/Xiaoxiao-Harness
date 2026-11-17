@@ -23,6 +23,10 @@ export function Welcome({ api }: { api: WelcomeApi }) {
   const pageRef = useRef<Page>('entry')
   const visiblePage = useRef<Page>('entry')
   const [draft, setDraft] = useState('')
+  const [baseUrl, setBaseUrl] = useState('')
+  const [models, setModels] = useState<readonly string[]>([])
+  const [selected, setSelected] = useState<readonly string[]>([])
+  const [probing, setProbing] = useState(false)
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
   const busyRef = useRef(false)
@@ -64,6 +68,32 @@ export function Welcome({ api }: { api: WelcomeApi }) {
     }
   }, [page, api])
 
+  async function probe(): Promise<void> {
+    if (probing) return
+    const key = draft.trim()
+    if (!/^[\x21-\x7e]+$/.test(key)) {
+      setError(key === '' ? m.welcomeKeyBlank : m.welcomeKeyInvalid)
+      input.current?.focus()
+      return
+    }
+    setProbing(true)
+    setError('')
+    try {
+      const result = await api.probeModels({ apiKey: key, baseURL: baseUrl.trim() === '' ? undefined : baseUrl.trim() })
+      if (!mounted.current) return
+      if (!result.ok) setError(m.welcomeModelsFailed)
+      else {
+        setModels(result.models)
+        setSelected(result.models)
+        if (result.models.length === 0) setError(m.welcomeModelsEmpty)
+      }
+    } catch {
+      if (mounted.current) setError(m.welcomeModelsFailed)
+    } finally {
+      if (mounted.current) setProbing(false)
+    }
+  }
+
   async function saveKey(event: FormEvent) {
     event.preventDefault()
     if (busyRef.current) return
@@ -79,7 +109,11 @@ export function Welcome({ api }: { api: WelcomeApi }) {
     setBusy(true)
     setError('')
     try {
-      const result = await api.saveApiKey(value)
+      const result = await api.saveApiKey({
+        apiKey: value,
+        baseURL: baseUrl.trim() === '' ? undefined : baseUrl.trim(),
+        models: selected.length > 0 ? selected : undefined,
+      })
       if (!mounted.current) return
       if (result.ok) setDraft('')
       else setError(m.welcomeKeyFailed)
@@ -119,10 +153,36 @@ export function Welcome({ api }: { api: WelcomeApi }) {
       <form id="key-form" className="key-form" hidden={page !== 'key'} noValidate onSubmit={(event) => { void saveKey(event) }} aria-busy={busy}>
         <header className="key-heading"><h1 id="key-title">{m.welcomeKeyTitle}</h1><p id="key-description">{m.welcomeKeyDescription}</p></header>
         <div className="key-field">
-          <label className="visually-hidden" htmlFor="key-input">{m.welcomeKeyPlaceholder}</label>
-          <input ref={input} id="key-input" type="password" autoComplete="new-password" autoCapitalize="off" spellCheck={false} required
+          <label className="field-label" htmlFor="base-url-input">{m.welcomeBaseUrlLabel}</label>
+          <input id="base-url-input" type="url" inputMode="url" autoComplete="off" autoCapitalize="off" spellCheck={false}
+            placeholder={m.welcomeBaseUrlPlaceholder}
+            value={baseUrl} disabled={busy} onChange={(event) => { setBaseUrl(event.target.value); setError('') }} />
+
+          <label className="field-label" htmlFor="key-input">{m.welcomeKeyPlaceholder}</label>
+          <input ref={input} id="key-input" type="password" autoComplete="new-password" autoCapitalize="off" spellCheck={false}
             aria-describedby="key-description key-error" aria-invalid={error !== ''} placeholder={m.welcomeKeyPlaceholder}
             value={draft} disabled={busy} onChange={(event) => { setDraft(event.target.value); setError('') }} />
+
+          <button id="probe-models" className="probe-button" type="button" disabled={busy || probing} onClick={() => { void probe() }}>
+            {probing ? m.welcomeModelsLoading : m.welcomeModelsFetch}
+          </button>
+
+          {models.length > 0 && (
+            <fieldset className="model-picker" aria-label={m.welcomeModelsLabel}>
+              {models.map((id) => {
+                const checked = selected.includes(id)
+                return (
+                  <label key={id} className="model-option">
+                    <input type="checkbox" checked={checked} disabled={busy} onChange={() => {
+                      setSelected(current => checked ? current.filter(item => item !== id) : [...current, id])
+                    }} />
+                    <span>{id}</span>
+                  </label>
+                )
+              })}
+            </fieldset>
+          )}
+
           <p id="key-error" className="key-error" role="alert" hidden={error === ''}>{error}</p>
         </div>
       </form>

@@ -3,6 +3,9 @@ import type { ProductEvent } from '@deepseek-ai/dsh-client-product-analytics/typ
 
 import { randomUUID } from 'node:crypto'
 import { desktopAccountBackend, type DesktopAccountBackend } from './account-backend.ts'
+import type {
+  WelcomeProbeInput, WelcomeProbeResult, WelcomeProviderInput,
+} from './welcome-api.ts'
 
 /** Metadata needed before the native entry or workspace becomes visible. */
 export interface WelcomeState {
@@ -26,10 +29,30 @@ export interface DesktopWelcomeBackend {
   /** @returns The saved UI language without account or provider requests. */
   readLocalePreference(): Promise<string | null>
   /**
-   * @param apiKey - User-entered official provider key.
+   * Persist the provider connection entered on the welcome page.
+   * @param input - key, optional endpoint override, and the model ids to enable.
    * @returns A safe write outcome without provider diagnostics.
    */
-  save(apiKey: string): Promise<{ ok: boolean }>
+  save(input: WelcomeProviderInput): Promise<{ ok: boolean }>
+  /**
+   * List the models an endpoint offers for these credentials.
+   * @param input - endpoint and key to probe; the key is never persisted here.
+   * @returns model ids, or a failure flag the native form localizes.
+   */
+  probeModels(input: WelcomeProbeInput): Promise<WelcomeProbeResult>
+}
+
+/** Provider default endpoint when the welcome form leaves the field empty. */
+const OFFICIAL_BASE_URL = 'https://api.deepseek.com'
+
+/** Upper bound on one listing request so a stalled endpoint cannot hold the form. */
+const PROBE_TIMEOUT_MS = 15_000
+
+/** One settings path write inside a namespace. */
+interface SettingsPathOp {
+  readonly op: 'set'
+  readonly path: readonly string[]
+  readonly value: unknown
 }
 
 function record(value: unknown): value is Record<string, unknown> {
@@ -143,16 +166,47 @@ export function connectDesktopWelcome(
       if (!record(settings) || !Array.isArray(settings.namespaces)) throw new Error('desktop welcome: missing settings namespaces')
       return localePreference(settings.namespaces)
     },
-    async save(apiKey) {
+    async save(input) {
+      const { apiKey, baseURL, models } = input
       if (!/^[\x21-\x7e]+$/.test(apiKey)) return { ok: false }
       try {
         const { ref } = await settingsAndReference()
         if (ref === undefined) return { ok: false }
         await invoke({ namespace: 'credentials', method: 'set', args: { ref, value: apiKey } })
+        // Endpoint and model selection live in the provider namespace, next to the
+        // credential reference that names where the key is stored.
+        const ops: SettingsPathOp[] = []
+        if (baseURL !== undefined && baseURL.trim() !== '') {
+          ops.push({ op: 'set', path: ['baseURL'], value: baseURL.trim() })
+        }
+        if (models !== undefined && models.length > 0) {
+          ops.push({ op: 'set', path: ['models'], value: models.map(id => ({ id })) })
+        }
+        if (ops.length > 0) {
+          await invoke({ namespace: 'settings', method: 'mutate', args: { ns: 'llm-deepseek', ops } })
+        }
         return { ok: true }
       } catch {
         // Provider diagnostics may contain credentials; the native form owns failure copy.
         return { ok: false }
+      }
+    },
+    async probeModels(input) {
+      const base = (input.baseURL ?? OFFICIAL_BASE_URL).trim().replace(/\/+$/u, '')
+      try {
+        const response = await fetch(`${base}/models`, {
+          headers: { authorization: `Bearer ${input.apiKey}` },
+          signal: AbortSignal.timeout(PROBE_TIMEOUT_MS),
+        })
+        if (!response.ok) return { ok: false, models: [] }
+        const body: unknown = await response.json()
+        if (!record(body) || !Array.isArray(body.data)) return { ok: false, models: [] }
+        const models = body.data
+          .map(entry => record(entry) && typeof entry.id === 'string' ? entry.id : undefined)
+          .filter((id): id is string => id !== undefined)
+        return { ok: true, models }
+      } catch {
+        return { ok: false, models: [] }
       }
     },
   }
