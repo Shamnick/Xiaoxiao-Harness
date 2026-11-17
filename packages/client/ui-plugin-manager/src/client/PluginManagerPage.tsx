@@ -17,7 +17,7 @@ import {
   IconDownloadOutlineRegular, IconInfoOutlineRegular, IconPlusOutlineRegular, IconRefreshOutlineRegular, IconTrashOutlineRegular,
   IconWarningOutlineRegular, Input, Menu, MenuItemButton, Modal, pointerModality,
   PluginArtworkDefault, PluginArtworkLoop, PluginArtworkSearch, PluginArtworkSubagent, PluginArtworkTerminal,
-  SegmentedTabs, StateDot, Switch, Tag, TerminalBlock, Toast, Tooltip, useDismissOnOutsidePointer,
+  SegmentedTabs, StateDisplay, StateDot, Switch, Tag, TerminalBlock, Toast, Tooltip, useDismissOnOutsidePointer,
   type IconProps, type StateDotState, type TerminalBlockLabels,
 } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { InjectFace, PropsLocale, PropsRenderSlots, PropsRuntime, PropsStore } from '@deepseek-ai/dsh-client-ui-slots'
@@ -1843,7 +1843,7 @@ export function PluginManagerPage(props: PluginManagerPageProps): ReactNode {
           : null}
         {loaded && installedCards
           ? basicCards.length === 0 && official.length === 0 && mine.length === 0 && state.status !== 'error'
-            ? <div className={css.installedPanel} {...installedPanel}><p className={css.empty}>{t('empty')}</p></div>
+            ? <div className={css.installedPanel} {...installedPanel}><StateDisplay title={t('empty')} /></div>
             : (
               <div className={css.installedPanel} {...installedPanel}>
                 {showsMoreList ? (

@@ -27,7 +27,7 @@
  * chevron, and each row whose value that selection carries shows one in place
  * of its check mark.
  */
-import { MenuGroup, MenuSurface, observeStickyMenuGroups } from '@deepseek-ai/dsh-client-ui-primitives'
+import { MenuGroup, MenuSurface, observeStickyMenuGroups, StateDisplay } from '@deepseek-ai/dsh-client-ui-primitives'
 import {
   useEffect, useId, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore,
   type CSSProperties, type KeyboardEvent, type FocusEvent,
@@ -611,7 +611,7 @@ export function ModelSelect(
                 })}
               </div>
               {state.status === 'ready' && filteredGroups.length === 0 && (
-                <div className={css.empty} role="status">{t(choices.length === 0 ? 'empty.models' : 'search.empty')}</div>
+                <StateDisplay title={t(choices.length === 0 ? 'empty.models' : 'search.empty')} />
               )}
             </>
           )}
@@ -626,7 +626,7 @@ export function ModelSelect(
               )}
               <div className={clsx(css.groups, 'scrollable')}>
                 {effortChoices.length === 0
-                  ? <div className={css.empty}>{t('empty.efforts')}</div>
+                  ? <StateDisplay title={t('empty.efforts')} />
                   : effortChoices.map(level => (
                     <button
                       ref={itemRef()}
