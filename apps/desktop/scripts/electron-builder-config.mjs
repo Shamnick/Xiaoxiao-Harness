@@ -99,7 +99,12 @@ export function createElectronBuilderConfig(
   if (windowsSigner !== undefined) {
     installWindowsNsisBootstrapSigner({ sign: windowsSigner })
   }
-  const update = unsigned ? undefined : resolveDesktopAutoUpdateConfig(env, resolvedPlatform, resolvedArch)
+  // Xiaoxiao Harness ships no update feed. The upstream resolver points a
+  // signed build at https://download.deepseek.com, which would let this product
+  // offer the original vendor's release to its own users.
+  void resolveDesktopAutoUpdateConfig
+  void unsigned
+  const update = undefined
   if (preparedRuntime !== undefined) buildPaths.dsh = preparedRuntime
   // electron-builder merges extraMetadata into the packaged manifest, so a build version here reaches
   // the artifact names, the update feed, and the installed app.getVersion() the updater compares against.
