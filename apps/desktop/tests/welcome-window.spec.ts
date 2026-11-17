@@ -127,11 +127,11 @@ describe('desktop welcome window', () => {
     expect(await take(own)).toBe('session-expired')
     expect(takeNotice).toHaveBeenCalledOnce()
     const save = electron.handlers.get(WELCOME_IPC.saveApiKey)!
-    await expect(save({ sender: {}, senderFrame: {} }, 'sk-test')).rejects.toThrow('unowned frame')
-    await expect(save({ ...own, senderFrame: {} }, 'sk-test')).rejects.toThrow('unowned frame')
-    expect(await save(own, 'bad key')).toEqual({ ok: false })
+    await expect(save({ sender: {}, senderFrame: {} }, { apiKey: 'sk-test' })).rejects.toThrow('unowned frame')
+    await expect(save({ ...own, senderFrame: {} }, { apiKey: 'sk-test' })).rejects.toThrow('unowned frame')
+    expect(await save(own, { apiKey: 'bad key' })).toEqual({ ok: false })
     expect(saveApiKey).not.toHaveBeenCalled()
-    expect(await save(own, 'sk-test')).toEqual({ ok: true })
+    expect(await save(own, { apiKey: 'sk-test' })).toEqual({ ok: true })
     await electron.handlers.get(WELCOME_IPC.skip)!(own)
     expect(skip).toHaveBeenCalledOnce()
     const copy = electron.handlers.get(WELCOME_IPC.copyLink)!

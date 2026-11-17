@@ -6,22 +6,44 @@ function transport(preference?: string) {
   const keys = new Map<string, string>()
   const namespaces = [
     { ns: 'llm-deepseek', value: { apiKeyEnv: 'CUSTOM_DEEPSEEK_KEY' } },
-    { ns: 'llm-pi-ai', value: { profiles: { example: { apiKeyEnv: 'EXAMPLE_API_KEY' } } } },
+    { ns: 'llm-pi-ai', value: { providers: { example: { apiKeyEnv: 'EXAMPLE_API_KEY' } } } },
     { ns: 'locale', value: preference === undefined ? {} : { preference } },
   ]
   const send = vi.fn<NonNullable<Parameters<typeof connectDesktopWelcome>[2]>>(async (_input, init) => {
     const { rpcId, method, payload } = JSON.parse(init!.body as string) as {
       rpcId: string
       method: string
-      payload: { args: { ref: string; value: string; refs: string[] } }
+      payload: { args: { ref: string; value: string; refs: string[]; ns: string; ops: unknown[] } }
     }
     let value: unknown
     if (method === 'account/getState') value = { links: { usageUrl: 'http://localhost/usage', topUpUrl: 'http://localhost/top_up' }, status: 'signed-out', attempt: null }
     else if (method === 'settings/describe') value = { namespaces }
-    else if (method === 'llm/listConfigurableProviders') value = [{ settingsNs: 'llm-pi-ai', settingsPath: ['profiles', 'example'] }]
+    else if (method === 'llm/listConfigurableProviders') {
+      // Mirror the live directory: every provider the settings document holds.
+      const pi = namespaces.find(item => item.ns === 'llm-pi-ai') as { value: { providers?: Record<string, unknown> } } | undefined
+      value = Object.keys(pi?.value.providers ?? {}).map(route => ({
+        settingsNs: 'llm-pi-ai', settingsPath: ['providers', route],
+      }))
+    }
     else if (method === 'productAnalytics/enabled') value = true
     else if (method === 'productAnalytics/report') value = undefined
     else if (method === 'credentials/set') keys.set(payload.args.ref, payload.args.value)
+    else if (method === 'settings/mutate') {
+      // Apply the write so a following read observes the saved provider, the way
+      // the real Host does.
+      const target = namespaces.find(item => item.ns === payload.args.ns) as { value: Record<string, unknown> } | undefined
+      if (target !== undefined) {
+        for (const op of payload.args.ops as Array<{ path: string[]; value: unknown }>) {
+          let cursor: Record<string, unknown> = target.value
+          for (const key of op.path.slice(0, -1)) {
+            if (typeof cursor[key] !== 'object' || cursor[key] === null) cursor[key] = {}
+            cursor = cursor[key] as Record<string, unknown>
+          }
+          cursor[op.path.at(-1)!] = op.value
+        }
+      }
+      value = undefined
+    }
     else value = Object.fromEntries(payload.args.refs.map(ref => [ref, { configured: keys.has(ref), writable: true }]))
     return Response.json({ type: 'server-response', rpcId, result: { ok: true, value } })
   })
@@ -57,7 +79,8 @@ describe('desktop welcome Web operations', () => {
     const backend = connectDesktopWelcome(url, cookie, host.send)
     expect(await backend.analyticsEnabled()).toBe(true)
     expect(await backend.save({ apiKey: 'sk-example' })).toEqual({ ok: true })
-    expect(host.keys.get('CUSTOM_DEEPSEEK_KEY')).toBe('sk-example')
+    // A custom route owns its own reference, derived from the endpoint.
+    expect(host.keys.get('XIAOXIAO_DEFAULT_API_KEY')).toBe('sk-example')
     expect(await backend.read()).toEqual({ loggedIn: false, hasApiKey: true, writable: true, localePreference: null, themePreference: 'system' })
     for (const [input, init] of host.send.mock.calls) {
       expect(input).toMatch(/^http:\/\/127\.0\.0\.1:19387\/api\//u)
@@ -92,7 +115,9 @@ describe('desktop welcome Web operations', () => {
     expect(await backend.read()).toMatchObject({ hasApiKey: false, writable: false })
     host.keys.set('EXAMPLE_API_KEY', 'custom-key')
     expect(await backend.read()).toMatchObject({ hasApiKey: true, writable: false })
-    expect(await backend.save({ apiKey: 'official-key' })).toEqual({ ok: false })
+    // A custom route no longer depends on the official provider being mounted.
+    expect(await backend.save({ apiKey: 'official-key' })).toEqual({ ok: true })
+    expect(host.keys.get('XIAOXIAO_DEFAULT_API_KEY')).toBe('official-key')
     expect(host.keys.has('undefined')).toBe(false)
   })
 

@@ -187,8 +187,8 @@ export function connectDesktopWelcome(
       const { apiKey, baseURL, api, displayName, models } = input
       if (!/^[\x21-\x7e]+$/.test(apiKey)) return { ok: false }
       try {
-        // A custom route needs a key of its own: derive a stable reference from
-        // the endpoint so re-saving the same endpoint updates one profile.
+        // A custom route owns its own credential reference; it does not depend on
+        // the official provider's namespace being present.
         const route = providerKey(baseURL)
         const ref = customCredentialRef(route)
         await invoke({ namespace: 'credentials', method: 'set', args: { ref, value: apiKey } })
