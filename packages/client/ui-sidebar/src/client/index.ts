@@ -86,7 +86,15 @@ export function apply(ctx: ClientContext): void {
     openSession: (sessionId) => { workspaceNavigation.openSession(sessionId) },
     setPinned: panelPins.setPinned,
     trackEntryClick: (attributes) => { ctx.get('productAnalytics')?.track('sidebar_menu_click', attributes) },
-    hooks: { panels, shortcuts: ctx.shortcuts.catalog, entryPins: panelPins.unpinned, entryActions, sessions: ctx.sessions.list },
+    recentSessions: () => {
+      const snapshot = ctx.sessions.list.getSnapshot()
+      return Object.values(snapshot.byId)
+        .filter(row => !row.blank && row.origin !== 'subagent')
+        .sort((a, b) => b.updatedAt - a.updatedAt)
+        .slice(0, 30)
+        .map(row => ({ id: String(row.id), title: row.displayTitle }))
+    },
+    hooks: { panels, shortcuts: ctx.shortcuts.catalog, entryPins: panelPins.unpinned, entryActions },
   })
   ctx.slots.inject('sidebar', function* () {
     yield ctx.slots.registerFactory({

@@ -36,6 +36,9 @@ async function bench(declare = true) {
   const layout = { toggleSidebar: vi.fn(), selectPanel: vi.fn() }
   const uiWorkspace = { startSession: vi.fn() }
   ctx.provide('shortcuts', { catalog: createSnapshotStore([]) } as never)
+  ctx.provide('sessions', {
+    list: createSnapshotStore({ byId: {}, order: [] }),
+  } as never)
   ctx.provide('layout', layout)
   ctx.provide('uiWorkspace', uiWorkspace as never)
   ctx.provide('locale', new LocaleRuntime(ctx))
@@ -59,7 +62,7 @@ describe('ui-sidebar apply', () => {
   })
 
   it('declares only the services it uses', () => {
-    expect(inject).toEqual(['slots', 'layout', 'uiWorkspace', 'locale', 'shortcuts'])
+    expect(inject).toEqual(['slots', 'layout', 'uiWorkspace', 'sessions', 'locale', 'shortcuts'])
   })
 
   it('registers the shell and declares its child seats', async () => {
@@ -85,7 +88,12 @@ describe('ui-sidebar apply', () => {
     expect(leading[0]!.locale).toBe('sidebar')
     expect(leading[0]!.inject).toBe(b.slots.entries('sidebar')[0]!.inject)
     const injected = (b.slots.entries('sidebar')[0]!.inject as () => SidebarRootInjected)()
-    expect(Object.keys(injected)).toEqual(['startSession', 'toggleSidebar', 'selectPanel', 'setPinned', 'trackEntryClick', 'hooks'])
+    expect(Object.keys(injected)).toEqual([
+      'startSession', 'toggleSidebar', 'selectPanel', 'openSession', 'setPinned', 'trackEntryClick', 'recentSessions', 'hooks',
+    ])
+    // The shell reads recents as data, never through a hook.
+    expect(typeof injected.recentSessions).toBe('function')
+    expect(injected.recentSessions!()).toEqual([])
     expect(injected.hooks.panels.getSnapshot()).toEqual([])
     expect(injected.hooks.entryPins.getSnapshot()).toEqual([])
     expect(injected.hooks.entryActions.getSnapshot()).toBe(false)

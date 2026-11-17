@@ -7,7 +7,6 @@
  * `sidebar.settings` registrant's (ui-settings), followed by optional footer
  * actions in `sidebar.footer.action`.
  */
-import type { SessionListState } from '@deepseek-ai/dsh-api-session-controller/client'
 import type { RefCallback } from 'react'
 import type {
   InjectFace, PropsLocale, PropsRenderFactories, PropsRenderSlots, PropsRuntime, SlotHookFactory,
@@ -78,6 +77,13 @@ declare module '@deepseek-ai/dsh-client-ui-slots' {
 }
 
 /** Geometry supplied to the sidebar brand-mark occupant. */
+/** One recent Session the command palette can open. */
+export interface RecentSessionEntry {
+  id: string
+  title: string
+  detail?: string | undefined
+}
+
 export interface SidebarBrandMarkOwnerProps {
   /** Requested square edge in pixels. */
   size: number
@@ -208,6 +214,12 @@ export type SidebarRootInjected = {
   /** Select an existing Session and reveal its Conversation; absent in tests. */
   openSession?: ((sessionId: string) => void) | undefined
   /**
+   * Recent Sessions the command palette may jump to. A plain computation, not a
+   * hook: the shell is not allowed to read global hooks, so the owner derives
+   * this list and passes it down.
+   */
+  recentSessions?: (() => readonly RecentSessionEntry[]) | undefined
+  /**
    * Show or unpin one panel launcher; Plugins is ignored.
    * @param id - Panel id.
    * @param pinned - Whether the launcher shows in the sidebar.
@@ -224,7 +236,6 @@ export type SidebarRootInjected = {
     /** Whether `sidebar.panellist.actions` has registrations. */
     entryActions: ObservableSnapshot<boolean>
     /** Session catalog and per-Session summaries; the palette searches these. */
-    sessions: ObservableSnapshot<SessionListState>
   }
 }
 

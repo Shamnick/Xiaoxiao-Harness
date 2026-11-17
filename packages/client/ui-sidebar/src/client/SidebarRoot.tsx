@@ -158,6 +158,7 @@ export function SidebarRoot({
   toggleSidebar,
   selectPanel,
   openSession,
+  recentSessions,
   setPinned,
   trackEntryClick,
   useRemoteAccess,
@@ -166,7 +167,6 @@ export function SidebarRoot({
   useEntryActions,
   useShortcuts,
   usePanelInfo,
-  useSessions,
   t,
   renderSlot,
   renderFactorySlot,
@@ -175,21 +175,10 @@ export function SidebarRoot({
   const unpinned = useEntryPins(ids => ids)
   const activePanelId = usePanelInfo(info => info.activePanelId)
   const hasEntryActions = useEntryActions(registered => registered)
-  const sessions = useSessions === undefined ? undefined : useSessions(snapshot => snapshot)
-  // The palette searches these; derived here so the array identity stays stable
-  // across renders (a selector building an array would defeat that).
-  const recentSessions = useMemo(() => {
-    if (sessions === undefined) return []
-    return Object.values(sessions.byId)
-      .filter(row => !row.blank && row.origin !== 'subagent')
-      .sort((a, b) => b.updatedAt - a.updatedAt)
-      .slice(0, 30)
-      .map(row => ({
-        id: String(row.id),
-        title: row.displayTitle,
-        detail: new Date(row.updatedAt).toLocaleString(),
-      }))
-  }, [sessions])
+  // Derived by the owner and passed down: the shell never reads global hooks.
+  const paletteSessions = useMemo(
+    () => recentSessions === undefined ? [] : recentSessions(),
+    [recentSessions])
   const shortcut = useShortcuts(rows => rows.find(row => row.id === 'sidebar.left.toggle'))
   const newShortcut = useShortcuts(rows => rows.find(row => row.id === 'session.new'))
   // A page whose access snapshot excludes starting a Session offers no New Session affordance.
@@ -352,7 +341,7 @@ export function SidebarRoot({
         closeLabel={t('palette.close')}
         entries={[
           ...panels.map(({ id, label }) => ({ id: `panel:${id}`, title: label })),
-          ...recentSessions.map(row => ({ id: `session:${row.id}`, title: row.title, detail: row.detail })),
+          ...paletteSessions.map(row => ({ id: `session:${row.id}`, title: row.title, detail: row.detail })),
         ]}
         onSelect={(id) => {
           if (id.startsWith('session:')) openSession?.(id.slice('session:'.length))
