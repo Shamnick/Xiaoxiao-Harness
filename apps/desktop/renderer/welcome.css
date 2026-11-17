@@ -76,20 +76,29 @@ body {
   app-region: drag;
 }
 
+/* Column flow, not a fixed grid: the provider form grows as fields are added
+   (format, endpoint, key, display name, model list), and a fixed three-row grid
+   made the content overflow into the brand and action rows. The form scrolls
+   instead of colliding. */
 .welcome {
-  display: grid;
+  display: flex;
   flex: 1;
-  min-height: 0;
-  grid-template-rows: 40px minmax(0, 1fr) 104px;
-  justify-items: center;
+  flex-direction: column;
   align-items: center;
-  padding: 24px 48px 76px;
+  min-height: 0;
+  padding: 28px 48px 24px;
+  overflow-y: auto;
+}
+
+.welcome > .brand {
+  flex: none;
+  margin-bottom: 20px;
 }
 
 .welcome > .tagline,
 .welcome > .key-form {
-  grid-row: 2;
-  grid-column: 1;
+  width: 100%;
+  max-width: 520px;
 }
 
 .brand {
@@ -131,15 +140,13 @@ body {
 }
 
 .actions {
-  position: relative;
-  grid-row: 3;
-  grid-column: 1;
-  align-self: stretch;
   display: flex;
   flex: none;
   flex-direction: column;
-  gap: 16px;
-  width: 240px;
+  gap: 12px;
+  width: 100%;
+  max-width: 520px;
+  margin-top: 20px;
 }
 
 .actions button {
