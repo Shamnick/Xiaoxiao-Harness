@@ -23,7 +23,9 @@ export function Welcome({ api }: { api: WelcomeApi }) {
   const pageRef = useRef<Page>('entry')
   const visiblePage = useRef<Page>('entry')
   const [draft, setDraft] = useState('')
+  const [protocol, setProtocol] = useState('openai-completions')
   const [baseUrl, setBaseUrl] = useState('')
+  const [displayName, setDisplayName] = useState('')
   const [models, setModels] = useState<readonly string[]>([])
   const [selected, setSelected] = useState<readonly string[]>([])
   const [probing, setProbing] = useState(false)
@@ -112,7 +114,9 @@ export function Welcome({ api }: { api: WelcomeApi }) {
       const result = await api.saveApiKey({
         apiKey: value,
         baseURL: baseUrl.trim() === '' ? undefined : baseUrl.trim(),
-        models: selected.length > 0 ? selected : undefined,
+        api: protocol,
+        displayName: displayName.trim() === '' ? undefined : displayName.trim(),
+        models: selected.length > 0 ? selected.map(id => ({ id })) : undefined,
       })
       if (!mounted.current) return
       if (result.ok) setDraft('')
@@ -153,6 +157,14 @@ export function Welcome({ api }: { api: WelcomeApi }) {
       <form id="key-form" className="key-form" hidden={page !== 'key'} noValidate onSubmit={(event) => { void saveKey(event) }} aria-busy={busy}>
         <header className="key-heading"><h1 id="key-title">{m.welcomeKeyTitle}</h1><p id="key-description">{m.welcomeKeyDescription}</p></header>
         <div className="key-field">
+          <label className="field-label" htmlFor="protocol-select">{m.welcomeProtocolLabel}</label>
+          <select id="protocol-select" className="protocol-select" value={protocol} disabled={busy}
+            onChange={(event) => { setProtocol(event.target.value) }}>
+            <option value="openai-completions">{m.welcomeProtocolOpenAiCompletions}</option>
+            <option value="openai-responses">{m.welcomeProtocolOpenAiResponses}</option>
+            <option value="anthropic-messages">{m.welcomeProtocolAnthropic}</option>
+          </select>
+
           <label className="field-label" htmlFor="base-url-input">{m.welcomeBaseUrlLabel}</label>
           <input id="base-url-input" type="url" inputMode="url" autoComplete="off" autoCapitalize="off" spellCheck={false}
             placeholder={m.welcomeBaseUrlPlaceholder}
@@ -162,6 +174,11 @@ export function Welcome({ api }: { api: WelcomeApi }) {
           <input ref={input} id="key-input" type="password" autoComplete="new-password" autoCapitalize="off" spellCheck={false}
             aria-describedby="key-description key-error" aria-invalid={error !== ''} placeholder={m.welcomeKeyPlaceholder}
             value={draft} disabled={busy} onChange={(event) => { setDraft(event.target.value); setError('') }} />
+
+          <label className="field-label" htmlFor="display-name-input">{m.welcomeDisplayNameLabel}</label>
+          <input id="display-name-input" type="text" autoComplete="off" spellCheck={false}
+            placeholder={m.welcomeDisplayNamePlaceholder}
+            value={displayName} disabled={busy} onChange={(event) => { setDisplayName(event.target.value) }} />
 
           <button id="probe-models" className="probe-button" type="button" disabled={busy || probing} onClick={() => { void probe() }}>
             {probing ? m.welcomeModelsLoading : m.welcomeModelsFetch}

@@ -48,11 +48,28 @@ const OFFICIAL_BASE_URL = 'https://api.deepseek.com'
 /** Upper bound on one listing request so a stalled endpoint cannot hold the form. */
 const PROBE_TIMEOUT_MS = 15_000
 
-/** One settings path write inside a namespace. */
-interface SettingsPathOp {
-  readonly op: 'set'
-  readonly path: readonly string[]
-  readonly value: unknown
+/**
+ * Stable provider key for an endpoint: the host it points at, reduced to a safe
+ * identifier. Re-saving the same endpoint updates one profile instead of
+ * accumulating duplicates.
+ * @param baseURL - endpoint entered on the welcome form, possibly absent.
+ * @returns a key safe for a settings record and a credential reference.
+ */
+function providerKey(baseURL: string | undefined): string {
+  const source = (baseURL ?? '').trim()
+  const host = source === '' ? 'default' : (() => {
+    try { return new URL(source).host } catch { return source }
+  })()
+  return host.toLowerCase().replace(/[^a-z0-9]+/gu, '-').replace(/^-+|-+$/gu, '') || 'default'
+}
+
+/**
+ * Credential reference for a custom route's key.
+ * @param route - provider key from {@link providerKey}.
+ * @returns the environment-style name stored in the provider profile.
+ */
+function customCredentialRef(route: string): string {
+  return `XIAOXIAO_${route.replace(/-/gu, '_').toUpperCase()}_API_KEY`
 }
 
 function record(value: unknown): value is Record<string, unknown> {
@@ -167,24 +184,29 @@ export function connectDesktopWelcome(
       return localePreference(settings.namespaces)
     },
     async save(input) {
-      const { apiKey, baseURL, models } = input
+      const { apiKey, baseURL, api, displayName, models } = input
       if (!/^[\x21-\x7e]+$/.test(apiKey)) return { ok: false }
       try {
-        const { ref } = await settingsAndReference()
-        if (ref === undefined) return { ok: false }
+        // A custom route needs a key of its own: derive a stable reference from
+        // the endpoint so re-saving the same endpoint updates one profile.
+        const route = providerKey(baseURL)
+        const ref = customCredentialRef(route)
         await invoke({ namespace: 'credentials', method: 'set', args: { ref, value: apiKey } })
-        // Endpoint and model selection live in the provider namespace, next to the
-        // credential reference that names where the key is stored.
-        const ops: SettingsPathOp[] = []
-        if (baseURL !== undefined && baseURL.trim() !== '') {
-          ops.push({ op: 'set', path: ['baseURL'], value: baseURL.trim() })
-        }
+
+        const profile: Record<string, unknown> = { apiKeyEnv: ref }
+        if (baseURL !== undefined && baseURL.trim() !== '') profile.baseURL = baseURL.trim()
+        if (api !== undefined) profile.api = api
+        if (displayName !== undefined && displayName.trim() !== '') profile.displayName = displayName.trim()
         if (models !== undefined && models.length > 0) {
-          ops.push({ op: 'set', path: ['models'], value: models.map(id => ({ id })) })
+          profile.models = models.map(model => model.name !== undefined && model.name !== ''
+            ? { id: model.id, name: model.name }
+            : { id: model.id })
         }
-        if (ops.length > 0) {
-          await invoke({ namespace: 'settings', method: 'mutate', args: { ns: 'llm-deepseek', ops } })
-        }
+        await invoke({
+          namespace: 'settings',
+          method: 'mutate',
+          args: { ns: 'llm-pi-ai', ops: [{ op: 'set', path: ['providers', route], value: profile }] },
+        })
         return { ok: true }
       } catch {
         // Provider diagnostics may contain credentials; the native form owns failure copy.

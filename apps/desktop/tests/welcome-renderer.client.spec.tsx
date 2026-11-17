@@ -69,7 +69,7 @@ describe('desktop welcome presentation', () => {
     view.submit()
     view.submit()
     fireEvent.click(view.button('#skip-key'))
-    expect(view.api.saveApiKey).toHaveBeenCalledExactlyOnceWith({ apiKey: 'sk-desktop-example', baseURL: undefined, models: undefined })
+    expect(view.api.saveApiKey).toHaveBeenCalledExactlyOnceWith({ apiKey: 'sk-desktop-example', baseURL: undefined, api: 'openai-completions', displayName: undefined, models: undefined })
     expect(view.api.skip).not.toHaveBeenCalled()
     expect(view.button('#save-key').disabled).toBe(true)
     expect(view.button('#save-key').textContent).toBe(view.api.messages.welcomeKeySave)

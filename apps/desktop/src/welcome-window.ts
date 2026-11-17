@@ -96,12 +96,23 @@ export async function openWelcomeWindow(locale: DesktopLocale, operations: Welco
   ipcMain.handle(WELCOME_IPC.saveApiKey, async (event, value: unknown) => {
     assertSender(event)
     if (typeof value !== 'object' || value === null) return { ok: false }
-    const input = value as { apiKey?: unknown; baseURL?: unknown; models?: unknown }
+    const input = value as { apiKey?: unknown; baseURL?: unknown; api?: unknown; displayName?: unknown; models?: unknown }
     if (typeof input.apiKey !== 'string' || !/^[\x21-\x7e]+$/.test(input.apiKey)) return { ok: false }
     return operations.saveApiKey({
       apiKey: input.apiKey,
       baseURL: typeof input.baseURL === 'string' ? input.baseURL : undefined,
-      models: Array.isArray(input.models) ? input.models.filter((id): id is string => typeof id === 'string') : undefined,
+      api: typeof input.api === 'string' ? input.api : undefined,
+      displayName: typeof input.displayName === 'string' ? input.displayName : undefined,
+      models: Array.isArray(input.models)
+        ? input.models.flatMap((entry) => {
+          if (typeof entry === 'string') return [{ id: entry }]
+          if (typeof entry === 'object' && entry !== null && typeof (entry as { id?: unknown }).id === 'string') {
+            const name = (entry as { name?: unknown }).name
+            return [{ id: (entry as { id: string }).id, name: typeof name === 'string' ? name : undefined }]
+          }
+          return []
+        })
+        : undefined,
     })
   })
   ipcMain.handle(WELCOME_IPC.probeModels, async (event, value: unknown) => {

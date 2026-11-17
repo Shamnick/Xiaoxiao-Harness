@@ -5,14 +5,26 @@ import type { ProductEventMap } from '@deepseek-ai/dsh-client-product-analytics/
 import type { DesktopLocale } from './locale.ts'
 
 
+/** One model to enable on the custom provider. */
+export interface WelcomeModelInput {
+  /** Wire model id sent to the endpoint. */
+  id: string
+  /** Name shown in pickers; absent shows the id. */
+  name?: string | undefined
+}
+
 /** Provider connection entered before the workspace opens. */
 export interface WelcomeProviderInput {
   /** Credential value written to the provider's referenced entry. */
   apiKey: string
-  /** Endpoint override; absent keeps the provider default. */
+  /** Endpoint the provider's models are reached at. */
   baseURL?: string | undefined
-  /** Model ids to enable; absent keeps the provider catalog. */
-  models?: readonly string[] | undefined
+  /** Wire protocol; absent keeps the provider catalog default. */
+  api?: string | undefined
+  /** Name shown by configuration surfaces. */
+  displayName?: string | undefined
+  /** Models to enable on this route. */
+  models?: readonly WelcomeModelInput[] | undefined
 }
 
 /** Credentials and endpoint used for one listing request. */

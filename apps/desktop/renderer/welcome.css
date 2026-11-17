@@ -503,3 +503,22 @@ button.back:hover {
 @media (prefers-reduced-motion: reduce) {
   .probe-button { transition: none; }
 }
+
+/* Protocol picker: a native select keeps the platform's own affordances. */
+.protocol-select {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 10px;
+  background: var(--dsw-alias-bg-layer-1);
+  color: var(--dsw-alias-label-primary);
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 20px;
+  cursor: pointer;
+}
+
+.protocol-select:focus {
+  outline: none;
+  border-color: var(--dsw-alias-brand-primary);
+}
