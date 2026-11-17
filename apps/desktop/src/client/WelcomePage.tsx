@@ -198,11 +198,6 @@ export function Welcome({ api }: { api: WelcomeApi }) {
             aria-describedby="key-description key-error" aria-invalid={error !== ''} placeholder={m.welcomeKeyPlaceholder}
             value={draft} disabled={busy} onChange={(event) => { setDraft(event.target.value); setError('') }} />
 
-          <label className="field-label" htmlFor="display-name-input">{m.welcomeDisplayNameLabel}</label>
-          <input id="display-name-input" type="text" autoComplete="off" spellCheck={false}
-            placeholder={m.welcomeDisplayNamePlaceholder}
-            value={displayName} disabled={busy} onChange={(event) => { setDisplayName(event.target.value) }} />
-
           <button type="button" className="advanced-toggle" aria-expanded={advanced}
             onClick={() => { setAdvanced(value => !value) }}>
             <span>{m.welcomeAdvancedLabel}</span>
@@ -210,6 +205,10 @@ export function Welcome({ api }: { api: WelcomeApi }) {
           </button>
           {advanced && (
             <div className="advanced-fields">
+              <label className="field-label" htmlFor="display-name-input">{m.welcomeDisplayNameLabel}</label>
+              <input id="display-name-input" type="text" autoComplete="off" spellCheck={false}
+                placeholder={m.welcomeDisplayNamePlaceholder}
+                value={displayName} disabled={busy} onChange={(event) => { setDisplayName(event.target.value) }} />
               <label className="field-label" htmlFor="ctx-input">{m.welcomeContextWindowLabel}</label>
               <input id="ctx-input" type="number" min={1} inputMode="numeric" placeholder={m.welcomeContextWindowPlaceholder}
                 value={contextWindow} disabled={busy} onChange={(event) => { setContextWindow(event.target.value) }} />

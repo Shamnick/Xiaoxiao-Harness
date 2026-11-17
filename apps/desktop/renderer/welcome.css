@@ -775,3 +775,111 @@ body {
   width: 100%;
   min-height: 42px;
 }
+
+/* ══ One-screen layout ═══════════════════════════════════════════════════
+   The welcome window is 600×700. Scrolling in a first-run dialog reads as a
+   defect, so this layer compresses the vertical rhythm until everything fits:
+   labels move beside their fields, the brand block shrinks, and secondary
+   fields live behind the disclosure. */
+
+.welcome {
+  overflow: hidden;
+  padding: 16px 40px 18px;
+  justify-content: center;
+}
+
+.welcome > .brand {
+  height: 42px;
+  margin: 0 0 16px;
+}
+
+.welcome > .key-form {
+  padding: 16px 18px 14px;
+  border-radius: 16px;
+}
+
+.key-heading {
+  padding-bottom: 0;
+}
+
+.key-heading h1 {
+  font-size: 17px;
+  line-height: 23px;
+}
+
+.key-heading p {
+  margin-top: 2px;
+  font-size: 12px;
+  line-height: 17px;
+}
+
+/* Field rhythm: one tight beat per label/control pair. The label and its input
+   are siblings, so the compression comes from margins rather than a grid row. */
+.key-form .field-label,
+.key-form .field-label-row {
+  margin: 10px 0 4px;
+  font-size: 12px;
+}
+
+.key-form .field-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.key-form .field-label-row .field-label {
+  margin: 0;
+}
+
+.key-form input[type='url'],
+.key-form input[type='text'],
+.key-form input[type='password'],
+.key-form input[type='number'],
+.key-form .protocol-select {
+  padding: 7px 10px;
+  font-size: 12.5px;
+}
+
+/* Compact disclosure and probe. */
+.advanced-toggle {
+  margin-top: 10px;
+  padding: 6px 0;
+  font-size: 11.5px;
+}
+
+.advanced-fields .field-label {
+  display: block;
+  margin: 8px 0 4px;
+  font-size: 11.5px;
+}
+
+.probe-button {
+  margin-top: 10px;
+  padding: 7px 12px;
+  font-size: 12px;
+}
+
+.model-picker {
+  max-height: 108px;
+  margin-top: 8px;
+  padding: 6px 8px;
+}
+
+.model-option {
+  padding: 4px 2px;
+  font-size: 11.5px;
+  line-height: 16px;
+}
+
+/* Actions closer to the card. */
+.actions {
+  margin-top: 14px;
+  gap: 8px;
+}
+
+#key-actions button,
+#entry-actions button {
+  min-height: 38px;
+  font-size: 13px;
+}
