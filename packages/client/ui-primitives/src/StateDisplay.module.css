@@ -46,3 +46,35 @@
 .action {
   margin-top: 8px;
 }
+
+/* ── Loading form ────────────────────────────────────────────────────────
+   A spinner and a shimmer bar replace the icon and title. The bar inherits the
+   product shimmer from the theme layer, so loading surfaces read as one family. */
+
+.loading {
+  gap: 12px;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--dsw-alias-border-l2);
+  border-top-color: var(--dsw-alias-brand-primary);
+  border-radius: 50%;
+  animation: state-spin 0.7s linear infinite;
+}
+
+@keyframes state-spin {
+  to { transform: rotate(360deg); }
+}
+
+.skeleton {
+  width: 120px;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--dsw-alias-bg-skeleton);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner { animation: none; }
+}

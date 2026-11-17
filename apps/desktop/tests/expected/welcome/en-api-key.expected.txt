@@ -1,8 +1,7 @@
-DeepSeek Harness
-DeepSeek Harness
+Xiaoxiao Harness
+Xiaoxiao Harness
 Add an API key to get started
-Configure official DeepSeek models to start using Harness
+Add an API key to start; custom endpoints and models live in Settings
 Enter API key [password]
 Save and continue [disabled]
 Set up later
-Back to sign in
