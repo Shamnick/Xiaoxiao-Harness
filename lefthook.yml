@@ -25,7 +25,11 @@ pre-commit:
       stage_fixed: true
 
     - name: whitespace (staged)
-      run: git diff --cached --check
+      # Snapshot files mirror rendered output byte for byte; a trailing space in
+      # that output is data, not a hygiene problem.
+      exclude:
+        - '**/__snapshots__/**'
+      run: git diff --cached --check -- ':!**/__snapshots__/**'
 
     - name: pi-ai provider metadata
       glob: '{pnpm-lock.yaml,packages/llm/llm-pi-ai/package.json,packages/llm/llm-pi-ai/scripts/gen-provider-data.ts,packages/llm/llm-pi-ai/src/provider-data.generated.ts}'

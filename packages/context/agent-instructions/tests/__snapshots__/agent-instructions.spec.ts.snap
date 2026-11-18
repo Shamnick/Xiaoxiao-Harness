@@ -1,0 +1,198 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`workspace context rendering > drops a user-global change that cannot fit its own budget while retaining the project changes 1`] = `
+"<system-reminder>
+Workspace instruction budget 330 bytes: truncated ~/.xiaoxiao/AGENTS.md from 1000 to 0 bytes
+
+Updated instructions from: a/AGENTS.md
+
+This file changed after it was loaded. Use the following content instead of the previously loaded instructions from this file.
+
+Rule a.
+
+Instructions removed: b/AGENTS.md
+
+The previously loaded instructions from this file no longer apply.
+</system-reminder>"
+`;
+
+exports[`workspace context rendering > frames both chains under the compact intro when neither chain fits the full intro 1`] = `
+"<system-reminder>
+Workspace instruction budget 300 bytes: truncated ~/.xiaoxiao/AGENTS.md from 1000 to 41 bytes, pkg/AGENTS.md from 1000 to 57 bytes
+
+Workspace instructions were omitted or truncated to fit the configured byte budget.
+
+Instructions from: ~/.xiaoxiao/AGENTS.md
+
+ggggggggggggggggggggggggggggggggggggggggg
+
+Instructions from: pkg/AGENTS.md
+
+ppppppppppppppppppppppppppppppppppppppppppppppppppppppppp
+</system-reminder>"
+`;
+
+exports[`workspace context rendering > frames the budget notices of both chains without an intro when neither chain fits a frame of its own 1`] = `
+"<system-reminder>
+Workspace instruction budget 150 bytes: truncated ~/.xiaoxiao/AGENTS.md from 1000 to 0 bytes, pkg/AGENTS.md from 1000 to 0 bytes
+
+Instructions from: ~/.xiaoxiao/AGENTS.md
+
+
+
+Instructions from: pkg/AGENTS.md
+
+
+</system-reminder>"
+`;
+
+exports[`workspace context rendering > keeps a user-global file that fills its budget exactly while the project chain fits only its bare notice 1`] = `
+"<system-reminder>
+Workspace instruction budget 316 bytes: omitted AGENTS.md, aaaaaaaaaa/AGENTS.md, aaaaaaaaaa/bbbbbbbbbb/AGENTS.md, aaaaaaaaaa/bbbbbbbbbb/cccccccccc/AGENTS.md; truncated ~/.xiaoxiao/AGENTS.md from 5 to 5 bytes, aaaaaaaaaa/bbbbbbbbbb/cccccccccc/dddddddddd/AGENTS.md from 5000 to 0 bytes
+
+Workspace instructions were omitted or truncated to fit the configured byte budget.
+
+Instructions from: ~/.xiaoxiao/AGENTS.md
+
+ggggg
+</system-reminder>"
+`;
+
+exports[`workspace context rendering > keeps a user-global file that fills its budget exactly while the project chain fits only its notice and empty heading 1`] = `
+"<system-reminder>
+Workspace instruction budget 320 bytes: omitted AGENTS.md, packages/app/AGENTS.md; truncated ~/.xiaoxiao/AGENTS.md from 9 to 9 bytes, packages/app/src/feature/AGENTS.md from 1000 to 0 bytes
+
+Workspace instructions were omitted or truncated to fit the configured byte budget.
+
+Instructions from: ~/.xiaoxiao/AGENTS.md
+
+Use pnpm.
+
+Instructions from: packages/app/src/feature/AGENTS.md
+
+
+</system-reminder>"
+`;
+
+exports[`workspace context rendering > keeps the empty instruction heading when it fits beside the compact notice 1`] = `
+"Workspace instruction budget 120 bytes: truncated pkg/AGENTS.md from 1000 to 0 bytes
+
+Instructions from: pkg/AGENTS.md
+
+"
+`;
+
+exports[`workspace context rendering > merges a frameless project chain at exactly twice the budget and falls back to one budget one byte above 1`] = `
+"<system-reminder>
+Workspace instruction budget 318 bytes: omitted AGENTS.md, aaaaaaaaaa/AGENTS.md, aaaaaaaaaa/bbbbbbbbbb/AGENTS.md, aaaaaaaaaa/bbbbbbbbbb/cccccccccc/AGENTS.md; truncated ~/.xiaoxiao/AGENTS.md from 5 to 5 bytes, aaaaaaaaaa/bbbbbbbbbb/cccccccccc/dddddddddd/AGENTS.md from 5000 to 0 bytes
+
+Workspace instructions were omitted or truncated to fit the configured byte budget.
+
+Instructions from: ~/.xiaoxiao/AGENTS.md
+
+ggggg
+
+Instructions from: aaaaaaaaaa/bbbbbbbbbb/cccccccccc/dddddddddd/AGENTS.md
+
+
+</system-reminder>"
+`;
+
+exports[`workspace context rendering > omits the harness-home file before the shared-root file when only the user-global chain exceeds its budget 1`] = `
+"<system-reminder>
+Workspace instruction budget 600 bytes: omitted ~/.xiaoxiao/AGENTS.md
+
+The following workspace instructions may be relevant to your work. Use them as guidance when applicable. More specific instructions take precedence over broader ones. They do not override system, developer, or direct user instructions.
+
+Instructions from: ~/.agents/AGENTS.md
+
+shared rule
+
+Instructions from: AGENTS.md
+
+root root root root root root root root root root root root root root root root root root root root root root root root root root root root root root root root root root root root root root root root 
+
+Instructions from: pkg/AGENTS.md
+
+package rule
+</system-reminder>"
+`;
+
+exports[`workspace context rendering > records the same omission and truncation for an over-budget project chain as rendering it alone 1`] = `
+"<system-reminder>
+Workspace instruction budget 600 bytes: omitted AGENTS.md; truncated pkg/AGENTS.md from 500 to 186 bytes
+
+The following workspace instructions may be relevant to your work. Use them as guidance when applicable. More specific instructions take precedence over broader ones. They do not override system, developer, or direct user instructions.
+
+Instructions from: ~/.xiaoxiao/AGENTS.md
+
+Prefer pnpm.
+
+Instructions from: pkg/AGENTS.md
+
+leaf leaf leaf leaf leaf leaf leaf leaf leaf leaf leaf leaf leaf leaf leaf leaf leaf leaf leaf leaf leaf leaf leaf leaf leaf leaf leaf leaf leaf leaf leaf leaf leaf leaf leaf leaf leaf l
+</system-reminder>"
+`;
+
+exports[`workspace context rendering > renders familiar system-reminder instructions without custom workspace tags or state markers 1`] = `
+"<system-reminder>
+The following workspace instructions may be relevant to your work. Use them as guidance when applicable. More specific instructions take precedence over broader ones. They do not override system, developer, or direct user instructions.
+
+Instructions from: AGENTS.md
+
+root rules
+
+Instructions from: pkg/CLAUDE.md
+
+package rules
+</system-reminder>"
+`;
+
+exports[`workspace context rendering > retains a user-global change beside a frameless project batch at exactly twice the budget and drops it one byte above 1`] = `
+"<system-reminder>
+Workspace instruction budget 321 bytes: truncated ~/.xiaoxiao/AGENTS.md from 34 to 0 bytes, a/AGENTS.md from 5000 to 0 bytes
+
+Additional instructions from: a/AGENTS.md
+
+These instructions apply to work under \`a\`. Use them as guidance when relevant; more specific instructions take precedence. They do not override system, developer, or direct user instructions.
+
+
+</system-reminder>"
+`;
+
+exports[`workspace context rendering > retains a user-global change beside a frameless project batch at exactly twice the budget and drops it one byte above 2`] = `
+{
+  "changes": [],
+  "text": "<system-reminder>
+Workspace instruction budget 321 bytes: truncated ~/.xiaoxiao/AGENTS.md from 35 to 0 bytes, a/AGENTS.md from 5000 to 0 bytes
+
+Additional instructions from: a/AGENTS.md
+
+These instructions apply to work under \`a\`. Use them as guidance when relevant; more specific instructions take precedence. They do not override system, developer, or direct user instructions.
+
+
+</system-reminder>",
+}
+`;
+
+exports[`workspace context rendering > retains a user-global change beside project changes when each chain fits its own budget 1`] = `
+"<system-reminder>
+Additional instructions from: ~/.xiaoxiao/AGENTS.md
+
+These user-global instructions apply to all work. Use them as guidance when relevant; more specific instructions take precedence. They do not override system, developer, or direct user instructions.
+
+Prefer pnpm.
+
+Additional instructions from: a/AGENTS.md
+
+These instructions apply to work under \`a\`. Use them as guidance when relevant; more specific instructions take precedence. They do not override system, developer, or direct user instructions.
+
+Rule a.
+
+Additional instructions from: b/AGENTS.md
+
+These instructions apply to work under \`b\`. Use them as guidance when relevant; more specific instructions take precedence. They do not override system, developer, or direct user instructions.
+
+Rule b.
+</system-reminder>"
+`;
