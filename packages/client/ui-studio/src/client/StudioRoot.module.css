@@ -595,3 +595,26 @@
   outline: var(--dsw-focus-ring-width, 2px) solid var(--dsw-focus-ring-color, var(--dsw-alias-state-business-primary));
   outline-offset: -2px;
 }
+
+/* Explorer search field. */
+.search {
+  width: 100%;
+  margin-bottom: 6px;
+  padding: 5px 9px;
+  border: 0.5px solid var(--dsw-alias-border-l1);
+  border-radius: 7px;
+  background: var(--dsw-alias-bg-base);
+  color: var(--dsw-alias-label-primary);
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 17px;
+}
+
+.search::placeholder { color: var(--dsw-alias-label-tertiary); }
+
+.search:focus-visible {
+  outline: none;
+  border-color: var(--dsw-alias-state-business-primary);
+}
+
+.search::-webkit-search-cancel-button { cursor: pointer; }

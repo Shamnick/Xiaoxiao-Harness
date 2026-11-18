@@ -258,6 +258,7 @@ function CodeSurface({ t, code, useStore, actions }: {
   const selected = widths.openFile
   const setSelected = actions.setOpenFile
   const [listing, setListing] = useState<Listing>({ state: 'loading', entries: [] })
+  const [query, setQuery] = useState('')
   const [openFile, setOpenFile] = useState<{ path: string; text: string; loading: boolean } | undefined>()
   const title = useMemo(() => code.sessionTitle(), [code])
 
@@ -313,6 +314,13 @@ function CodeSurface({ t, code, useStore, actions }: {
     }
   }, [])
   const segments = path === '' ? [] : path.split('/')
+  const needle = query.trim().toLowerCase()
+  const matched = useMemo(
+    () => needle === ''
+      ? listing.entries
+      : listing.entries.filter(entry => entry.name.toLowerCase().includes(needle)),
+    [listing.entries, needle],
+  )
 
   return (
     <div
@@ -321,6 +329,15 @@ function CodeSurface({ t, code, useStore, actions }: {
     >
       <aside className={css.codeExplorer} aria-label={t('code.explorer')}>
         <p className={css.paneTitle}>{title ?? t('code.explorer')}</p>
+        <input
+          className={css.search}
+          type="search"
+          value={query}
+          placeholder={t('code.searchPlaceholder')}
+          aria-label={t('code.search')}
+          onChange={(event) => { setQuery(event.target.value) }}
+          onKeyDown={(event) => { if (event.key === 'Escape') { setQuery(''); event.preventDefault() } }}
+        />
         <nav className={css.crumbs} aria-label={t('code.path')}>
           <button type="button" className={css.crumb} onClick={() => { setPath('') }}>{t('code.root')}</button>
           {segments.map((segment, index) => (
@@ -335,9 +352,12 @@ function CodeSurface({ t, code, useStore, actions }: {
         {listing.state === 'loading' && <p className={css.mapEmpty}>{t('code.loading')}</p>}
         {listing.state === 'error' && <p className={css.mapEmpty}>{t('code.listFailed')}</p>}
         {listing.state === 'idle' && listing.entries.length === 0 && <p className={css.mapEmpty}>{t('code.empty')}</p>}
-        {listing.state === 'idle' && listing.entries.length > 0 && (
+        {listing.state === 'idle' && listing.entries.length > 0 && matched.length === 0 && (
+          <p className={css.mapEmpty}>{t('code.noMatch')}</p>
+        )}
+        {listing.state === 'idle' && matched.length > 0 && (
           <ul className={css.tree}>
-            {listing.entries.map(entry => (
+            {matched.map(entry => (
               <li key={entry.name}>
                 <button
                   type="button"
