@@ -157,6 +157,31 @@ const IMAGE_EXT = /\.(?:png|jpe?g|gif|webp|svg|avif)$/iu
  * generation itself still goes through the agent.
  */
 /**
+ * Path breadcrumb shared by the code explorer and the image gallery.
+ * The root crumb clears the path; each segment jumps to that prefix.
+ */
+function Breadcrumbs({ t, path, onNavigate }: {
+  t: StudioRootProps['t']
+  path: string
+  onNavigate: (next: string) => void
+}) {
+  const segments = path === '' ? [] : path.split('/')
+  return (
+    <nav className={css.crumbs} aria-label={t('code.path')}>
+      <button type="button" className={css.crumb} onClick={() => { onNavigate('') }}>{t('code.root')}</button>
+      {segments.map((segment, index) => (
+        <button
+          key={`${segment}-${String(index)}`}
+          type="button"
+          className={css.crumb}
+          onClick={() => { onNavigate(segments.slice(0, index + 1).join('/')) }}
+        >{segment}</button>
+      ))}
+    </nav>
+  )
+}
+
+/**
  * Work surface: the sessions the reader was last in, plus the way back to the
  * conversation. The list is read once at mount; live session subscription
  * belongs to the conversation, which owns that projection.
@@ -223,8 +248,6 @@ function ImageSurface({ t, code, submitPrompt, history, onPush, onClear }: {
     () => entries.filter(entry => entry.type === 'directory'),
     [entries],
   )
-  const segments = path === '' ? [] : path.split('/')
-
   const open = useCallback((path: string) => {
     const controller = new AbortController()
     void code.readImage(path, controller.signal).then((url) => {
@@ -244,17 +267,7 @@ function ImageSurface({ t, code, submitPrompt, history, onPush, onClear }: {
         <GenerateForm t={t} mode="image" submitPrompt={submitPrompt} onPush={onPush} />
         <div className={css.gallery}>
           <p className={css.paneTitle}>{t('image.gallery')}</p>
-          <nav className={css.crumbs} aria-label={t('code.path')}>
-            <button type="button" className={css.crumb} onClick={() => { setPath('') }}>{t('code.root')}</button>
-            {segments.map((segment, index) => (
-              <button
-                key={`${segment}-${String(index)}`}
-                type="button"
-                className={css.crumb}
-                onClick={() => { setPath(segments.slice(0, index + 1).join('/')) }}
-              >{segment}</button>
-            ))}
-          </nav>
+          <Breadcrumbs t={t} path={path} onNavigate={setPath} />
           {folders.length > 0 && (
             <ul className={css.galleryGrid}>
               {folders.map(folder => (
