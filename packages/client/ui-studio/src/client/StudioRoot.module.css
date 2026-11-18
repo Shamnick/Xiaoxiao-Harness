@@ -1,0 +1,158 @@
+/* Studio surface: vertical activity rail plus the selected work area. */
+
+.root {
+  display: flex;
+  height: 100%;
+  min-height: 0;
+  background: var(--dsw-alias-bg-base);
+}
+
+/* ── Activity rail ─────────────────────────────────────────────────────── */
+
+.rail {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: none;
+  width: 76px;
+  padding: 10px 6px;
+  border-right: 0.5px solid var(--dsw-alias-border-l1);
+  background: var(--dsw-alias-bg-layer-1);
+}
+
+.railButton {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 4px 6px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--dsw-alias-label-tertiary);
+  font-family: inherit;
+  font-size: 11px;
+  line-height: 14px;
+  cursor: pointer;
+  transition: background-color 0.14s ease, color 0.14s ease;
+}
+
+.railButton[data-active] {
+  background: color-mix(in srgb, var(--dsw-alias-brand-primary) 12%, transparent);
+  color: var(--dsw-alias-brand-primary);
+}
+
+.railLabel {
+  white-space: nowrap;
+}
+
+@media (hover: hover) {
+  .railButton:not([data-active]):hover {
+    background: color-mix(in srgb, var(--dsw-alias-bg-layer-2) 80%, transparent);
+    color: var(--dsw-alias-label-secondary);
+  }
+}
+
+.railButton:focus-visible {
+  outline: var(--dsw-focus-ring-width, 2px) solid var(--dsw-focus-ring-color, var(--dsw-alias-state-business-primary));
+  outline-offset: -2px;
+}
+
+/* ── Surface region ───────────────────────────────────────────────────── */
+
+.surface {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.placeholder {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 40px 24px;
+  text-align: center;
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.placeholderTitle {
+  margin: 8px 0 0;
+  color: var(--dsw-alias-label-primary);
+  font-size: 19px;
+  line-height: 26px;
+  font-weight: 600;
+}
+
+.placeholderText {
+  max-width: 36ch;
+  margin: 0;
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.badge {
+  margin-top: 10px;
+  padding: 3px 10px;
+  border: 0.5px solid var(--dsw-alias-border-l1);
+  border-radius: 999px;
+  corner-shape: round;
+  font-size: 11px;
+  line-height: 16px;
+}
+
+/* ── Code surface ─────────────────────────────────────────────────────── */
+
+.codeGrid {
+  display: grid;
+  flex: 1;
+  min-height: 0;
+  grid-template-columns: 240px minmax(0, 1fr) 260px;
+}
+
+.codeExplorer,
+.codeMap {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 12px;
+  background: var(--dsw-alias-bg-layer-1);
+}
+
+.codeExplorer {
+  border-right: 0.5px solid var(--dsw-alias-border-l1);
+}
+
+.codeMap {
+  border-left: 0.5px solid var(--dsw-alias-border-l1);
+}
+
+.codeEditor {
+  min-width: 0;
+  background: var(--dsw-alias-bg-base);
+}
+
+.paneTitle {
+  margin: 0 0 8px;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.mapEmpty {
+  margin: 0;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .railButton { transition: none; }
+}

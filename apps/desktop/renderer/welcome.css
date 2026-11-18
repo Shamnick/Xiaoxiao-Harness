@@ -302,8 +302,9 @@ body {
 }
 
 .key-error {
-  position: absolute;
-  top: 100%;
+  /* In flow, not absolute: the form card owns its own bottom edge, and an
+     absolutely positioned message escaped past it into the action row. */
+  position: static;
   width: 100%;
   margin: 8px 0 0;
   color: var(--dsw-alias-label-primary);
