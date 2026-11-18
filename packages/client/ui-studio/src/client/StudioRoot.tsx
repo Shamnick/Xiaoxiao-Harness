@@ -259,6 +259,7 @@ function CodeSurface({ t, code, useStore, actions }: {
   const setSelected = actions.setOpenFile
   const [listing, setListing] = useState<Listing>({ state: 'loading', entries: [] })
   const [query, setQuery] = useState('')
+  const [cursor, setCursor] = useState(0)
   const [openFile, setOpenFile] = useState<{ path: string; text: string; loading: boolean } | undefined>()
   const title = useMemo(() => code.sessionTitle(), [code])
 
@@ -356,15 +357,36 @@ function CodeSurface({ t, code, useStore, actions }: {
           <p className={css.mapEmpty}>{t('code.noMatch')}</p>
         )}
         {listing.state === 'idle' && matched.length > 0 && (
-          <ul className={css.tree}>
-            {matched.map(entry => (
+          <ul
+            className={css.tree}
+            tabIndex={0}
+            role="tree"
+            aria-label={t('code.explorer')}
+            onKeyDown={(event) => {
+              if (event.key === 'ArrowDown') {
+                setCursor(index => Math.min(matched.length - 1, index + 1))
+                event.preventDefault()
+              } else if (event.key === 'ArrowUp') {
+                setCursor(index => Math.max(0, index - 1))
+                event.preventDefault()
+              } else if (event.key === 'Enter') {
+                const entry = matched[Math.min(cursor, matched.length - 1)]
+                if (entry !== undefined) { openEntry(entry); event.preventDefault() }
+              } else if (event.key === 'ArrowLeft' || event.key === 'Backspace') {
+                if (path !== '') { setPath(segments.slice(0, -1).join('/')); event.preventDefault() }
+              }
+            }}
+          >
+            {matched.map((entry, index) => (
               <li key={entry.name}>
                 <button
                   type="button"
                   className={css.treeItem}
                   data-kind={entry.type}
                   data-selected={selected === (path === '' ? entry.name : `${path}/${entry.name}`) || undefined}
-                  onClick={() => { openEntry(entry) }}
+                  data-cursor={index === Math.min(cursor, matched.length - 1) || undefined}
+                  tabIndex={-1}
+                  onClick={() => { setCursor(index); openEntry(entry) }}
                 >
                   <span className={css.treeGlyph} aria-hidden="true">{entry.type === 'directory' ? '▸' : '·'}</span>
                   {entry.name}

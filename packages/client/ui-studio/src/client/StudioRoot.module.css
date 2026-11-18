@@ -618,3 +618,14 @@
 }
 
 .search::-webkit-search-cancel-button { cursor: pointer; }
+
+/* Roving cursor inside the explorer tree. */
+.tree:focus-visible {
+  outline: var(--dsw-focus-ring-width, 2px) solid var(--dsw-focus-ring-color, var(--dsw-alias-state-business-primary));
+  outline-offset: -2px;
+  border-radius: 7px;
+}
+
+.treeItem[data-cursor] {
+  box-shadow: inset 1.5px 0 0 var(--dsw-alias-brand-primary);
+}
