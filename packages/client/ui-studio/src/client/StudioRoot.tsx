@@ -221,26 +221,7 @@ function ImageSurface({ t, code, submitPrompt, history, onPush, onClear }: {
           )}
         </div>
       </div>
-      <div className={css.generateHistory}>
-        <div className={css.historyHead}>
-          <p className={css.paneTitle}>{t('generate.history')}</p>
-          {history.length > 0 && (
-            <button type="button" className={css.retry} onClick={onClear}>{t('generate.clear')}</button>
-          )}
-        </div>
-        {history.length === 0
-          ? <p className={css.mapEmpty}>{t('generate.empty')}</p>
-          : (
-            <ul className={css.historyList}>
-              {history.map(entry => (
-                <li key={entry.id} className={css.historyItem}>
-                  <span className={css.historyPrompt}>{entry.prompt}</span>
-                  <span className={css.historyMeta}>{entry.variant} · ×{String(entry.count)}</span>
-                </li>
-              ))}
-            </ul>
-          )}
-      </div>
+      <HistoryPanel t={t} history={history} onClear={onClear} />
     </div>
   )
 }
@@ -328,6 +309,39 @@ function GenerateForm({ mode, t, submitPrompt, onPush }: {
   )
 }
 
+/**
+ * Recorded requests beside a generation form, newest first.
+ * Both surfaces show the same list; only the history they pass in differs.
+ */
+function HistoryPanel({ t, history, onClear }: {
+  t: StudioRootProps['t']
+  history: readonly StudioGeneration[]
+  onClear: () => void
+}) {
+  return (
+    <div className={css.generateHistory}>
+      <div className={css.historyHead}>
+        <p className={css.paneTitle}>{t('generate.history')}</p>
+        {history.length > 0 && (
+          <button type="button" className={css.retry} onClick={onClear}>{t('generate.clear')}</button>
+        )}
+      </div>
+      {history.length === 0
+        ? <p className={css.mapEmpty}>{t('generate.empty')}</p>
+        : (
+          <ul className={css.historyList}>
+            {history.map(entry => (
+              <li key={entry.id} className={css.historyItem}>
+                <span className={css.historyPrompt}>{entry.prompt}</span>
+                <span className={css.historyMeta}>{entry.variant} · ×{String(entry.count)}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+    </div>
+  )
+}
+
 function GenerateSurface({ mode, t, submitPrompt, history, onPush, onClear }: {
   mode: 'video'
   t: StudioRootProps['t']
@@ -341,26 +355,7 @@ function GenerateSurface({ mode, t, submitPrompt, history, onPush, onClear }: {
       <div className={css.generateForm}>
         <GenerateForm mode={mode} t={t} submitPrompt={submitPrompt} onPush={onPush} />
       </div>
-      <div className={css.generateHistory}>
-        <div className={css.historyHead}>
-          <p className={css.paneTitle}>{t('generate.history')}</p>
-          {history.length > 0 && (
-            <button type="button" className={css.retry} onClick={onClear}>{t('generate.clear')}</button>
-          )}
-        </div>
-        {history.length === 0
-          ? <p className={css.mapEmpty}>{t('generate.empty')}</p>
-          : (
-            <ul className={css.historyList}>
-              {history.map(entry => (
-                <li key={entry.id} className={css.historyItem}>
-                  <span className={css.historyPrompt}>{entry.prompt}</span>
-                  <span className={css.historyMeta}>{entry.variant} · ×{String(entry.count)}</span>
-                </li>
-              ))}
-            </ul>
-          )}
-      </div>
+      <HistoryPanel t={t} history={history} onClear={onClear} />
     </div>
   )
 }
