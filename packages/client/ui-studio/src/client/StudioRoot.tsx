@@ -255,12 +255,16 @@ function CodeSurface({ t, code, useStore, actions }: {
   const widths = useStore(state => state)
   const path = widths.openPath
   const setPath = actions.setOpenPath
-  const selected = widths.openFile
-  const setSelected = actions.setOpenFile
+  const tabs = widths.tabs
+  const active = widths.activeTab
+  const selected = active
   const [listing, setListing] = useState<Listing>({ state: 'loading', entries: [] })
   const [query, setQuery] = useState('')
   const [cursor, setCursor] = useState(0)
-  const [openFile, setOpenFile] = useState<{ path: string; text: string; loading: boolean } | undefined>()
+  // File contents stay in the component: the store holds paths only, so a
+  // large file never lands in the persisted snapshot.
+  const [fileCache, setFileCache] = useState<Record<string, string>>({})
+  const [loadingPath, setLoadingPath] = useState<string | undefined>()
   const title = useMemo(() => code.sessionTitle(), [code])
 
   useEffect(() => {
@@ -278,25 +282,32 @@ function CodeSurface({ t, code, useStore, actions }: {
       return
     }
     const target = path === '' ? entry.name : `${path}/${entry.name}`
-    setSelected(target)
-    setOpenFile({ path: target, text: '', loading: true })
-    const controller = new AbortController()
-    void code.read(target, controller.signal)
-      .then((file) => { if (!controller.signal.aborted) setOpenFile({ path: target, text: file.text, loading: false }) })
-      .catch(() => { if (!controller.signal.aborted) setOpenFile({ path: target, text: '', loading: false }) })
-  }, [code, path])
+    actions.openTab(target)
+  }, [actions, path])
 
-  // Restore the file the reader had open: the store keeps the path, the text
-  // is re-read because it may have changed while the surface was away.
+  // Read a tab the first time it becomes active. Contents are re-read rather
+  // than persisted, so a file edited elsewhere shows its current text.
   useEffect(() => {
-    if (selected === '' || openFile?.path === selected) return undefined
+    if (active === '' || fileCache[active] !== undefined) return undefined
     const controller = new AbortController()
-    setOpenFile({ path: selected, text: '', loading: true })
-    void code.read(selected, controller.signal)
-      .then((file) => { if (!controller.signal.aborted) setOpenFile({ path: selected, text: file.text, loading: false }) })
-      .catch(() => { if (!controller.signal.aborted) setOpenFile({ path: selected, text: '', loading: false }) })
+    setLoadingPath(active)
+    void code.read(active, controller.signal)
+      .then((file) => {
+        if (controller.signal.aborted) return
+        setFileCache(cache => ({ ...cache, [active]: file.text }))
+        setLoadingPath(undefined)
+      })
+      .catch(() => {
+        if (controller.signal.aborted) return
+        setFileCache(cache => ({ ...cache, [active]: '' }))
+        setLoadingPath(undefined)
+      })
     return () => { controller.abort() }
-  }, [code, openFile?.path, selected])
+  }, [active, code, fileCache])
+
+  const openFile = active === ''
+    ? undefined
+    : { path: active, text: fileCache[active] ?? '', loading: loadingPath === active || fileCache[active] === undefined }
 
   const symbols = useMemo(
     () => openFile === undefined || openFile.loading ? [] : outlineSymbols(openFile.text),
@@ -398,6 +409,27 @@ function CodeSurface({ t, code, useStore, actions }: {
       </aside>
       <PaneHandle label={t('code.resizeExplorer')} value={widths.explorer} onResize={actions.resizeExplorer} />
       <div className={css.codeEditor} ref={editorRef}>
+        {tabs.length > 0 && (
+          <div className={css.tabBar} role="tablist" aria-label={t('code.tabs')}>
+            {tabs.map(tab => (
+              <span key={tab} className={css.tab} data-active={tab === active || undefined}>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={tab === active}
+                  className={css.tabName}
+                  onClick={() => { actions.openTab(tab) }}
+                >{tab.split('/').pop() ?? tab}</button>
+                <button
+                  type="button"
+                  className={css.tabClose}
+                  aria-label={t('code.closeTab')}
+                  onClick={() => { actions.closeTab(tab) }}
+                >×</button>
+              </span>
+            ))}
+          </div>
+        )}
         {openFile === undefined
           ? <p className={css.editorEmpty}>{t('code.pickFile')}</p>
           : openFile.loading

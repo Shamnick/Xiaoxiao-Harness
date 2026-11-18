@@ -19,8 +19,10 @@ export const studioStore = defineStore({
     videos: [] as readonly StudioGeneration[],
     /** Server-relative directory the code explorer is showing. */
     openPath: '',
-    /** Server-relative file the editor is showing. */
-    openFile: '',
+    /** Open file tabs, in the order the reader opened them. */
+    tabs: [] as readonly string[],
+    /** Which tab the editor is showing. */
+    activeTab: '',
   }),
   persist: 'ui-studio.state',
   actions: {
@@ -35,6 +37,20 @@ export const studioStore = defineStore({
     clearImages: (state) => { state.images = [] },
     clearVideos: (state) => { state.videos = [] },
     setOpenPath: (state, value: string) => { state.openPath = value },
-    setOpenFile: (state, value: string) => { state.openFile = value },
+    /** Open a file in a tab, or focus its existing tab. */
+    openTab: (state, value: string) => {
+      if (value === '') return
+      if (!state.tabs.includes(value)) state.tabs = [...state.tabs, value].slice(-8)
+      state.activeTab = value
+    },
+    closeTab: (state, value: string) => {
+      const index = state.tabs.indexOf(value)
+      if (index < 0) return
+      const next = state.tabs.filter(tab => tab !== value)
+      state.tabs = next
+      if (state.activeTab === value) {
+        state.activeTab = next[Math.min(index, next.length - 1)] ?? ''
+      }
+    },
   },
 })
