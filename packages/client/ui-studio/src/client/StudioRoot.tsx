@@ -434,6 +434,29 @@ function CodeSurface({ t, code, useStore, actions }: {
     () => openFile === undefined || openFile.loading ? [] : outlineSymbols(openFile.text),
     [openFile],
   )
+  // Symbols grouped by declaration kind, with per-group collapse.
+  const groups = useMemo(() => {
+    const order: StudioSymbol['kind'][] = ['class', 'interface', 'type', 'function', 'constant', 'method']
+    const buckets = new Map<StudioSymbol['kind'], StudioSymbol[]>()
+    for (const symbol of symbols) {
+      const bucket = buckets.get(symbol.kind)
+      if (bucket === undefined) buckets.set(symbol.kind, [symbol])
+      else bucket.push(symbol)
+    }
+    return order
+      .filter(kind => buckets.has(kind))
+      .map(kind => ({ kind, items: buckets.get(kind) as StudioSymbol[] }))
+  }, [symbols])
+  const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(new Set())
+  const toggleGroup = useCallback((kind: string) => {
+    setCollapsed((current) => {
+      const next = new Set(current)
+      if (next.has(kind)) next.delete(kind)
+      else next.add(kind)
+      return next
+    })
+  }, [])
+
   const editorRef = useRef<HTMLDivElement | null>(null)
   const jump = useCallback((line: number) => {
     const host = editorRef.current
@@ -579,17 +602,34 @@ function CodeSurface({ t, code, useStore, actions }: {
         {symbols.length === 0
           ? <p className={css.mapEmpty}>{t('code.map.empty')}</p>
           : (
-            <ul className={css.outline}>
-              {symbols.map(symbol => (
-                <li key={`${String(symbol.line)}-${symbol.name}`}>
-                  <button type="button" className={css.outlineItem} onClick={() => { jump(symbol.line) }}>
-                    <span className={css.outlineKind} data-kind={symbol.kind}>{symbol.kind.slice(0, 3)}</span>
-                    <span className={css.outlineName}>{symbol.name}</span>
-                    <span className={css.outlineLine}>{symbol.line}</span>
+            <div className={css.outline}>
+              {groups.map(group => (
+                <section key={group.kind} className={css.outlineGroup}>
+                  <button
+                    type="button"
+                    className={css.outlineGroupHead}
+                    aria-expanded={!collapsed.has(group.kind)}
+                    onClick={() => { toggleGroup(group.kind) }}
+                  >
+                    <span className={css.outlineCaret} data-open={!collapsed.has(group.kind) || undefined} aria-hidden="true">▸</span>
+                    <span className={css.outlineKind} data-kind={group.kind}>{group.kind}</span>
+                    <span className={css.outlineCount}>{group.items.length}</span>
                   </button>
-                </li>
+                  {!collapsed.has(group.kind) && (
+                    <ul className={css.outlineList}>
+                      {group.items.map(symbol => (
+                        <li key={`${String(symbol.line)}-${symbol.name}`}>
+                          <button type="button" className={css.outlineItem} onClick={() => { jump(symbol.line) }}>
+                            <span className={css.outlineName}>{symbol.name}</span>
+                            <span className={css.outlineLine}>{symbol.line}</span>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </section>
               ))}
-            </ul>
+            </div>
           )}
       </aside>
     </div>

@@ -775,3 +775,56 @@
   color: var(--dsw-alias-label-tertiary);
   font-size: 11px;
 }
+
+/* Grouped outline: kind headers with counts, each collapsible. */
+.outlineGroup + .outlineGroup { margin-top: 2px; }
+
+.outlineGroupHead {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 4px 4px;
+  border: 0;
+  border-radius: var(--dsw-radius-xs);
+  background: transparent;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.outlineCaret {
+  flex: none;
+  width: 10px;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 9px;
+  transition: transform 0.13s ease;
+}
+
+.outlineCaret[data-open] { transform: rotate(90deg); }
+
+.outlineCount {
+  margin-left: auto;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+.outlineList {
+  margin: 0;
+  padding: 0 0 2px 14px;
+  list-style: none;
+}
+
+@media (hover: hover) {
+  .outlineGroupHead:hover { background: color-mix(in srgb, var(--dsw-alias-bg-layer-2) 80%, transparent); }
+}
+
+.outlineGroupHead:focus-visible {
+  outline: var(--dsw-focus-ring-width, 2px) solid var(--dsw-focus-ring-color, var(--dsw-alias-state-business-primary));
+  outline-offset: -2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .outlineCaret { transition: none; }
+}

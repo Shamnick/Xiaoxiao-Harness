@@ -815,3 +815,49 @@ describe('root-level keys', () => {
     expect(store.snapshot().openPath).toBe('')
   })
 })
+
+describe('grouped outline', () => {
+  const mixed = [
+    'export class Beta {}',
+    'export function alpha() {}',
+    'export const EPSILON = 1',
+    'export function gamma() {}',
+  ].join('\n')
+
+  /** Mount a file whose outline has three distinct kinds. */
+  async function mountMixed() {
+    const store = makeStore({ tabs: ['a.ts'], activeTab: 'a.ts' })
+    const code = makeCode({
+      list: vi.fn<StudioCodeApi['list']>().mockResolvedValue({ entries: [file('a.ts')] }),
+      read: vi.fn<StudioCodeApi['read']>().mockResolvedValue({ text: mixed }),
+    })
+    mount('code', store, code)
+    await screen.findByRole('button', { name: /alpha/u })
+    return store
+  }
+
+  it('groups symbols under a header per kind with its count', async () => {
+    await mountMixed()
+    const headers = screen.getAllByRole('button', { expanded: true })
+      .filter(node => node.textContent?.includes('function') || node.textContent?.includes('class'))
+    expect(headers.length).toBeGreaterThanOrEqual(2)
+    const fnHead = screen.getByRole('button', { name: /function/u })
+    // Two functions in this file.
+    expect(fnHead.textContent).toContain('2')
+  })
+
+  it('collapses and reopens a group', async () => {
+    await mountMixed()
+    const header = screen.getByRole('button', { name: /function/u })
+    fireEvent.click(header)
+    await waitFor(() => { expect(screen.queryByRole('button', { name: /alpha/u })).toBeNull() })
+    fireEvent.click(header)
+    expect(await screen.findByRole('button', { name: /alpha/u })).toBeTruthy()
+  })
+
+  it('keeps other groups open while one collapses', async () => {
+    await mountMixed()
+    fireEvent.click(screen.getByRole('button', { name: /function/u }))
+    await waitFor(() => { expect(screen.queryByRole('button', { name: /Beta/u })).toBeTruthy() })
+  })
+})
