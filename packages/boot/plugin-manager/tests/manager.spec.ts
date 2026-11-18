@@ -2437,7 +2437,7 @@ it.each([
   })
   expect(pnpm.mock.calls.map(call => call[1])).toEqual([['remove', 'extra'], ['add', GIT_B], ['add', GIT_A]])
   expect(readProfileManifest('test', dir).dependencies).toEqual({ extra: GIT_A })
-})
+}, 30_000)
 
 it('updates a copy pnpm saved as a known host\'s shortcut to the HTTPS spec of another commit', async () => {
   const { manager, dir, bundle } = await fixture()

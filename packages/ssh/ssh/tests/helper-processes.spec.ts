@@ -200,7 +200,9 @@ describe.skipIf(process.platform === 'win32')('SSH helper process settlement', (
 
   it('rolls back a listener path that exceeds the operating system socket limit', async () => {
     const root = await mkdtemp('/tmp/dsh-ssh-long-')
-    const longRoot = `${root}/${'x'.repeat(140)}`
+    // The socket path limit differs per platform (104 on macOS, 108 on Linux);
+    // this is long enough to exceed either.
+    const longRoot = `${root}/${'x'.repeat(240)}`
     await mkdir(longRoot)
     const owner = new RemoteProcesses(new Context(), longRoot, 1, 5000)
     try {
