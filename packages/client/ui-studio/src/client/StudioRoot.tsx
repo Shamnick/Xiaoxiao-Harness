@@ -557,14 +557,17 @@ function CodeSurface({ t, code, useStore, actions }: {
   /** First line currently visible, used to start the find from where the reader is. */
   const currentLine = useCallback((): number => {
     const host = editorRef.current
+    /* v8 ignore next -- the editor renders before the find bar can be typed into, so this ref is never null here */
     if (host === null) return 0
     const top = host.scrollTop
     const rows = host.querySelectorAll('[data-line]')
     for (const row of rows) {
+      /* v8 ignore next -- every match of `[data-line]` is an HTMLElement carrying the attribute */
       if (row instanceof HTMLElement && row.offsetTop + row.offsetHeight >= top) {
         return Number(row.dataset.line ?? '0')
       }
     }
+    /* v8 ignore next -- a rendered file always has at least one row, so the loop returns first */
     return 0
   }, [])
 

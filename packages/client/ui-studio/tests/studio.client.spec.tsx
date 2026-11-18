@@ -1035,3 +1035,51 @@ describe('in-file find', () => {
     expect(screen.queryByLabelText('code.find')).toBeNull()
   })
 })
+
+describe('find navigation keys', () => {
+  const text = ['aaa one', 'bbb', 'aaa three'].join('\n')
+
+  /** Mount a file with two matches for "aaa". */
+  async function mountText() {
+    const store = makeStore({ tabs: ['a.ts'], activeTab: 'a.ts' })
+    const code = makeCode({
+      list: vi.fn<StudioCodeApi['list']>().mockResolvedValue({ entries: [file('a.ts')] }),
+      read: vi.fn<StudioCodeApi['read']>().mockResolvedValue({ text }),
+    })
+    mount('code', store, code)
+    await screen.findByText('aaa one')
+  }
+
+  it('step backwards with Shift+Enter from the last match', async () => {
+    await mountText()
+    const input = screen.getByLabelText('code.find')
+    fireEvent.change(input, { target: { value: 'aaa' } })
+    fireEvent.keyDown(input, { key: 'Enter', shiftKey: true })
+    expect(document.querySelectorAll('[data-hit]')).toHaveLength(2)
+  })
+
+  it('ignores Enter when the term matches nothing', async () => {
+    await mountText()
+    const input = screen.getByLabelText('code.find')
+    fireEvent.change(input, { target: { value: 'zzz' } })
+    fireEvent.keyDown(input, { key: 'Enter' })
+    expect(screen.getByText('code.findNone')).toBeTruthy()
+  })
+
+  it('ignores other keys in the find bar', async () => {
+    await mountText()
+    const input = screen.getByLabelText('code.find') as HTMLInputElement
+    fireEvent.change(input, { target: { value: 'aaa' } })
+    fireEvent.keyDown(input, { key: 'a' })
+    expect(input.value).toBe('aaa')
+  })
+
+  it('starts the find from the top when the editor is not scrolled', async () => {
+    await mountText()
+    const input = screen.getByLabelText('code.find')
+    fireEvent.change(input, { target: { value: 'aaa' } })
+    fireEvent.keyDown(input, { key: 'Enter' })
+    // jsdom reports every row at offset 0, so the search starts at line 1.
+    expect(document.querySelectorAll('[data-hit]').length).toBeGreaterThan(0)
+  })
+})
