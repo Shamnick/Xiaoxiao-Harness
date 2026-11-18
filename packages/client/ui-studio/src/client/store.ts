@@ -34,6 +34,8 @@ export const studioStore = defineStore({
     pushVideo: (state, entry: StudioGeneration) => {
       state.videos = [entry, ...state.videos].slice(0, HISTORY_LIMIT)
     },
+    removeImage: (state, id: string) => { state.images = state.images.filter(entry => entry.id !== id) },
+    removeVideo: (state, id: string) => { state.videos = state.videos.filter(entry => entry.id !== id) },
     clearImages: (state) => { state.images = [] },
     clearVideos: (state) => { state.videos = [] },
     setOpenPath: (state, value: string) => { state.openPath = value },

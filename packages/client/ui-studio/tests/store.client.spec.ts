@@ -118,3 +118,20 @@ describe('studioStore', () => {
     expect(instance.getSnapshot().openPath).toBe('src/lib')
   })
 })
+
+describe('removing one generation', () => {
+  it('drops only the addressed image', () => {
+    const instance = studioStore.create()
+    instance.actions.pushImage(entry('a'))
+    instance.actions.pushImage(entry('b'))
+    instance.actions.removeImage('a')
+    expect(instance.getSnapshot().images.map(item => item.id)).toEqual(['b'])
+  })
+
+  it('leaves the list alone when the id is absent', () => {
+    const instance = studioStore.create()
+    instance.actions.pushVideo(entry('a'))
+    instance.actions.removeVideo('missing')
+    expect(instance.getSnapshot().videos).toHaveLength(1)
+  })
+})

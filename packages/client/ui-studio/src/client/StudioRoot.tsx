@@ -126,6 +126,7 @@ export function StudioRoot(props: StudioRootProps) {
             history={surface === 'image' ? state.images : state.videos}
             onPush={surface === 'image' ? actions.pushImage : actions.pushVideo}
             onClear={surface === 'image' ? actions.clearImages : actions.clearVideos}
+            onRemove={surface === 'image' ? actions.removeImage : actions.removeVideo}
           />
         )}
       </section>
@@ -383,10 +384,11 @@ function GenerateForm({ mode, t, submitPrompt, onPush }: {
  * Recorded requests beside a generation form, newest first.
  * Both surfaces show the same list; only the history they pass in differs.
  */
-function HistoryPanel({ t, history, onClear }: {
+function HistoryPanel({ t, history, onClear, onRemove }: {
   t: StudioRootProps['t']
   history: readonly StudioGeneration[]
   onClear: () => void
+  onRemove: (id: string) => void
 }) {
   return (
     <div className={css.generateHistory}>
@@ -404,6 +406,12 @@ function HistoryPanel({ t, history, onClear }: {
               <li key={entry.id} className={css.historyItem}>
                 <span className={css.historyPrompt}>{entry.prompt}</span>
                 <span className={css.historyMeta}>{entry.variant} · ×{String(entry.count)}</span>
+                <button
+                  type="button"
+                  className={css.historyRemove}
+                  aria-label={`${t('generate.remove')} ${entry.prompt}`}
+                  onClick={() => { onRemove(entry.id) }}
+                >×</button>
               </li>
             ))}
           </ul>
@@ -412,7 +420,7 @@ function HistoryPanel({ t, history, onClear }: {
   )
 }
 
-function GenerateSurface({ mode, t, code, submitPrompt, history, onPush, onClear }: {
+function GenerateSurface({ mode, t, code, submitPrompt, history, onPush, onClear, onRemove }: {
   mode: 'image' | 'video'
   t: StudioRootProps['t']
   code: StudioCodeApi
@@ -420,6 +428,7 @@ function GenerateSurface({ mode, t, code, submitPrompt, history, onPush, onClear
   history: readonly StudioGeneration[]
   onPush: (entry: StudioGeneration) => void
   onClear: () => void
+  onRemove: (id: string) => void
 }) {
   return (
     <div className={css.generate}>
@@ -442,7 +451,7 @@ function GenerateSurface({ mode, t, code, submitPrompt, history, onPush, onClear
           )}
         </MediaBrowser>
       </div>
-      <HistoryPanel t={t} history={history} onClear={onClear} />
+      <HistoryPanel t={t} history={history} onClear={onClear} onRemove={onRemove} />
     </div>
   )
 }

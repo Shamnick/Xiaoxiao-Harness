@@ -973,3 +973,30 @@
 .sourceRow[data-hit] {
   background: color-mix(in srgb, var(--dsw-alias-brand-primary) 8%, transparent);
 }
+
+/* Per-row remove button; stays quiet until the row is hovered. */
+.historyRemove {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border: none;
+  border-radius: var(--dsw-radius-xs);
+  padding: 0;
+  background: transparent;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0;
+}
+
+.historyItem:hover .historyRemove,
+.historyRemove:focus-visible {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .historyRemove {
+    opacity: 1;
+  }
+}

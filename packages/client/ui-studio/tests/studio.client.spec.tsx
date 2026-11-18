@@ -45,6 +45,8 @@ function makeStore(initial: Partial<Record<string, unknown>> = {}) {
     resizeMap: (value: number) => { store.update((d) => { d.map = value }) },
     pushImage: (entry: StudioGeneration) => { store.update((d) => { d.images = [entry, ...d.images] }) },
     pushVideo: (entry: StudioGeneration) => { store.update((d) => { d.videos = [entry, ...d.videos] }) },
+    removeImage: (id: string) => { store.update((d) => { d.images = d.images.filter(item => item.id !== id) }) },
+    removeVideo: (id: string) => { store.update((d) => { d.videos = d.videos.filter(item => item.id !== id) }) },
     clearImages: () => { store.update((d) => { d.images = [] }) },
     clearVideos: () => { store.update((d) => { d.videos = [] }) },
     setOpenPath: (value: string) => { store.update((d) => { d.openPath = value }) },
@@ -1081,5 +1083,20 @@ describe('find navigation keys', () => {
     fireEvent.keyDown(input, { key: 'Enter' })
     // jsdom reports every row at offset 0, so the search starts at line 1.
     expect(document.querySelectorAll('[data-hit]').length).toBeGreaterThan(0)
+  })
+})
+
+describe('removing one history entry', () => {
+  it('removes only the clicked row', async () => {
+    const store = makeStore({
+      images: [
+        { id: 'a', prompt: 'first', variant: '1:1', count: 1, requestedAt: 0 },
+        { id: 'b', prompt: 'second', variant: '1:1', count: 1, requestedAt: 0 },
+      ],
+    })
+    mount('image', store, makeCode())
+    const remove = await screen.findByLabelText(/generate.remove first/u)
+    fireEvent.click(remove)
+    expect(store.snapshot().images.map(item => item.id)).toEqual(['b'])
   })
 })

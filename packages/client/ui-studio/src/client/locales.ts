@@ -59,6 +59,7 @@ export const zh = {
   'generate.history': '请求记录',
   'generate.empty': '还没有请求',
   'generate.clear': '清空',
+  'generate.remove': '删除',
 } satisfies Record<string, string>
 
 /** The studio namespace key union. */
@@ -123,6 +124,7 @@ export const en: Record<StudioKey, string> = {
   'generate.history': 'Requests',
   'generate.empty': 'No requests yet',
   'generate.clear': 'Clear',
+  'generate.remove': 'Remove',
 }
 
 /** Japanese dictionary. */
@@ -184,6 +186,7 @@ export const ja: Record<StudioKey, string> = {
   'generate.history': 'リクエスト',
   'generate.empty': 'リクエストはまだありません',
   'generate.clear': 'クリア',
+  'generate.remove': '削除',
 }
 
 /** Spanish dictionary. */
@@ -245,6 +248,7 @@ export const es: Record<StudioKey, string> = {
   'generate.history': 'Solicitudes',
   'generate.empty': 'Aún no hay solicitudes',
   'generate.clear': 'Limpiar',
+  'generate.remove': 'Eliminar',
 }
 
 /** French dictionary. */
@@ -306,6 +310,7 @@ export const fr: Record<StudioKey, string> = {
   'generate.history': 'Demandes',
   'generate.empty': 'Aucune demande',
   'generate.clear': 'Effacer',
+  'generate.remove': 'Remove',
 }
 
 /** German dictionary. */
@@ -367,6 +372,7 @@ export const de: Record<StudioKey, string> = {
   'generate.history': 'Anfragen',
   'generate.empty': 'Noch keine Anfragen',
   'generate.clear': 'Leeren',
+  'generate.remove': 'Entfernen',
 }
 
 /** Russian dictionary. */
@@ -428,6 +434,7 @@ export const ru: Record<StudioKey, string> = {
   'generate.history': 'Запросы',
   'generate.empty': 'Запросов пока нет',
   'generate.clear': 'Очистить',
+  'generate.remove': 'Удалить',
 }
 
 /** Portuguese dictionary. */
@@ -489,4 +496,5 @@ export const pt: Record<StudioKey, string> = {
   'generate.history': 'Solicitações',
   'generate.empty': 'Nenhuma solicitação ainda',
   'generate.clear': 'Limpar',
+  'generate.remove': 'Remover',
 }
