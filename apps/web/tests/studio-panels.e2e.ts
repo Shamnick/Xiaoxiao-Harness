@@ -45,3 +45,27 @@ it('renders every studio surface from the sidebar', async () => {
     await expect.poll(() => pane.isVisible(), { timeout: 30_000 }).toBe(true)
   }
 })
+
+it('mounts the code surface with its three panes and the explorer search', async () => {
+  const scaffold: WebScaffold = await launchWebScaffold()
+  onTestFinished(() => scaffold.close())
+  const browser = await chromium.launch()
+  onTestFinished(() => browser.close())
+  const page = await browser.newPage({ viewport: { width: 1440, height: 900 } })
+  const tripwire = watchConsole(page)
+  onTestFinished(() => { expect(tripwire.pageErrors).toEqual([]) })
+
+  await page.goto(scaffold.authenticatedUrl)
+  await page.waitForSelector('[aria-label]', { timeout: 60_000 })
+  await page.getByRole('button', { name: /code/iu }).first().click()
+
+  const code = page.locator('[data-surface="code"]')
+  await expect.poll(() => code.isVisible(), { timeout: 30_000 }).toBe(true)
+
+  // Two side panes carry accessible names from the dictionary, so assert the
+  // structure instead of a key: the grid holds explorer, editor, and map.
+  expect(await code.locator('aside').count(), 'expected two side panes').toBe(2)
+  // The name filter and the two resize handles are the surface's controls.
+  expect(await code.getByRole('searchbox').count(), 'explorer search missing').toBeGreaterThan(0)
+  expect(await page.getByRole('separator').count(), 'expected two pane handles').toBe(2)
+})
