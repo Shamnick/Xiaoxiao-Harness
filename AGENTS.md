@@ -8,62 +8,48 @@
 
 ### 推送规则（硬约束）
 
-**每次完成更新后必须提交并推送到远程仓库**，不要留在本地：
+每次更新后必须提交并推送，不要留在本地：
 
 ```bash
-git add -A
-git commit -m "<说明这次改了什么>"
+git add <改动的文件>   # 不要用 -A：构建会在 src/ 留下 .d.ts/.js
+git commit -m "<说明>"
 git push
 ```
 
-- 远程：`https://github.com/Shamnick/Xiaoxiao-Harness.git`，分支 `main`（已设 upstream，直接 `git push`）
-- 提交前先 `git status`：确认没把 `node_modules/`、`dist/`、`lib/` 构建产物带进来
-- 工作区同级目录（`claude-risk` / `clone-ytkj` / `doubao-gateway` 等）属于其它项目，与本仓库无关
+远程 `Shamnick/Xiaoxiao-Harness`，分支 `main`（已设 upstream）。同级目录属其它项目。
 
 ### 网络配置（已固化，勿删）
 
-本机直连 `github.com` 会报 `Error in the HTTP2 framing layer`（git 的 HTTP/2 与链路不兼容），必须走本地代理：
+直连 `github.com` 会报 HTTP/2 framing error，需本地代理：
 
 ```bash
-git config --local http.proxy   http://127.0.0.1:7890
-git config --local https.proxy  http://127.0.0.1:7890
-git config --local http.version HTTP/1.1
+git config --local http.proxy    http://127.0.0.1:7890
+git config --local https.proxy   http://127.0.0.1:7890
+git config --local http.version  HTTP/1.1
 ```
 
-`--local` 配置只作用于本仓库（存在 `.git/config`，不随仓库分发，新克隆需重配）。
-判据：`curl -x http://127.0.0.1:7890 https://github.com` 返回 200 且 <1s；直连 `git ls-remote` 会卡 60s+ 后报错。
-
-> macOS 没有 `timeout` 命令（GNU coreutils 专有），用它测连通性会误报成网络故障。
+`--local` 不随仓库分发，新克隆需重配。macOS 无 `timeout` 命令，用它测连通性会误报。
 
 ### git 身份
 
-```bash
-git config --local user.name  "Shamnick"
-git config --local user.email "131834928+Shamnick@users.noreply.github.com"
-```
+`user.name=Shamnick`，`user.email=131834928+Shamnick@users.noreply.github.com`（均 `--local`）。
 
 ### 品牌标识符
 
-| 项 | 值 |
-|---|---|
-| 产品名 | Xiaoxiao Harness |
-| 缩写 | XH |
-| CLI | `xxh`（`dsh` 作为内部兼容别名保留） |
-| bundle id | `com.xiaoxiao.harness` |
-| npm scope | `@xiaoxiao` |
-
-**禁用**：`DeepSeek Harness`（注册商标）、`DSH`（官方生态缩写）、任何含 `Deep` / `Seek` 的前后缀组合。
+产品名 Xiaoxiao Harness，缩写 XH，CLI `dsh`（唯一受支持的 Node 启动入口），
+bundle id `com.xiaoxiao.harness`，npm scope `@xiaoxiao`。
+**禁用** `DeepSeek Harness`（注册商标）、`DSH`、任何含 `Deep`/`Seek` 的前后缀。
 
 ### 内部 scope 保留 `@deepseek-ai/*`（有意为之）
 
-332 个包互相以 workspace 引用，改 scope 的风险远大于收益，MIT 也不要求改。
-已完成对外可见层的自有化：README、产品名、桌面端 8 语言菜单文案、侧栏品牌组件、应用图标、CLI 名、bundle id、LICENSE 版权行。
+332 个包互相 workspace 引用，改 scope 风险大于收益，MIT 也不要求。
+对外可见层已完成自有化（README、产品名、菜单文案、图标、CLI 名、bundle id、LICENSE）。
 
 ### 二开工具
 
-[`tools/rebrand/`](tools/rebrand/) 收录改名清单、MIT 声明模板、改名与复核脚本、品牌插件脚手架。
-**改品牌字符串前必读** [`tools/rebrand/REBRAND-CHECKLIST.md`](tools/rebrand/REBRAND-CHECKLIST.md) §0——
-`DeepSeek` 在代码里有三种角色（品牌名 / API 服务端点 / 路径标识符），全局替换会把模型调用改坏。
+[`tools/rebrand/`](tools/rebrand/) 收录清单、声明模板与复核脚本。
+**改品牌串前必读** [`REBRAND-CHECKLIST.md`](tools/rebrand/REBRAND-CHECKLIST.md) §0——
+`DeepSeek` 有品牌名 / API 端点 / 路径标识符三种角色，全局替换会改坏模型调用。
 
 ## 架构与开发约定（继承自上游）
 
