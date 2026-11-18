@@ -82,21 +82,24 @@ function makeCode(overrides: Partial<StudioCodeApi> = {}): StudioCodeApi {
 }
 
 /** Render one surface with driven props. */
-function mount(surface: StudioRootProps['surface'], store = makeStore(), code = makeCode()) {
+function mount(surface: StudioRootProps['surface'], store = makeStore(), code = makeCode(), sessions: StudioRootProps['recentSessions'] = () => []) {
   const openConversation = vi.fn()
   const submitPrompt = vi.fn()
+  const openSession = vi.fn()
   render(
     <StudioRoot
       t={t}
       surface={surface}
       openConversation={openConversation}
       submitPrompt={submitPrompt}
+      recentSessions={sessions}
+      openSession={openSession}
       code={code}
       useStore={store.useStore as StudioRootProps['useStore']}
       actions={store.actions as StudioRootProps['actions']}
     />,
   )
-  return { store, code, openConversation, submitPrompt }
+  return { store, code, openConversation, submitPrompt, openSession }
 }
 
 const file = (name: string): StudioEntry => ({ name, type: 'file' })
@@ -475,6 +478,8 @@ describe('navigation edges', () => {
         surface="image"
         openConversation={() => {}}
         submitPrompt={() => {}}
+        recentSessions={() => []}
+        openSession={() => {}}
         code={code}
         useStore={makeStore().useStore as StudioRootProps['useStore']}
         actions={makeStore().actions as StudioRootProps['actions']}
@@ -510,6 +515,8 @@ describe('failure paths', () => {
         surface="image"
         openConversation={() => {}}
         submitPrompt={() => {}}
+        recentSessions={() => []}
+        openSession={() => {}}
         code={code}
         useStore={store.useStore as StudioRootProps['useStore']}
         actions={store.actions as StudioRootProps['actions']}
@@ -696,6 +703,8 @@ describe('remaining branches', () => {
         surface="code"
         openConversation={() => {}}
         submitPrompt={() => {}}
+        recentSessions={() => []}
+        openSession={() => {}}
         code={code}
         useStore={store.useStore as StudioRootProps['useStore']}
         actions={store.actions as StudioRootProps['actions']}
@@ -719,6 +728,8 @@ describe('remaining branches', () => {
         surface="code"
         openConversation={() => {}}
         submitPrompt={() => {}}
+        recentSessions={() => []}
+        openSession={() => {}}
         code={code}
         useStore={store.useStore as StudioRootProps['useStore']}
         actions={store.actions as StudioRootProps['actions']}
@@ -741,6 +752,8 @@ describe('remaining branches', () => {
         surface="code"
         openConversation={() => {}}
         submitPrompt={() => {}}
+        recentSessions={() => []}
+        openSession={() => {}}
         code={code}
         useStore={store.useStore as StudioRootProps['useStore']}
         actions={store.actions as StudioRootProps['actions']}
@@ -763,6 +776,8 @@ describe('remaining branches', () => {
         surface="code"
         openConversation={() => {}}
         submitPrompt={() => {}}
+        recentSessions={() => []}
+        openSession={() => {}}
         code={code}
         useStore={store.useStore as StudioRootProps['useStore']}
         actions={store.actions as StudioRootProps['actions']}
@@ -859,5 +874,28 @@ describe('grouped outline', () => {
     await mountMixed()
     fireEvent.click(screen.getByRole('button', { name: /function/u }))
     await waitFor(() => { expect(screen.queryByRole('button', { name: /Beta/u })).toBeTruthy() })
+  })
+})
+
+describe('work surface', () => {
+  it('lists recent sessions newest first and opens one', async () => {
+    const sessions = () => [
+      { id: 's1', title: 'first', running: false },
+      { id: 's2', title: 'second', running: true },
+    ]
+    const { openSession } = mount('work', makeStore(), makeCode(), sessions)
+    expect(await screen.findByText('first')).toBeTruthy()
+    fireEvent.click(screen.getByText('second'))
+    expect(openSession).toHaveBeenCalledWith('s2')
+  })
+
+  it('marks a running session', () => {
+    mount('work', makeStore(), makeCode(), () => [{ id: 's1', title: 'busy', running: true }])
+    expect(screen.getByText('work.running')).toBeTruthy()
+  })
+
+  it('notes the empty case', () => {
+    mount('work', makeStore(), makeCode(), () => [])
+    expect(screen.getAllByText('work.noSessions').length).toBeGreaterThan(0)
   })
 })

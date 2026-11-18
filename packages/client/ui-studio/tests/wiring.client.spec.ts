@@ -41,6 +41,7 @@ function makeContext() {
       },
     },
     layout: { selectPanel: (id: string | null) => { selected.push(id) } },
+    uiWorkspace: { openSession: (_id: unknown) => {} },
     sessions: { list: { getSnapshot: () => ({ ids: [], byId: {} }) } },
     remote: {
       workspaceFiles: {
@@ -56,7 +57,7 @@ function makeContext() {
 describe('studio wiring', () => {
   it('declares the plugin identity and required services', () => {
     expect(name).toBe('client-ui-studio')
-    expect(inject).toEqual(['slots', 'locale', 'layout', 'sessions', 'remote', 'remote.workspaceFiles'])
+    expect(inject).toEqual(['slots', 'locale', 'layout', 'sessions', 'uiWorkspace', 'remote', 'remote.workspaceFiles'])
   })
 
   it('maps every surface to a distinct panel id', () => {
@@ -221,5 +222,59 @@ describe('studio wiring', () => {
     const face = (registrations.find(entry => entry.options.name === 'main')
       ?.options.inject as () => { code: { sessionTitle: () => string | undefined } })()
     expect(face.code.sessionTitle()).toBe('new')
+  })
+})
+
+describe('work surface wiring', () => {
+  /** Build a context whose session snapshot holds the given rows. */
+  function withSessions(rows: Record<string, unknown>[]) {
+    const made = makeContext()
+    made.ctx.sessions.list.getSnapshot = () => ({
+      ids: rows.map(row => (row as { id: string }).id),
+      byId: Object.fromEntries(rows.map(row => [(row as { id: string }).id, row])) as never,
+    }) as never
+    return made
+  }
+
+  it('lists sessions newest first and skips subagents and untitled rows', () => {
+    const { ctx, registrations } = withSessions([
+      { id: 'a', displayTitle: 'older', updatedAt: 1, running: false },
+      { id: 'b', displayTitle: 'newer', updatedAt: 9, running: true },
+      { id: 'c', displayTitle: 'sub', updatedAt: 99, running: false, origin: 'subagent' },
+      { id: 'd', displayTitle: '', updatedAt: 50, running: false },
+    ])
+    apply(ctx as never)
+    const face = (registrations.find(entry => entry.options.name === 'main')
+      ?.options.inject as () => { recentSessions: () => { id: string; title: string; running: boolean }[] })()
+    expect(face.recentSessions()).toEqual([
+      { id: 'b', title: 'newer', running: true },
+      { id: 'a', title: 'older', running: false },
+    ])
+  })
+
+  it('caps the list at twenty rows', () => {
+    const rows = Array.from({ length: 30 }, (_unused, index) => ({
+      id: `s${String(index)}`,
+      displayTitle: `t${String(index)}`,
+      updatedAt: index,
+      running: false,
+    }))
+    const { ctx, registrations } = withSessions(rows)
+    apply(ctx as never)
+    const face = (registrations.find(entry => entry.options.name === 'main')
+      ?.options.inject as () => { recentSessions: () => unknown[] })()
+    expect(face.recentSessions()).toHaveLength(20)
+  })
+
+  it('clears the panel and opens the chosen session', () => {
+    const made = makeContext()
+    const opened: unknown[] = []
+    made.ctx.uiWorkspace.openSession = (id: unknown) => { opened.push(id) }
+    apply(made.ctx as never)
+    const face = (made.registrations.find(entry => entry.options.name === 'main')
+      ?.options.inject as () => { openSession: (id: string) => void })()
+    face.openSession('s1')
+    expect(opened).toEqual(['s1'])
+    expect(made.selected).toEqual([null])
   })
 })

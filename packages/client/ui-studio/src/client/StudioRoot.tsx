@@ -53,6 +53,10 @@ export type StudioRootProps = PropsLocale<'ui-studio'>
     code: StudioCodeApi
     /** Hand the reader to the conversation, which owns submission. */
     submitPrompt: () => void
+    /** Sessions the reader was last in, newest first. */
+    recentSessions: () => readonly { id: string; title: string; running: boolean }[]
+    /** Open an existing session and return to the conversation. */
+    openSession: (id: string) => void
   }
 
 /** Narrowest a resizable pane may become, in pixels. */
@@ -111,12 +115,7 @@ export function StudioRoot(props: StudioRootProps) {
       <section className={css.surface} data-surface={surface}>
         {surface === 'code' && <CodeSurface t={t} code={code} useStore={useStore} actions={actions} />}
         {surface === 'work' && (
-          <div className={css.placeholder}>
-            <SurfaceGlyph surface="work" large />
-            <h2 className={css.placeholderTitle}>{t('work.title')}</h2>
-            <p className={css.placeholderText}>{t('work.description')}</p>
-            <button type="button" className={css.primaryAction} onClick={openConversation}>{t('work.open')}</button>
-          </div>
+          <WorkSurface t={t} openConversation={openConversation} recentSessions={props.recentSessions} openSession={props.openSession} />
         )}
         {surface === 'image' && (
           <ImageSurface
@@ -157,6 +156,43 @@ const IMAGE_EXT = /\.(?:png|jpe?g|gif|webp|svg|avif)$/iu
  * The gallery lists real files the Host resolves, so what it shows exists;
  * generation itself still goes through the agent.
  */
+/**
+ * Work surface: the sessions the reader was last in, plus the way back to the
+ * conversation. The list is read once at mount; live session subscription
+ * belongs to the conversation, which owns that projection.
+ */
+function WorkSurface({ t, openConversation, recentSessions, openSession }: {
+  t: StudioRootProps['t']
+  openConversation: () => void
+  recentSessions: StudioRootProps['recentSessions']
+  openSession: StudioRootProps['openSession']
+}) {
+  const sessions = useMemo(() => recentSessions(), [recentSessions])
+  return (
+    <div className={css.work}>
+      <header className={css.workHead}>
+        <h2 className={css.workTitle}>{t('work.title')}</h2>
+        <button type="button" className={css.primaryAction} onClick={openConversation}>{t('work.open')}</button>
+      </header>
+      <p className={css.workHint}>{t('work.recent')}</p>
+      {sessions.length === 0
+        ? <p className={css.mapEmpty}>{t('work.noSessions')}</p>
+        : (
+          <ul className={css.sessionList}>
+            {sessions.map(session => (
+              <li key={session.id}>
+                <button type="button" className={css.sessionItem} onClick={() => { openSession(session.id) }}>
+                  <span className={css.sessionTitle}>{session.title}</span>
+                  {session.running && <span className={css.sessionBadge}>{t('work.running')}</span>}
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+    </div>
+  )
+}
+
 function ImageSurface({ t, code, submitPrompt, history, onPush, onClear }: {
   t: StudioRootProps['t']
   code: StudioCodeApi

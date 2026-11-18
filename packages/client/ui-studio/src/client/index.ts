@@ -14,6 +14,8 @@ import type {} from '@deepseek-ai/dsh-client-locale/client'
 import type { MainPanelId } from '@deepseek-ai/dsh-client-ui-layout/client'
 // Type-only: pulls the sidebar panel-list slot declaration.
 import type {} from '@deepseek-ai/dsh-client-ui-sidebar/client'
+// Type-only: pulls the ctx.uiWorkspace navigation capability.
+import type {} from '@deepseek-ai/dsh-client-ui-workspace/client'
 // Type-only: pulls the ctx.sessions service merge.
 import type {} from '@deepseek-ai/dsh-api-session-controller/client'
 // Type-only: pulls the generated Client Remote face.
@@ -28,7 +30,7 @@ import { zh, en, ja, es, fr, de, ru, pt } from './locales.ts'
 export const name = 'client-ui-studio'
 
 /** Required services: slots, dictionaries, layout navigation, Sessions and file reads. */
-export const inject = ['slots', 'locale', 'layout', 'sessions', 'remote', 'remote.workspaceFiles']
+export const inject = ['slots', 'locale', 'layout', 'sessions', 'uiWorkspace', 'remote', 'remote.workspaceFiles']
 
 const NS = 'ui-studio'
 
@@ -119,6 +121,13 @@ export function apply(ctx: ClientContext): void {
         // Generation surfaces record the request and hand the reader to the
         // conversation, which owns submission; the studio never fabricates a result.
         submitPrompt: () => { ctx.layout.selectPanel(null) },
+        // The work surface lists what the reader was last in, newest first.
+        recentSessions: () => Object.values(ctx.sessions.list.getSnapshot().byId)
+          .filter(row => row.origin !== 'subagent' && row.displayTitle !== '')
+          .sort((a, b) => b.updatedAt - a.updatedAt)
+          .slice(0, 20)
+          .map(row => ({ id: String(row.id), title: row.displayTitle, running: row.running })),
+        openSession: (id: string) => { ctx.layout.selectPanel(null); ctx.uiWorkspace.openSession(id as never) },
       }),
     }, StudioRoot))
     ctx.slots.inject('sidebar.panellist', () => ctx.slots.register({
