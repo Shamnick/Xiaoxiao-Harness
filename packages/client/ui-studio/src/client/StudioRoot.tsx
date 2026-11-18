@@ -253,8 +253,11 @@ function CodeSurface({ t, code, useStore, actions }: {
   actions: StudioRootProps['actions']
 }) {
   const widths = useStore(state => state)
+  const path = widths.openPath
+  const setPath = actions.setOpenPath
+  const selected = widths.openFile
+  const setSelected = actions.setOpenFile
   const [listing, setListing] = useState<Listing>({ state: 'loading', entries: [] })
-  const [path, setPath] = useState<string>('')
   const [openFile, setOpenFile] = useState<{ path: string; text: string; loading: boolean } | undefined>()
   const title = useMemo(() => code.sessionTitle(), [code])
 
@@ -269,16 +272,29 @@ function CodeSurface({ t, code, useStore, actions }: {
 
   const openEntry = useCallback((entry: StudioEntry) => {
     if (entry.type === 'directory') {
-      setPath(current => current === '' ? entry.name : `${current}/${entry.name}`)
+      setPath(path === '' ? entry.name : `${path}/${entry.name}`)
       return
     }
     const target = path === '' ? entry.name : `${path}/${entry.name}`
+    setSelected(target)
     setOpenFile({ path: target, text: '', loading: true })
     const controller = new AbortController()
     void code.read(target, controller.signal)
       .then((file) => { if (!controller.signal.aborted) setOpenFile({ path: target, text: file.text, loading: false }) })
       .catch(() => { if (!controller.signal.aborted) setOpenFile({ path: target, text: '', loading: false }) })
   }, [code, path])
+
+  // Restore the file the reader had open: the store keeps the path, the text
+  // is re-read because it may have changed while the surface was away.
+  useEffect(() => {
+    if (selected === '' || openFile?.path === selected) return undefined
+    const controller = new AbortController()
+    setOpenFile({ path: selected, text: '', loading: true })
+    void code.read(selected, controller.signal)
+      .then((file) => { if (!controller.signal.aborted) setOpenFile({ path: selected, text: file.text, loading: false }) })
+      .catch(() => { if (!controller.signal.aborted) setOpenFile({ path: selected, text: '', loading: false }) })
+    return () => { controller.abort() }
+  }, [code, openFile?.path, selected])
 
   const symbols = useMemo(
     () => openFile === undefined || openFile.loading ? [] : outlineSymbols(openFile.text),
@@ -315,7 +331,7 @@ function CodeSurface({ t, code, useStore, actions }: {
                   type="button"
                   className={css.treeItem}
                   data-kind={entry.type}
-                  data-selected={openFile?.path === (path === '' ? entry.name : `${path}/${entry.name}`) || undefined}
+                  data-selected={selected === (path === '' ? entry.name : `${path}/${entry.name}`) || undefined}
                   onClick={() => { openEntry(entry) }}
                 >
                   <span className={css.treeGlyph} aria-hidden="true">{entry.type === 'directory' ? '▸' : '·'}</span>

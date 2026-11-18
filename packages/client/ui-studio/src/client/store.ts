@@ -17,6 +17,10 @@ export const studioStore = defineStore({
     map: 260,
     images: [] as readonly StudioGeneration[],
     videos: [] as readonly StudioGeneration[],
+    /** Server-relative directory the code explorer is showing. */
+    openPath: '',
+    /** Server-relative file the editor is showing. */
+    openFile: '',
   }),
   persist: 'ui-studio.state',
   actions: {
@@ -30,5 +34,7 @@ export const studioStore = defineStore({
     },
     clearImages: (state) => { state.images = [] },
     clearVideos: (state) => { state.videos = [] },
+    setOpenPath: (state, value: string) => { state.openPath = value },
+    setOpenFile: (state, value: string) => { state.openFile = value },
   },
 })
