@@ -86,7 +86,7 @@ function createCodeApi(ctx: ClientContext): StudioCodeApi {
       const result = await face.readBytes(session.id, path, {}, signal)
       if (!result.ok) return undefined
       // The Host hands back raw bytes; the surface owns the object URL lifetime.
-      const blob = new Blob([result.value.data as unknown as BlobPart])
+      const blob = new Blob([result.value.data])
       return URL.createObjectURL(blob)
     },
   }

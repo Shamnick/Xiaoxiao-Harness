@@ -17,7 +17,7 @@ declare module '@deepseek-ai/dsh-client-ui-slots' {
 }
 
 /** Dictionary stand-in: every key resolves to itself, so assertions read the key. */
-const t = ((key: string) => key) as unknown as StudioRootProps['t']
+const t: StudioRootProps['t'] = key => key
 
 beforeAll(() => {
   // jsdom has no layout engine; the symbol jump calls this.

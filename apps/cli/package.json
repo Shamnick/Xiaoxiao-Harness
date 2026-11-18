@@ -12,8 +12,7 @@
   },
   "type": "module",
   "bin": {
-    "dsh": "lib/bin.js",
-    "xxh": "lib/bin.js"
+    "dsh": "lib/bin.js"
   },
   "files": [
     "lib/*.js",
