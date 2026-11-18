@@ -38,6 +38,8 @@ export interface StudioGeneration {
 /** Owner props of the studio main panel. */
 export type StudioRootProps = PropsRuntime<'main'> & PropsLocale<'ui-studio'>
   & PropsStore<typeof studioStore> & {
+    /** Which surface this panel renders. */
+    surface: StudioSurface
     /** Return to the conversation surface, which the layout owns as its default entry. */
     openConversation: () => void
     /** Workspace file access. */
@@ -45,9 +47,6 @@ export type StudioRootProps = PropsRuntime<'main'> & PropsLocale<'ui-studio'>
     /** Hand the reader to the conversation, which owns submission. */
     submitPrompt: () => void
   }
-
-/** Rail entries in display order. */
-const SURFACES: readonly StudioSurface[] = ['work', 'code', 'image', 'video']
 
 /** Narrowest a resizable pane may become, in pixels. */
 const MIN_PANE = 160
@@ -97,26 +96,11 @@ export function outlineSymbols(text: string): StudioSymbol[] {
  * @param props - locale seat, panel widths, workspace file access and prompt dispatch.
  * @returns the studio shell.
  */
-export function StudioRoot({ t, openConversation, code, submitPrompt, useStore, actions }: StudioRootProps) {
-  const [surface, setSurface] = useState<StudioSurface>('work')
-  const generation = useStore(state => state)
+export function StudioRoot(props: StudioRootProps) {
+  const { t, surface, openConversation, code, submitPrompt, useStore, actions } = props
+  const state = useStore(snapshot => snapshot)
   return (
     <div className={css.root}>
-      <nav className={css.rail} aria-label={t('rail.aria')}>
-        {SURFACES.map(id => (
-          <button
-            key={id}
-            type="button"
-            className={css.railButton}
-            data-active={surface === id || undefined}
-            aria-current={surface === id ? 'page' : undefined}
-            onClick={() => { setSurface(id) }}
-          >
-            <SurfaceGlyph surface={id} />
-            <span className={css.railLabel}>{t(`rail.${id}` as 'rail.work')}</span>
-          </button>
-        ))}
-      </nav>
       <section className={css.surface} data-surface={surface}>
         {surface === 'code' && <CodeSurface t={t} code={code} useStore={useStore} actions={actions} />}
         {surface === 'work' && (
@@ -132,7 +116,7 @@ export function StudioRoot({ t, openConversation, code, submitPrompt, useStore, 
             mode={surface}
             t={t}
             submitPrompt={submitPrompt}
-            history={surface === 'image' ? generation.images : generation.videos}
+            history={surface === 'image' ? state.images : state.videos}
             onPush={surface === 'image' ? actions.pushImage : actions.pushVideo}
             onClear={surface === 'image' ? actions.clearImages : actions.clearVideos}
           />
@@ -437,6 +421,11 @@ function SurfaceGlyph({ surface, large = false }: { surface: StudioSurface; larg
  * Sidebar launcher glyph for the studio panel.
  * @returns a 16px grid mark.
  */
+export function SurfaceIcon({ surface }: { surface: StudioSurface }) {
+  return <span className={css.railIcon}><SurfaceGlyph surface={surface} /></span>
+}
+
+/** Kept for the docs reference; the rail lives in the sidebar. */
 export function StudioPanelIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
