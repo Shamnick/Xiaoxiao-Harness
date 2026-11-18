@@ -25,6 +25,9 @@ export const zh = {
   'code.loading': '读取中…',
   'code.empty': '目录为空',
   'code.retry': '重试',
+  'code.path': '路径',
+  'code.root': '根目录',
+  'code.pickFile': '从左侧选择一个文件',
 } satisfies Record<string, string>
 
 /** The studio namespace key union. */
@@ -55,6 +58,9 @@ export const en: Record<StudioKey, string> = {
   'code.loading': 'Loading…',
   'code.empty': 'Empty directory',
   'code.retry': 'Retry',
+  'code.path': 'Path',
+  'code.root': 'root',
+  'code.pickFile': 'Pick a file on the left',
 }
 
 /** Japanese dictionary. */
@@ -82,6 +88,9 @@ export const ja: Record<StudioKey, string> = {
   'code.loading': '読み込み中…',
   'code.empty': '空のディレクトリ',
   'code.retry': '再試行',
+  'code.path': 'パス',
+  'code.root': 'ルート',
+  'code.pickFile': '左のファイルを選択してください',
 }
 
 /** Spanish dictionary. */
@@ -109,6 +118,9 @@ export const es: Record<StudioKey, string> = {
   'code.loading': 'Cargando…',
   'code.empty': 'Directorio vacío',
   'code.retry': 'Reintentar',
+  'code.path': 'Ruta',
+  'code.root': 'raíz',
+  'code.pickFile': 'Elige un archivo a la izquierda',
 }
 
 /** French dictionary. */
@@ -136,6 +148,9 @@ export const fr: Record<StudioKey, string> = {
   'code.loading': 'Chargement…',
   'code.empty': 'Répertoire vide',
   'code.retry': 'Réessayer',
+  'code.path': 'Chemin',
+  'code.root': 'racine',
+  'code.pickFile': 'Choisissez un fichier à gauche',
 }
 
 /** German dictionary. */
@@ -163,6 +178,9 @@ export const de: Record<StudioKey, string> = {
   'code.loading': 'Wird geladen…',
   'code.empty': 'Leeres Verzeichnis',
   'code.retry': 'Erneut versuchen',
+  'code.path': 'Pfad',
+  'code.root': 'Wurzel',
+  'code.pickFile': 'Datei links auswählen',
 }
 
 /** Russian dictionary. */
@@ -190,6 +208,9 @@ export const ru: Record<StudioKey, string> = {
   'code.loading': 'Загрузка…',
   'code.empty': 'Каталог пуст',
   'code.retry': 'Повторить',
+  'code.path': 'Путь',
+  'code.root': 'корень',
+  'code.pickFile': 'Выберите файл слева',
 }
 
 /** Portuguese dictionary. */
@@ -217,4 +238,7 @@ export const pt: Record<StudioKey, string> = {
   'code.loading': 'Carregando…',
   'code.empty': 'Diretório vazio',
   'code.retry': 'Tentar novamente',
+  'code.path': 'Caminho',
+  'code.root': 'raiz',
+  'code.pickFile': 'Escolha um arquivo à esquerda',
 }

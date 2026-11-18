@@ -220,3 +220,139 @@
   font-size: 12px;
   cursor: pointer;
 }
+
+/* Breadcrumb path. */
+.crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  margin-bottom: 8px;
+}
+
+.crumb {
+  padding: 1px 4px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--dsw-alias-label-tertiary);
+  font-family: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.crumb + .crumb::before {
+  content: '/';
+  margin-right: 2px;
+  color: var(--dsw-alias-border-l2);
+}
+
+@media (hover: hover) {
+  .crumb:hover { color: var(--dsw-alias-label-primary); }
+}
+
+/* Tree rows are buttons so they take focus and activate from the keyboard. */
+.treeItem {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  width: 100%;
+  padding: 3px 6px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--dsw-alias-label-secondary);
+  font-family: inherit;
+  font-size: 12.5px;
+  line-height: 18px;
+  text-align: left;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.treeItem[data-kind='directory'] { color: var(--dsw-alias-label-primary); font-weight: 500; }
+.treeItem[data-selected] { background: color-mix(in srgb, var(--dsw-alias-brand-primary) 14%, transparent); color: var(--dsw-alias-brand-primary); }
+
+.treeGlyph { flex: none; width: 10px; color: var(--dsw-alias-label-tertiary); font-size: 10px; }
+
+@media (hover: hover) {
+  .treeItem:hover:not([data-selected]) {
+    background: color-mix(in srgb, var(--dsw-alias-bg-layer-2) 80%, transparent);
+    color: var(--dsw-alias-label-primary);
+  }
+}
+
+.treeItem:focus-visible {
+  outline: var(--dsw-focus-ring-width, 2px) solid var(--dsw-focus-ring-color, var(--dsw-alias-state-business-primary));
+  outline-offset: -2px;
+}
+
+/* Editor pane. */
+.codeEditor {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: auto;
+  background: var(--dsw-alias-bg-base);
+}
+
+.editorEmpty {
+  margin: auto;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 12.5px;
+}
+
+.source {
+  margin: 0;
+  padding: 12px 14px;
+  color: var(--dsw-alias-label-secondary);
+  font-family: var(--dsw-font-family-mono, ui-monospace, monospace);
+  font-size: 12px;
+  line-height: 19px;
+  white-space: pre;
+  tab-size: 2;
+}
+
+/* Symbol outline. */
+.outline {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-y: auto;
+}
+
+.outlineItem {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 3px 4px;
+  border-radius: 5px;
+  font-size: 12px;
+  line-height: 17px;
+}
+
+.outlineKind {
+  flex: none;
+  padding: 0 4px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--dsw-alias-bg-layer-2) 90%, transparent);
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.outlineKind[data-kind='class'],
+.outlineKind[data-kind='interface'] { color: var(--dsw-alias-brand-primary); }
+
+.outlineName {
+  flex: 1;
+  min-width: 0;
+  color: var(--dsw-alias-label-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.outlineLine { flex: none; color: var(--dsw-alias-label-tertiary); font-size: 10px; }
