@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import type { PropsLocale, PropsRuntime, PropsStore } from '@deepseek-ai/dsh-client-ui-slots'
+import type { studioStore } from './store.ts'
 import css from './StudioRoot.module.css'
 
 /** The four working surfaces the rail switches between. */
@@ -24,15 +25,21 @@ export interface StudioCodeApi {
 }
 
 /** Owner props of the studio main panel. */
-export type StudioRootProps = PropsRuntime<'main'> & PropsLocale<'ui-studio'> & {
-  /** Return to the conversation surface, which the layout owns as its default entry. */
-  openConversation: () => void
-  /** Workspace file access. */
-  code: StudioCodeApi
-}
+export type StudioRootProps = PropsRuntime<'main'> & PropsLocale<'ui-studio'>
+  & PropsStore<typeof studioStore> & {
+    /** Return to the conversation surface, which the layout owns as its default entry. */
+    openConversation: () => void
+    /** Workspace file access. */
+    code: StudioCodeApi
+  }
 
 /** Rail entries in display order. */
 const SURFACES: readonly StudioSurface[] = ['work', 'code', 'image', 'video']
+
+/** Narrowest a resizable pane may become, in pixels. */
+const MIN_PANE = 160
+/** Widest a side pane may become, in pixels. */
+const MAX_PANE = 560
 
 /** One symbol found in a source file. */
 export interface StudioSymbol {
@@ -51,7 +58,6 @@ export interface StudioSymbol {
  */
 export function outlineSymbols(text: string): StudioSymbol[] {
   const out: StudioSymbol[] = []
-  const lines = text.split('\n')
   const patterns: readonly { re: RegExp; kind: StudioSymbol['kind'] }[] = [
     { re: /^\s*(?:export\s+)?(?:default\s+)?(?:async\s+)?function\s+([A-Za-z_$][\w$]*)/, kind: 'function' },
     { re: /^\s*(?:export\s+)?(?:default\s+)?(?:abstract\s+)?class\s+([A-Za-z_$][\w$]*)/, kind: 'class' },
@@ -59,9 +65,8 @@ export function outlineSymbols(text: string): StudioSymbol[] {
     { re: /^\s*(?:export\s+)?type\s+([A-Za-z_$][\w$]*)/, kind: 'type' },
     { re: /^\s*(?:export\s+)?const\s+([A-Za-z_$][\w$]*)\s*[=:]/, kind: 'constant' },
     { re: /^\s*def\s+([A-Za-z_][\w]*)\s*\(/, kind: 'function' },
-    { re: /^\s*(?:\/\/|#)\s*([A-Z][\w ]{3,})/, kind: 'type' },
   ]
-  lines.forEach((line, index) => {
+  text.split('\n').forEach((line, index) => {
     for (const { re, kind } of patterns) {
       const match = re.exec(line)
       if (match?.[1] !== undefined && match[1].length > 0) {
@@ -76,10 +81,10 @@ export function outlineSymbols(text: string): StudioSymbol[] {
 /**
  * Render the studio surface: a vertical activity rail plus the selected
  * work area.
- * @param props - locale seat plus workspace file access.
+ * @param props - locale seat, panel widths and workspace file access.
  * @returns the studio shell.
  */
-export function StudioRoot({ t, openConversation, code }: StudioRootProps) {
+export function StudioRoot({ t, openConversation, code, useStore, actions }: StudioRootProps) {
   const [surface, setSurface] = useState<StudioSurface>('work')
   return (
     <div className={css.root}>
@@ -100,7 +105,7 @@ export function StudioRoot({ t, openConversation, code }: StudioRootProps) {
       </nav>
       <section className={css.surface} data-surface={surface}>
         {surface === 'code'
-          ? <CodeSurface t={t} code={code} />
+          ? <CodeSurface t={t} code={code} useStore={useStore} actions={actions} />
           : <SurfacePlaceholder id={surface} t={t} openConversation={openConversation} />}
       </section>
     </div>
@@ -132,9 +137,15 @@ type Listing = { state: 'idle' | 'loading' | 'error'; entries: readonly StudioEn
 
 /**
  * Code surface: workspace explorer, file view and the symbol outline.
- * Selecting a file reads it and derives the outline in one pass.
+ * Both side panes carry a drag handle and remember their width.
  */
-function CodeSurface({ t, code }: { t: StudioRootProps['t']; code: StudioCodeApi }) {
+function CodeSurface({ t, code, useStore, actions }: {
+  t: StudioRootProps['t']
+  code: StudioCodeApi
+  useStore: StudioRootProps['useStore']
+  actions: StudioRootProps['actions']
+}) {
+  const widths = useStore(state => state)
   const [listing, setListing] = useState<Listing>({ state: 'loading', entries: [] })
   const [path, setPath] = useState<string>('')
   const [openFile, setOpenFile] = useState<{ path: string; text: string; loading: boolean } | undefined>()
@@ -144,7 +155,7 @@ function CodeSurface({ t, code }: { t: StudioRootProps['t']; code: StudioCodeApi
     const controller = new AbortController()
     setListing({ state: 'loading', entries: [] })
     void code.list(path, controller.signal)
-      .then((entries) => { if (!controller.signal.aborted) setListing({ state: 'idle', entries: entries.entries }) })
+      .then((result) => { if (!controller.signal.aborted) setListing({ state: 'idle', entries: result.entries }) })
       .catch(() => { if (!controller.signal.aborted) setListing({ state: 'error', entries: [] }) })
     return () => { controller.abort() }
   }, [code, path])
@@ -169,7 +180,10 @@ function CodeSurface({ t, code }: { t: StudioRootProps['t']; code: StudioCodeApi
   const segments = path === '' ? [] : path.split('/')
 
   return (
-    <div className={css.codeGrid}>
+    <div
+      className={css.codeGrid}
+      style={{ gridTemplateColumns: `${String(widths.explorer)}px minmax(0, 1fr) ${String(widths.map)}px` }}
+    >
       <aside className={css.codeExplorer} aria-label={t('code.explorer')}>
         <p className={css.paneTitle}>{title ?? t('code.explorer')}</p>
         <nav className={css.crumbs} aria-label={t('code.path')}>
@@ -205,6 +219,7 @@ function CodeSurface({ t, code }: { t: StudioRootProps['t']; code: StudioCodeApi
           </ul>
         )}
       </aside>
+      <PaneHandle label={t('code.resizeExplorer')} value={widths.explorer} onResize={actions.resizeExplorer} />
       <div className={css.codeEditor}>
         {openFile === undefined
           ? <p className={css.editorEmpty}>{t('code.pickFile')}</p>
@@ -212,6 +227,7 @@ function CodeSurface({ t, code }: { t: StudioRootProps['t']; code: StudioCodeApi
             ? <p className={css.editorEmpty}>{t('code.loading')}</p>
             : <pre className={css.source}>{openFile.text}</pre>}
       </div>
+      <PaneHandle label={t('code.resizeMap')} value={widths.map} onResize={actions.resizeMap} inverted />
       <aside className={css.codeMap} aria-label={t('code.map')}>
         <p className={css.paneTitle}>{t('code.map')}</p>
         {symbols.length === 0
@@ -229,6 +245,52 @@ function CodeSurface({ t, code }: { t: StudioRootProps['t']; code: StudioCodeApi
           )}
       </aside>
     </div>
+  )
+}
+
+/**
+ * Drag handle between the editor and a side pane.
+ * Uses pointer capture so the drag survives the pointer leaving the handle,
+ * and supports arrow keys for keyboard resizing.
+ */
+function PaneHandle({ label, value, onResize, inverted = false }: {
+  label: string
+  value: number
+  onResize: (next: number) => void
+  inverted?: boolean
+}) {
+  const drag = useRef<{ startX: number; startValue: number } | undefined>(undefined)
+  const clamp = (next: number) => Math.min(MAX_PANE, Math.max(MIN_PANE, next))
+  const move = useCallback((deltaX: number) => {
+    if (drag.current === undefined) return
+    const delta = inverted ? -deltaX : deltaX
+    onResize(clamp(drag.current.startValue + delta))
+  }, [inverted, onResize])
+  return (
+    <div
+      className={css.paneHandle}
+      role="separator"
+      aria-orientation="vertical"
+      aria-label={label}
+      aria-valuenow={value}
+      aria-valuemin={MIN_PANE}
+      aria-valuemax={MAX_PANE}
+      tabIndex={0}
+      onPointerDown={(event) => {
+        drag.current = { startX: event.clientX, startValue: value }
+        event.currentTarget.setPointerCapture(event.pointerId)
+      }}
+      onPointerMove={(event) => { move(event.clientX - (drag.current?.startX ?? event.clientX)) }}
+      onPointerUp={(event) => {
+        drag.current = undefined
+        event.currentTarget.releasePointerCapture(event.pointerId)
+      }}
+      onKeyDown={(event) => {
+        const step = event.shiftKey ? 40 : 12
+        if (event.key === 'ArrowLeft') { onResize(clamp(value + (inverted ? step : -step))); event.preventDefault() }
+        if (event.key === 'ArrowRight') { onResize(clamp(value + (inverted ? -step : step))); event.preventDefault() }
+      }}
+    />
   )
 }
 

@@ -18,6 +18,8 @@ import type {} from '@deepseek-ai/dsh-client-ui-sidebar/client'
 import type {} from '@deepseek-ai/dsh-api-session-controller/client'
 // Type-only: pulls the generated Client Remote face.
 import type { ClientRemote } from '@deepseek-ai/dsh-api-remotes/client'
+
+import { studioStore } from './store.ts'
 import type { StudioKey } from './locales.ts'
 import type { StudioCodeApi } from './StudioRoot.tsx'
 import { StudioPanelIcon, StudioRoot } from './StudioRoot.tsx'
@@ -86,6 +88,7 @@ export function apply(ctx: ClientContext): void {
     name: 'main',
     key: PANEL_ID,
     locale: NS,
+    store: studioStore,
     inject: () => ({
       // `conversation` is the layout's default entry rather than a keyed panel,
       // so returning to it means clearing the selected panel.

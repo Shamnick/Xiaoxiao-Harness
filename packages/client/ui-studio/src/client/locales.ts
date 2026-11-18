@@ -28,6 +28,8 @@ export const zh = {
   'code.path': '路径',
   'code.root': '根目录',
   'code.pickFile': '从左侧选择一个文件',
+  'code.resizeExplorer': '调整文件树宽度',
+  'code.resizeMap': '调整代码地图宽度',
 } satisfies Record<string, string>
 
 /** The studio namespace key union. */
@@ -61,6 +63,8 @@ export const en: Record<StudioKey, string> = {
   'code.path': 'Path',
   'code.root': 'root',
   'code.pickFile': 'Pick a file on the left',
+  'code.resizeExplorer': 'Resize the file tree',
+  'code.resizeMap': 'Resize the code map',
 }
 
 /** Japanese dictionary. */
@@ -91,6 +95,8 @@ export const ja: Record<StudioKey, string> = {
   'code.path': 'パス',
   'code.root': 'ルート',
   'code.pickFile': '左のファイルを選択してください',
+  'code.resizeExplorer': 'ファイルツリーの幅を変更',
+  'code.resizeMap': 'コードマップの幅を変更',
 }
 
 /** Spanish dictionary. */
@@ -121,6 +127,8 @@ export const es: Record<StudioKey, string> = {
   'code.path': 'Ruta',
   'code.root': 'raíz',
   'code.pickFile': 'Elige un archivo a la izquierda',
+  'code.resizeExplorer': 'Ajustar el ancho del árbol',
+  'code.resizeMap': 'Ajustar el ancho del mapa',
 }
 
 /** French dictionary. */
@@ -151,6 +159,8 @@ export const fr: Record<StudioKey, string> = {
   'code.path': 'Chemin',
   'code.root': 'racine',
   'code.pickFile': 'Choisissez un fichier à gauche',
+  'code.resizeExplorer': "Ajuster la largeur de l'arborescence",
+  'code.resizeMap': 'Ajuster la largeur de la carte',
 }
 
 /** German dictionary. */
@@ -181,6 +191,8 @@ export const de: Record<StudioKey, string> = {
   'code.path': 'Pfad',
   'code.root': 'Wurzel',
   'code.pickFile': 'Datei links auswählen',
+  'code.resizeExplorer': 'Breite des Dateibaums ändern',
+  'code.resizeMap': 'Breite der Codekarte ändern',
 }
 
 /** Russian dictionary. */
@@ -211,6 +223,8 @@ export const ru: Record<StudioKey, string> = {
   'code.path': 'Путь',
   'code.root': 'корень',
   'code.pickFile': 'Выберите файл слева',
+  'code.resizeExplorer': 'Изменить ширину дерева',
+  'code.resizeMap': 'Изменить ширину карты',
 }
 
 /** Portuguese dictionary. */
@@ -241,4 +255,6 @@ export const pt: Record<StudioKey, string> = {
   'code.path': 'Caminho',
   'code.root': 'raiz',
   'code.pickFile': 'Escolha um arquivo à esquerda',
+  'code.resizeExplorer': 'Ajustar a largura da árvore',
+  'code.resizeMap': 'Ajustar a largura do mapa',
 }

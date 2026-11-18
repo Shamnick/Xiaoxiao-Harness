@@ -356,3 +356,28 @@
 }
 
 .outlineLine { flex: none; color: var(--dsw-alias-label-tertiary); font-size: 10px; }
+
+/* Drag handle between the editor and a side pane. */
+.paneHandle {
+  width: 5px;
+  margin: 0 -2px;
+  background: transparent;
+  cursor: col-resize;
+  touch-action: none;
+  transition: background-color 0.14s ease;
+}
+
+@media (hover: hover) {
+  .paneHandle:hover { background: color-mix(in srgb, var(--dsw-alias-border-l2) 70%, transparent); }
+}
+
+.paneHandle:focus-visible {
+  outline: var(--dsw-focus-ring-width, 2px) solid var(--dsw-focus-ring-color, var(--dsw-alias-state-business-primary));
+  outline-offset: -1px;
+}
+
+/* Handles sit in their own grid column, so the grid gains two tracks. */
+.codeGrid {
+  grid-template-rows: minmax(0, 1fr);
+  align-items: stretch;
+}
