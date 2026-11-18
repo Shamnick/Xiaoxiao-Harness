@@ -24,6 +24,17 @@ export interface StudioCodeApi {
   read: (path: string, signal: AbortSignal) => Promise<{ text: string }>
 }
 
+/** One generation job, as the studio tracks it. */
+export interface StudioGeneration {
+  id: string
+  prompt: string
+  /** Free-form aspect or duration label the surface offered. */
+  variant: string
+  /** Requested count. */
+  count: number
+  requestedAt: number
+}
+
 /** Owner props of the studio main panel. */
 export type StudioRootProps = PropsRuntime<'main'> & PropsLocale<'ui-studio'>
   & PropsStore<typeof studioStore> & {
@@ -31,6 +42,8 @@ export type StudioRootProps = PropsRuntime<'main'> & PropsLocale<'ui-studio'>
     openConversation: () => void
     /** Workspace file access. */
     code: StudioCodeApi
+    /** Hand the reader to the conversation, which owns submission. */
+    submitPrompt: () => void
   }
 
 /** Rail entries in display order. */
@@ -81,11 +94,12 @@ export function outlineSymbols(text: string): StudioSymbol[] {
 /**
  * Render the studio surface: a vertical activity rail plus the selected
  * work area.
- * @param props - locale seat, panel widths and workspace file access.
+ * @param props - locale seat, panel widths, workspace file access and prompt dispatch.
  * @returns the studio shell.
  */
-export function StudioRoot({ t, openConversation, code, useStore, actions }: StudioRootProps) {
+export function StudioRoot({ t, openConversation, code, submitPrompt, useStore, actions }: StudioRootProps) {
   const [surface, setSurface] = useState<StudioSurface>('work')
+  const generation = useStore(state => state)
   return (
     <div className={css.root}>
       <nav className={css.rail} aria-label={t('rail.aria')}>
@@ -104,30 +118,139 @@ export function StudioRoot({ t, openConversation, code, useStore, actions }: Stu
         ))}
       </nav>
       <section className={css.surface} data-surface={surface}>
-        {surface === 'code'
-          ? <CodeSurface t={t} code={code} useStore={useStore} actions={actions} />
-          : <SurfacePlaceholder id={surface} t={t} openConversation={openConversation} />}
+        {surface === 'code' && <CodeSurface t={t} code={code} useStore={useStore} actions={actions} />}
+        {surface === 'work' && (
+          <div className={css.placeholder}>
+            <SurfaceGlyph surface="work" large />
+            <h2 className={css.placeholderTitle}>{t('work.title')}</h2>
+            <p className={css.placeholderText}>{t('work.description')}</p>
+            <button type="button" className={css.primaryAction} onClick={openConversation}>{t('work.open')}</button>
+          </div>
+        )}
+        {(surface === 'image' || surface === 'video') && (
+          <GenerateSurface
+            mode={surface}
+            t={t}
+            submitPrompt={submitPrompt}
+            history={surface === 'image' ? generation.images : generation.videos}
+            onPush={surface === 'image' ? actions.pushImage : actions.pushVideo}
+            onClear={surface === 'image' ? actions.clearImages : actions.clearVideos}
+          />
+        )}
       </section>
     </div>
   )
 }
 
-/** Surface placeholder for areas whose tools are not mounted yet. */
-function SurfacePlaceholder({ id, t, openConversation }: {
-  id: StudioSurface
+/** Aspect or duration choices per generation mode. */
+const VARIANTS: Record<'image' | 'video', readonly string[]> = {
+  image: ['1:1', '16:9', '9:16', '4:3'],
+  video: ['4s', '8s', '12s'],
+}
+
+/**
+ * Generation surface: prompt, variant, count and the request history.
+ * The prompt reaches the agent, which owns whichever generation tool the
+ * deployment mounts; this surface never invents a result.
+ */
+function GenerateSurface({ mode, t, submitPrompt, history, onPush, onClear }: {
+  mode: 'image' | 'video'
   t: StudioRootProps['t']
-  openConversation: () => void
+  submitPrompt: () => void
+  history: readonly StudioGeneration[]
+  onPush: (entry: StudioGeneration) => void
+  onClear: () => void
 }) {
-  const title = t(`${id}.title` as 'work.title')
-  const description = t(`${id}.description` as 'work.description')
+  const [prompt, setPrompt] = useState('')
+  const [variant, setVariant] = useState(VARIANTS[mode][0] as string)
+  const [count, setCount] = useState(1)
+  const idRef = useRef(0)
+
+  useEffect(() => { setVariant(VARIANTS[mode][0] as string) }, [mode])
+
+  const submit = useCallback(() => {
+    const text = prompt.trim()
+    if (text === '') return
+    onPush({
+      id: `${String(Date.now())}-${String(idRef.current++)}`,
+      prompt: text,
+      variant,
+      count,
+      requestedAt: Date.now(),
+    })
+    submitPrompt()
+    setPrompt('')
+  }, [count, onPush, prompt, submitPrompt, variant])
+
   return (
-    <div className={css.placeholder}>
-      <SurfaceGlyph surface={id} large />
-      <h2 className={css.placeholderTitle}>{title}</h2>
-      <p className={css.placeholderText}>{description}</p>
-      {id === 'work'
-        ? <button type="button" className={css.primaryAction} onClick={openConversation}>{t('work.open')}</button>
-        : <span className={css.badge}>{t('common.soon')}</span>}
+    <div className={css.generate}>
+      <div className={css.generateForm}>
+        <label className={css.field}>
+          <span className={css.fieldLabel}>{t(`${mode}.prompt` as 'image.prompt')}</span>
+          <textarea
+            className={css.textarea}
+            rows={4}
+            value={prompt}
+            placeholder={t(`${mode}.promptPlaceholder` as 'image.promptPlaceholder')}
+            onChange={(event) => { setPrompt(event.target.value) }}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) { submit(); event.preventDefault() }
+            }}
+          />
+        </label>
+        <div className={css.row}>
+          <span className={css.fieldLabel}>{mode === 'image' ? t('image.aspect') : t('video.duration')}</span>
+          <div className={css.chips}>
+            {VARIANTS[mode].map(option => (
+              <button
+                key={option}
+                type="button"
+                className={css.chip}
+                data-active={option === variant || undefined}
+                onClick={() => { setVariant(option) }}
+              >{option}</button>
+            ))}
+          </div>
+        </div>
+        <div className={css.row}>
+          <span className={css.fieldLabel}>{t('image.count')}</span>
+          <div className={css.chips}>
+            {[1, 2, 4].map(option => (
+              <button
+                key={option}
+                type="button"
+                className={css.chip}
+                data-active={option === count || undefined}
+                onClick={() => { setCount(option) }}
+              >{option}</button>
+            ))}
+          </div>
+        </div>
+        <button type="button" className={css.primaryAction} onClick={submit} disabled={prompt.trim() === ''}>
+          {t(`${mode}.generate` as 'image.generate')}
+        </button>
+        <p className={css.hint}>{t('generate.hint')}</p>
+      </div>
+      <div className={css.generateHistory}>
+        <div className={css.historyHead}>
+          <p className={css.paneTitle}>{t('generate.history')}</p>
+          {history.length > 0 && (
+            <button type="button" className={css.retry} onClick={onClear}>{t('generate.clear')}</button>
+          )}
+        </div>
+        {history.length === 0
+          ? <p className={css.mapEmpty}>{t('generate.empty')}</p>
+          : (
+            <ul className={css.historyList}>
+              {history.map(entry => (
+                <li key={entry.id} className={css.historyItem}>
+                  <span className={css.historyPrompt}>{entry.prompt}</span>
+                  <span className={css.historyMeta}>{entry.variant} · ×{String(entry.count)}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+      </div>
     </div>
   )
 }
@@ -182,7 +305,7 @@ function CodeSurface({ t, code, useStore, actions }: {
   return (
     <div
       className={css.codeGrid}
-      style={{ gridTemplateColumns: `${String(widths.explorer)}px minmax(0, 1fr) ${String(widths.map)}px` }}
+      style={{ gridTemplateColumns: `${String(widths.explorer)}px 5px minmax(0, 1fr) 5px ${String(widths.map)}px` }}
     >
       <aside className={css.codeExplorer} aria-label={t('code.explorer')}>
         <p className={css.paneTitle}>{title ?? t('code.explorer')}</p>
@@ -261,11 +384,6 @@ function PaneHandle({ label, value, onResize, inverted = false }: {
 }) {
   const drag = useRef<{ startX: number; startValue: number } | undefined>(undefined)
   const clamp = (next: number) => Math.min(MAX_PANE, Math.max(MIN_PANE, next))
-  const move = useCallback((deltaX: number) => {
-    if (drag.current === undefined) return
-    const delta = inverted ? -deltaX : deltaX
-    onResize(clamp(drag.current.startValue + delta))
-  }, [inverted, onResize])
   return (
     <div
       className={css.paneHandle}
@@ -280,7 +398,11 @@ function PaneHandle({ label, value, onResize, inverted = false }: {
         drag.current = { startX: event.clientX, startValue: value }
         event.currentTarget.setPointerCapture(event.pointerId)
       }}
-      onPointerMove={(event) => { move(event.clientX - (drag.current?.startX ?? event.clientX)) }}
+      onPointerMove={(event) => {
+        if (drag.current === undefined) return
+        const delta = inverted ? -1 : 1
+        onResize(clamp(drag.current.startValue + delta * (event.clientX - drag.current.startX)))
+      }}
       onPointerUp={(event) => {
         drag.current = undefined
         event.currentTarget.releasePointerCapture(event.pointerId)

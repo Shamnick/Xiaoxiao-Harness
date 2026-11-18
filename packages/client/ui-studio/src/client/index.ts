@@ -94,6 +94,9 @@ export function apply(ctx: ClientContext): void {
       // so returning to it means clearing the selected panel.
       openConversation: () => { ctx.layout.selectPanel(null) },
       code: createCodeApi(ctx),
+      // Generation surfaces record the request and hand the reader to the
+      // conversation, which owns submission; the studio never fabricates a result.
+      submitPrompt: () => { ctx.layout.selectPanel(null) },
     }),
   }, StudioRoot))
   // Sidebar entry: a main panel with no launcher is unreachable.
