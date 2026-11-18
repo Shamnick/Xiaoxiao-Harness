@@ -469,6 +469,7 @@ function CodeSurface({ t, code, useStore, actions }: {
   const [listing, setListing] = useState<Listing>({ state: 'loading', entries: [] })
   const [query, setQuery] = useState('')
   const [cursor, setCursor] = useState(0)
+  const [find, setFind] = useState('')
   // File contents stay in the component: the store holds paths only, so a
   // large file never lands in the persisted snapshot.
   const [fileCache, setFileCache] = useState<Record<string, string>>({})
@@ -542,6 +543,29 @@ function CodeSurface({ t, code, useStore, actions }: {
       else next.add(kind)
       return next
     })
+  }, [])
+
+  // Lines matching the in-file find term, in source order.
+  const hits = useMemo(() => {
+    const needle = find.trim().toLowerCase()
+    if (needle === '' || openFile === undefined || openFile.loading) return []
+    return openFile.text.split('\n')
+      .map((line, index) => line.toLowerCase().includes(needle) ? index + 1 : 0)
+      .filter(line => line > 0)
+  }, [find, openFile])
+
+  /** First line currently visible, used to start the find from where the reader is. */
+  const currentLine = useCallback((): number => {
+    const host = editorRef.current
+    if (host === null) return 0
+    const top = host.scrollTop
+    const rows = host.querySelectorAll('[data-line]')
+    for (const row of rows) {
+      if (row instanceof HTMLElement && row.offsetTop + row.offsetHeight >= top) {
+        return Number(row.dataset.line ?? '0')
+      }
+    }
+    return 0
   }, [])
 
   const editorRef = useRef<HTMLDivElement | null>(null)
@@ -644,6 +668,31 @@ function CodeSurface({ t, code, useStore, actions }: {
       </aside>
       <PaneHandle label={t('code.resizeExplorer')} value={widths.explorer} onResize={actions.resizeExplorer} />
       <div className={css.codeEditor} ref={editorRef}>
+        {active !== '' && (
+          <div className={css.findBar}>
+            <input
+              className={css.findInput}
+              type="search"
+              value={find}
+              placeholder={t('code.findPlaceholder')}
+              aria-label={t('code.find')}
+              onChange={(event) => { setFind(event.target.value) }}
+              onKeyDown={(event) => {
+                if (event.key === 'Escape') { setFind(''); event.preventDefault() }
+                if (event.key === 'Enter' && hits.length > 0) {
+                  const next = event.shiftKey ? hits[hits.length - 1] : (hits.find(line => line > currentLine()) ?? hits[0])
+                  if (next !== undefined) jump(next)
+                  event.preventDefault()
+                }
+              }}
+            />
+            {find.trim() !== '' && (
+              <span className={css.findCount}>
+                {hits.length === 0 ? t('code.findNone') : `${String(hits.length)} ${t('code.findHits')}`}
+              </span>
+            )}
+          </div>
+        )}
         {tabs.length > 0 && (
           <div className={css.tabBar} role="tablist" aria-label={t('code.tabs')}>
             {tabs.map(tab => (
@@ -675,7 +724,12 @@ function CodeSurface({ t, code, useStore, actions }: {
             : (
               <div className={css.sourceRows}>
                 {openFile.text.split('\n').map((line, index) => (
-                  <div key={String(index)} className={css.sourceRow} data-line={String(index + 1)}>
+                  <div
+                    key={String(index)}
+                    className={css.sourceRow}
+                    data-line={String(index + 1)}
+                    data-hit={hits.includes(index + 1) || undefined}
+                  >
                     <span className={css.lineNo} aria-hidden="true">{index + 1}</span>
                     <span className={css.lineText}>{line === '' ? '\u00a0' : line}</span>
                   </div>

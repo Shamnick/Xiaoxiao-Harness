@@ -981,3 +981,57 @@ describe('video gallery', () => {
     expect((await screen.findAllByText('video.galleryEmpty')).length).toBeGreaterThan(0)
   })
 })
+
+describe('in-file find', () => {
+  const text = ['alpha one', 'beta two', 'alpha three'].join('\n')
+
+  /** Mount a file whose content has two matches for "alpha". */
+  async function mountText() {
+    const store = makeStore({ tabs: ['a.ts'], activeTab: 'a.ts' })
+    const code = makeCode({
+      list: vi.fn<StudioCodeApi['list']>().mockResolvedValue({ entries: [file('a.ts')] }),
+      read: vi.fn<StudioCodeApi['read']>().mockResolvedValue({ text }),
+    })
+    mount('code', store, code)
+    await screen.findByText('alpha one')
+    return store
+  }
+
+  it('counts matching lines and marks them', async () => {
+    await mountText()
+    fireEvent.change(screen.getByLabelText('code.find'), { target: { value: 'alpha' } })
+    expect(await screen.findByText('2 code.findHits')).toBeTruthy()
+    expect(document.querySelectorAll('[data-hit]')).toHaveLength(2)
+  })
+
+  it('reports no match without marking anything', async () => {
+    await mountText()
+    fireEvent.change(screen.getByLabelText('code.find'), { target: { value: 'zzz' } })
+    expect(await screen.findByText('code.findNone')).toBeTruthy()
+    expect(document.querySelectorAll('[data-hit]')).toHaveLength(0)
+  })
+
+  it('clears the term on Escape', async () => {
+    await mountText()
+    const input = screen.getByLabelText('code.find') as HTMLInputElement
+    fireEvent.change(input, { target: { value: 'alpha' } })
+    fireEvent.keyDown(input, { key: 'Escape' })
+    expect(input.value).toBe('')
+    expect(document.querySelectorAll('[data-hit]')).toHaveLength(0)
+  })
+
+  it('keeps the matches marked after Enter scrolls to one', async () => {
+    await mountText()
+    const input = screen.getByLabelText('code.find')
+    fireEvent.change(input, { target: { value: 'alpha' } })
+    fireEvent.keyDown(input, { key: 'Enter' })
+    // The jump flashes one row for under a second; what must survive is the
+    // match marking, which is what the count describes.
+    expect(document.querySelectorAll('[data-hit]')).toHaveLength(2)
+  })
+
+  it('hides the bar when no tab is open', () => {
+    mount('code', makeStore(), makeCode())
+    expect(screen.queryByLabelText('code.find')).toBeNull()
+  })
+})

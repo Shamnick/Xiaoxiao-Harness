@@ -932,3 +932,44 @@
   border-radius: var(--dsw-radius-sm);
   border: 0.5px solid var(--dsw-alias-border-l1);
 }
+
+/* In-file find bar. */
+.findBar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+  padding: 6px 10px;
+  border-bottom: 0.5px solid var(--dsw-alias-border-l1);
+  background: var(--dsw-alias-bg-layer-1);
+}
+
+.findInput {
+  flex: 1;
+  min-width: 0;
+  padding: 4px 8px;
+  border: 0.5px solid var(--dsw-alias-border-l1);
+  border-radius: var(--dsw-radius-sm);
+  background: var(--dsw-alias-bg-base);
+  color: var(--dsw-alias-label-primary);
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 17px;
+}
+
+.findInput:focus-visible {
+  outline: none;
+  border-color: var(--dsw-alias-state-business-primary);
+}
+
+.findCount {
+  flex: none;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Matching source lines get a quiet wash so the count and the text agree. */
+.sourceRow[data-hit] {
+  background: color-mix(in srgb, var(--dsw-alias-brand-primary) 8%, transparent);
+}
