@@ -84,6 +84,7 @@ export interface RecentSessionEntry {
   detail?: string | undefined
 }
 
+/** Owner share for the sidebar brand-mark occupant: the square edge it must draw into. */
 export interface SidebarBrandMarkOwnerProps {
   /** Requested square edge in pixels. */
   size: number
