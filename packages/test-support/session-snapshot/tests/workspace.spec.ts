@@ -48,7 +48,7 @@ describe('workspace snapshots', () => {
       { path: 'visible.txt', kind: 'text', content: 'visible' },
     ])
     expect(await captureExpectedWorkspaceSnapshot(directory)).toEqual([
-      { path: '.dsh/runtime.json', kind: 'text', content: '{}' },
+      { path: '.xiaoxiao/runtime.json', kind: 'text', content: '{}' },
       { path: 'visible.txt', kind: 'text', content: 'visible' },
     ])
   })

@@ -192,12 +192,12 @@ describe('FileSystemSkillProvider', () => {
     await mkdir(join(project, '.git'), { recursive: true })
 
     await writeSkill(join(home, '.agents/skills'), 'same', 'user agents skill')
-    await writeSkill(join(home, '.dsh/skills'), 'same', 'user dsh skill')
+    await writeSkill(join(home, '.xiaoxiao/skills'), 'same', 'user dsh skill')
     await writeSkill(custom, 'same', 'custom skill')
     await writeSkill(join(project, '.agents/skills'), 'same', 'project agents skill')
-    await writeSkill(join(project, '.dsh/skills'), 'same', 'project dsh skill')
+    await writeSkill(join(project, '.xiaoxiao/skills'), 'same', 'project dsh skill')
     await writeSkill(custom, 'custom-only', 'custom only')
-    await writeSkill(join(home, '.dsh/skills/.system'), 'hidden-system', 'hidden system')
+    await writeSkill(join(home, '.xiaoxiao/skills/.system'), 'hidden-system', 'hidden system')
 
     const bundled = await tempDir('skill-bundled')
     await writeSkill(bundled, 'bundled-only', 'bundled skill')
@@ -218,7 +218,7 @@ describe('FileSystemSkillProvider', () => {
     expect((await ctx.skills.get('bundled-only'))?.content).toBe('Use the skill.')
 
     const noGit = await tempDir('skill-no-git')
-    await writeSkill(join(noGit, '.dsh/skills'), 'fallback-root', 'Fallback root')
+    await writeSkill(join(noGit, '.xiaoxiao/skills'), 'fallback-root', 'Fallback root')
     expect((await ctx.skills.list({ cwd: noGit })).map(skill => skill.name)).toContain('fallback-root')
   })
 
@@ -228,9 +228,9 @@ describe('FileSystemSkillProvider', () => {
     const custom = await tempDir('skill-runtime-custom')
     await mkdir(join(project, '.git'), { recursive: true })
 
-    await writeSkill(join(project, '.dsh/skills'), 'project-name', 'Project wins')
+    await writeSkill(join(project, '.xiaoxiao/skills'), 'project-name', 'Project wins')
     await writeSkill(custom, 'runtime-name', 'Custom loses')
-    await writeSkill(join(home, '.dsh/skills'), 'runtime-name', 'User loses')
+    await writeSkill(join(home, '.xiaoxiao/skills'), 'runtime-name', 'User loses')
 
     const ctx = await setupLocal(home, { customSkillDirs: [custom] })
     ctx.skills.register({
@@ -252,7 +252,7 @@ describe('FileSystemSkillProvider', () => {
 
   it('parses flat skills and filters invalid skills from the invocation-neutral listing', async () => {
     const home = await tempDir('skill-flat')
-    const root = join(home, '.dsh/skills')
+    const root = join(home, '.xiaoxiao/skills')
     await writeFlatSkill(root, 'flat-skill', 'flat description', 'Flat instructions.')
     await writeFile(join(root, 'rich-skill.md'), [
       '---',
@@ -317,7 +317,7 @@ describe('FileSystemSkillProvider', () => {
 
   it('accepts the documented boolean spellings for invocation frontmatter', async () => {
     const home = await tempDir('skill-invocation-booleans')
-    const root = join(home, '.dsh/skills')
+    const root = join(home, '.xiaoxiao/skills')
     await mkdir(root, { recursive: true })
     const truthy = ['true', 'TRUE', '"true"', 'yes', 'ON', '1', '"1"']
     const falsy = ['false', 'FALSE', '"false"', 'no', 'OFF', '0', '"0"']
@@ -362,7 +362,7 @@ describe('FileSystemSkillProvider', () => {
 
   it('rejects legacy and invalid invocation frontmatter without hiding valid siblings', async () => {
     const home = await tempDir('skill-invalid-invocation')
-    const root = join(home, '.dsh/skills')
+    const root = join(home, '.xiaoxiao/skills')
     await writeSkill(root, 'good-skill', 'Good skill')
     const invalid = [
       ['legacy-model', 'disableModelInvocation: true'],
@@ -382,7 +382,7 @@ describe('FileSystemSkillProvider', () => {
 
   it('supports CRLF frontmatter and ignores delimiter-looking text inside YAML values', async () => {
     const home = await tempDir('skill-frontmatter-crlf')
-    const root = join(home, '.dsh/skills')
+    const root = join(home, '.xiaoxiao/skills')
     await mkdir(root, { recursive: true })
     await writeFile(join(root, 'crlf-skill.md'), [
       '---',
@@ -414,7 +414,7 @@ describe('FileSystemSkillProvider', () => {
 
   it('skips invalid YAML skill files without hiding valid siblings', async () => {
     const home = await tempDir('skill-invalid-yaml')
-    const root = join(home, '.dsh/skills')
+    const root = join(home, '.xiaoxiao/skills')
     await writeSkill(root, 'good-skill', 'Good skill')
     await writeFile(join(root, 'bad-yaml.md'), '---\nname: bad-yaml\ndescription: [unclosed\n---\n\nBad body.\n')
 
@@ -428,11 +428,11 @@ describe('FileSystemSkillProvider', () => {
     const external = await tempDir('skill-symlink-external')
     await writeSkill(external, 'linked-dir', 'Linked directory')
     await writeFlatSkill(external, 'linked-flat', 'Linked flat')
-    await mkdir(join(home, '.dsh/skills'), { recursive: true })
-    await symlink(join(external, 'linked-dir'), join(home, '.dsh/skills/linked-dir'))
-    await symlink(join(external, 'linked-flat.md'), join(home, '.dsh/skills/linked-flat.md'))
-    await symlink(join(external, 'missing'), join(home, '.dsh/skills/broken-link'))
-    await symlink('/dev/null', join(home, '.dsh/skills/device-link'))
+    await mkdir(join(home, '.xiaoxiao/skills'), { recursive: true })
+    await symlink(join(external, 'linked-dir'), join(home, '.xiaoxiao/skills/linked-dir'))
+    await symlink(join(external, 'linked-flat.md'), join(home, '.xiaoxiao/skills/linked-flat.md'))
+    await symlink(join(external, 'missing'), join(home, '.xiaoxiao/skills/broken-link'))
+    await symlink('/dev/null', join(home, '.xiaoxiao/skills/device-link'))
 
     const ctx = new Context()
     await ctx.plugin(SkillRegistry)
@@ -454,12 +454,12 @@ describe('FileSystemSkillProvider', () => {
         expect(catalog.find(skill => skill.name === name)?.path).toBe(path)
         const loaded = await ctx.skills.get(name)
         expect(loaded?.path).toBe(path)
-        expect(loaded?.resourceBase).toEqual({ kind: 'directory', path: name === 'linked-dir' ? join(home, '.dsh/skills', name) : join(home, '.dsh/skills') })
+        expect(loaded?.resourceBase).toEqual({ kind: 'directory', path: name === 'linked-dir' ? join(home, '.xiaoxiao/skills', name) : join(home, '.xiaoxiao/skills') })
         expect((await lstat(path)).isFile()).toBe(true)
       }
       await writeFile(join(external, 'replacement.md'), '---\nname: linked-flat\ndescription: Replacement\n---\n\nReplacement body.\n')
-      await rm(join(home, '.dsh/skills/linked-flat.md'))
-      await symlink(join(external, 'replacement.md'), join(home, '.dsh/skills/linked-flat.md'))
+      await rm(join(home, '.xiaoxiao/skills/linked-flat.md'))
+      await symlink(join(external, 'replacement.md'), join(home, '.xiaoxiao/skills/linked-flat.md'))
       expect((await ctx.skills.get('linked-flat'))?.content).toBe('Replacement body.')
     } finally {
       await fiber.dispose()
@@ -470,7 +470,7 @@ describe('FileSystemSkillProvider', () => {
     const home = await tempDir('skill-read-fs')
     const project = await tempDir('skill-project-root-backend')
     const nestedCwd = join(project, 'packages/app')
-    const root = join(home, '.dsh/skills')
+    const root = join(home, '.xiaoxiao/skills')
     await mkdir(nestedCwd, { recursive: true })
     await writeFlatSkill(root, 'text-skill', 'Text skill', 'Text body.')
     await writeFlatSkill(root, 'resolve-fail', 'Resolve fail', 'Resolve body.')
@@ -702,7 +702,7 @@ describe('FileSystemSkillProvider', () => {
     const home = await tempDir('skill-native-read-failure')
     const root = join(home, '.agents/skills')
     await mkdir(join(root, 'broken-skill/SKILL.md'), { recursive: true })
-    await writeSkill(join(home, '.dsh/skills'), 'healthy-skill', 'Healthy native root')
+    await writeSkill(join(home, '.xiaoxiao/skills'), 'healthy-skill', 'Healthy native root')
     const ctx = await setupLocal(home)
 
     expect(await ctx.skills.snapshot()).toMatchObject({ skills: [{ name: 'healthy-skill' }], complete: false })
@@ -710,7 +710,7 @@ describe('FileSystemSkillProvider', () => {
 
   it('forwards cancellation to filesystem reads while loading a skill', async () => {
     const home = await tempDir('skill-read-abort')
-    await writeSkill(join(home, '.dsh/skills'), 'abortable-skill', 'Abortable skill')
+    await writeSkill(join(home, '.xiaoxiao/skills'), 'abortable-skill', 'Abortable skill')
 
     const ctx = new Context()
     await ctx.plugin(TestFileSystem)
@@ -833,7 +833,7 @@ describe('FileSystemSkillProvider', () => {
     emitObserved(join(home, 'outside.md'), { name: 'write' })
     emitObserved(root, { name: 'write' })
     emitObserved(join(root, 'observed-skill/references/notes.md'), { name: 'write' })
-    emitObserved(join(home, '.dsh/skills/.system/SKILL.md'), { name: 'write' })
+    emitObserved(join(home, '.xiaoxiao/skills/.system/SKILL.md'), { name: 'write' })
     emitObserved(join(root, 'flat-skill.md'), { name: 'write' })
     ctx.emit(
       'fs/observed',
@@ -924,7 +924,7 @@ describe('FileSystemSkillProvider', () => {
   it('refreshes frontmatter through a followed skill symlink', { timeout: 10000 }, async () => {
     const home = await tempDir('skill-watch-symlink-home')
     const external = await tempDir('skill-watch-symlink-external')
-    const root = join(home, '.dsh/skills')
+    const root = join(home, '.xiaoxiao/skills')
     await writeSkill(external, 'linked-skill', 'First linked description')
     await mkdir(root, { recursive: true })
     await symlink(join(external, 'linked-skill'), join(root, 'linked-skill'))
@@ -970,7 +970,7 @@ describe('FileSystemSkillProvider', () => {
       process.env.DSH_AGENTS_HOME = join(envHome, '.agents')
       const bundled = join(envHome, 'bundled-skills')
       process.env.DSH_BUNDLED_SKILL_DIR = bundled
-      await writeSkill(join(envHome, '.dsh/skills'), 'env-skill', 'Env skill')
+      await writeSkill(join(envHome, '.xiaoxiao/skills'), 'env-skill', 'Env skill')
       await writeSkill(bundled, 'env-bundled-skill', 'Env bundled skill')
       const ctx = new Context()
       await ctx.plugin(SkillRegistry)

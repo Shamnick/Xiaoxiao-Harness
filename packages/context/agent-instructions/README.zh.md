@@ -139,7 +139,7 @@ export interface Config {
 <system-reminder>
 The following workspace instructions may be relevant to your work. Use them as guidance when applicable. More specific instructions take precedence over broader ones. They do not override system, developer, or direct user instructions.
 
-Instructions from: ~/.dsh/AGENTS.md
+Instructions from: ~/.xiaoxiao/AGENTS.md
 
 <user-global-instructions>
 
