@@ -899,3 +899,58 @@ describe('work surface', () => {
     expect(screen.getAllByText('work.noSessions').length).toBeGreaterThan(0)
   })
 })
+
+describe('image gallery navigation', () => {
+  it('descends into a folder and lists its images', async () => {
+    const code = makeCode({
+      list: vi.fn<StudioCodeApi['list']>()
+        .mockResolvedValueOnce({ entries: [dir('shots'), file('notes.md')] })
+        .mockResolvedValueOnce({ entries: [file('deep.png')] }),
+    })
+    mount('image', makeStore(), code)
+    fireEvent.click(await screen.findByText(/shots/u))
+    expect(await screen.findByText('deep.png')).toBeTruthy()
+    expect(code.list).toHaveBeenLastCalledWith('shots', expect.anything())
+  })
+
+  it('reads an image from the nested path it was listed under', async () => {
+    const readImage = vi.fn<StudioCodeApi['readImage']>().mockResolvedValue('blob:deep')
+    const code = makeCode({
+      list: vi.fn<StudioCodeApi['list']>()
+        .mockResolvedValueOnce({ entries: [dir('shots')] })
+        .mockResolvedValueOnce({ entries: [file('deep.png')] }),
+      readImage,
+    })
+    mount('image', makeStore(), code)
+    fireEvent.click(await screen.findByText(/shots/u))
+    fireEvent.click(await screen.findByText('deep.png'))
+    await waitFor(() => { expect(readImage).toHaveBeenCalledWith('shots/deep.png', expect.anything()) })
+  })
+
+  it('returns to the root from the breadcrumb', async () => {
+    const code = makeCode({
+      list: vi.fn<StudioCodeApi['list']>()
+        .mockResolvedValueOnce({ entries: [dir('shots')] })
+        .mockResolvedValueOnce({ entries: [file('deep.png')] })
+        .mockResolvedValue({ entries: [file('top.png')] }),
+    })
+    mount('image', makeStore(), code)
+    fireEvent.click(await screen.findByText(/shots/u))
+    await screen.findByText('deep.png')
+    fireEvent.click(screen.getByRole('button', { name: 'code.root' }))
+    expect(await screen.findByText('top.png')).toBeTruthy()
+  })
+})
+
+describe('image breadcrumb depth', () => {
+  it('jumps to an intermediate folder from the breadcrumb', async () => {
+    const code = makeCode({
+      list: vi.fn<StudioCodeApi['list']>().mockResolvedValue({ entries: [dir('inner')] }),
+    })
+    mount('image', makeStore(), code)
+    fireEvent.click(await screen.findByText(/inner/u))
+    await screen.findByRole('button', { name: 'code.root' })
+    fireEvent.click(await screen.findByRole('button', { name: /^inner$/u }))
+    expect(code.list).toHaveBeenCalled()
+  })
+})

@@ -201,18 +201,29 @@ function ImageSurface({ t, code, submitPrompt, history, onPush, onClear }: {
   onPush: (entry: StudioGeneration) => void
   onClear: () => void
 }) {
-  const [images, setImages] = useState<readonly StudioEntry[]>([])
+  const [path, setPath] = useState('')
+  const [entries, setEntries] = useState<readonly StudioEntry[]>([])
   const [active, setActive] = useState<{ path: string; url: string } | undefined>()
 
   useEffect(() => {
     const controller = new AbortController()
-    void code.list('', controller.signal)
+    void code.list(path, controller.signal)
       .then((result) => {
-        if (!controller.signal.aborted) setImages(result.entries.filter(entry => entry.type === 'file' && IMAGE_EXT.test(entry.name)))
+        if (!controller.signal.aborted) setEntries(result.entries)
       })
-      .catch(() => { if (!controller.signal.aborted) setImages([]) })
+      .catch(() => { if (!controller.signal.aborted) setEntries([]) })
     return () => { controller.abort() }
-  }, [code])
+  }, [code, path])
+
+  const images = useMemo(
+    () => entries.filter(entry => entry.type === 'file' && IMAGE_EXT.test(entry.name)),
+    [entries],
+  )
+  const folders = useMemo(
+    () => entries.filter(entry => entry.type === 'directory'),
+    [entries],
+  )
+  const segments = path === '' ? [] : path.split('/')
 
   const open = useCallback((path: string) => {
     const controller = new AbortController()
@@ -233,6 +244,31 @@ function ImageSurface({ t, code, submitPrompt, history, onPush, onClear }: {
         <GenerateForm t={t} mode="image" submitPrompt={submitPrompt} onPush={onPush} />
         <div className={css.gallery}>
           <p className={css.paneTitle}>{t('image.gallery')}</p>
+          <nav className={css.crumbs} aria-label={t('code.path')}>
+            <button type="button" className={css.crumb} onClick={() => { setPath('') }}>{t('code.root')}</button>
+            {segments.map((segment, index) => (
+              <button
+                key={`${segment}-${String(index)}`}
+                type="button"
+                className={css.crumb}
+                onClick={() => { setPath(segments.slice(0, index + 1).join('/')) }}
+              >{segment}</button>
+            ))}
+          </nav>
+          {folders.length > 0 && (
+            <ul className={css.galleryGrid}>
+              {folders.map(folder => (
+                <li key={folder.name}>
+                  <button
+                    type="button"
+                    className={css.galleryItem}
+                    data-kind="directory"
+                    onClick={() => { setPath(path === '' ? folder.name : `${path}/${folder.name}`) }}
+                  >▸ {folder.name}</button>
+                </li>
+              ))}
+            </ul>
+          )}
           {images.length === 0
             ? <p className={css.mapEmpty}>{t('image.galleryEmpty')}</p>
             : (
@@ -242,8 +278,8 @@ function ImageSurface({ t, code, submitPrompt, history, onPush, onClear }: {
                     <button
                       type="button"
                       className={css.galleryItem}
-                      data-active={active?.path === entry.name || undefined}
-                      onClick={() => { open(entry.name) }}
+                      data-active={active?.path === (path === '' ? entry.name : `${path}/${entry.name}`) || undefined}
+                      onClick={() => { open(path === '' ? entry.name : `${path}/${entry.name}`) }}
                     >{entry.name}</button>
                   </li>
                 ))}
