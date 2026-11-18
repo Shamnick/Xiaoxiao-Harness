@@ -990,9 +990,14 @@
   opacity: 0;
 }
 
-.historyItem:hover .historyRemove,
 .historyRemove:focus-visible {
   opacity: 1;
+}
+
+@media (hover: hover) {
+  .historyItem:hover .historyRemove {
+    opacity: 1;
+  }
 }
 
 @media (hover: none) {
