@@ -954,3 +954,30 @@ describe('image breadcrumb depth', () => {
     expect(code.list).toHaveBeenCalled()
   })
 })
+
+describe('video gallery', () => {
+  it('lists only video files and previews one', async () => {
+    const code = makeCode({
+      list: vi.fn<StudioCodeApi['list']>().mockResolvedValue({
+        entries: [file('clip.mp4'), file('notes.txt'), file('still.png')],
+      }),
+      readImage: vi.fn<StudioCodeApi['readImage']>().mockResolvedValue('blob:clip'),
+    })
+    mount('video', makeStore(), code)
+    const item = await screen.findByText('clip.mp4')
+    expect(screen.queryByText('notes.txt')).toBeNull()
+    expect(screen.queryByText('still.png')).toBeNull()
+    fireEvent.click(item)
+    await waitFor(() => {
+      const video = document.querySelector('video')
+      expect(video?.getAttribute('src')).toBe('blob:clip')
+    })
+  })
+
+  it('notes an empty video gallery', async () => {
+    mount('video', makeStore(), makeCode({
+      list: vi.fn<StudioCodeApi['list']>().mockResolvedValue({ entries: [file('still.png')] }),
+    }))
+    expect((await screen.findAllByText('video.galleryEmpty')).length).toBeGreaterThan(0)
+  })
+})

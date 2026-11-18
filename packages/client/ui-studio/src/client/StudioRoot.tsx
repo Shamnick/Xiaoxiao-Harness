@@ -117,24 +117,15 @@ export function StudioRoot(props: StudioRootProps) {
         {surface === 'work' && (
           <WorkSurface t={t} openConversation={openConversation} recentSessions={props.recentSessions} openSession={props.openSession} />
         )}
-        {surface === 'image' && (
-          <ImageSurface
+        {(surface === 'image' || surface === 'video') && (
+          <GenerateSurface
+            mode={surface}
             t={t}
             code={code}
             submitPrompt={submitPrompt}
-            history={state.images}
-            onPush={actions.pushImage}
-            onClear={actions.clearImages}
-          />
-        )}
-        {surface === 'video' && (
-          <GenerateSurface
-            mode="video"
-            t={t}
-            submitPrompt={submitPrompt}
-            history={state.videos}
-            onPush={actions.pushVideo}
-            onClear={actions.clearVideos}
+            history={surface === 'image' ? state.images : state.videos}
+            onPush={surface === 'image' ? actions.pushImage : actions.pushVideo}
+            onClear={surface === 'image' ? actions.clearImages : actions.clearVideos}
           />
         )}
       </section>
@@ -150,6 +141,8 @@ const VARIANTS: Record<'image' | 'video', readonly string[]> = {
 
 /** Image extensions the workspace gallery lists. */
 const IMAGE_EXT = /\.(?:png|jpe?g|gif|webp|svg|avif)$/iu
+/** Video extensions the workspace gallery lists. */
+const VIDEO_EXT = /\.(?:mp4|webm|mov|m4v|ogv)$/iu
 
 /**
  * Image surface: the workspace gallery beside the prompt form.
@@ -218,13 +211,16 @@ function WorkSurface({ t, openConversation, recentSessions, openSession }: {
   )
 }
 
-function ImageSurface({ t, code, submitPrompt, history, onPush, onClear }: {
+/** Directory listing plus a preview, shared by the image and video galleries. */
+function MediaBrowser({ t, code, accept, label, emptyLabel, children }: {
   t: StudioRootProps['t']
   code: StudioCodeApi
-  submitPrompt: () => void
-  history: readonly StudioGeneration[]
-  onPush: (entry: StudioGeneration) => void
-  onClear: () => void
+  /** File extensions this gallery lists. */
+  accept: RegExp
+  label: string
+  emptyLabel: string
+  /** Renders the preview for the selected file. */
+  children: (selected: { path: string; url: string }) => React.ReactNode
 }) {
   const [path, setPath] = useState('')
   const [entries, setEntries] = useState<readonly StudioEntry[]>([])
@@ -233,28 +229,28 @@ function ImageSurface({ t, code, submitPrompt, history, onPush, onClear }: {
   useEffect(() => {
     const controller = new AbortController()
     void code.list(path, controller.signal)
-      .then((result) => {
-        if (!controller.signal.aborted) setEntries(result.entries)
-      })
+      .then((result) => { if (!controller.signal.aborted) setEntries(result.entries) })
       .catch(() => { if (!controller.signal.aborted) setEntries([]) })
     return () => { controller.abort() }
   }, [code, path])
 
-  const images = useMemo(
-    () => entries.filter(entry => entry.type === 'file' && IMAGE_EXT.test(entry.name)),
-    [entries],
+  const files = useMemo(
+    () => entries.filter(entry => entry.type === 'file' && accept.test(entry.name)),
+    [accept, entries],
   )
   const folders = useMemo(
     () => entries.filter(entry => entry.type === 'directory'),
     [entries],
   )
-  const open = useCallback((path: string) => {
+  const join = (name: string) => path === '' ? name : `${path}/${name}`
+
+  const open = useCallback((target: string) => {
     const controller = new AbortController()
-    void code.readImage(path, controller.signal).then((url) => {
+    void code.readImage(target, controller.signal).then((url) => {
       if (controller.signal.aborted || url === undefined) return
       setActive((current) => {
         if (current !== undefined) URL.revokeObjectURL(current.url)
-        return { path, url }
+        return { path: target, url }
       })
     })
   }, [code])
@@ -262,51 +258,40 @@ function ImageSurface({ t, code, submitPrompt, history, onPush, onClear }: {
   useEffect(() => () => { if (active !== undefined) URL.revokeObjectURL(active.url) }, [active])
 
   return (
-    <div className={css.generate}>
-      <div className={css.generateForm}>
-        <GenerateForm t={t} mode="image" submitPrompt={submitPrompt} onPush={onPush} />
-        <div className={css.gallery}>
-          <p className={css.paneTitle}>{t('image.gallery')}</p>
-          <Breadcrumbs t={t} path={path} onNavigate={setPath} />
-          {folders.length > 0 && (
-            <ul className={css.galleryGrid}>
-              {folders.map(folder => (
-                <li key={folder.name}>
-                  <button
-                    type="button"
-                    className={css.galleryItem}
-                    data-kind="directory"
-                    onClick={() => { setPath(path === '' ? folder.name : `${path}/${folder.name}`) }}
-                  >▸ {folder.name}</button>
-                </li>
-              ))}
-            </ul>
-          )}
-          {images.length === 0
-            ? <p className={css.mapEmpty}>{t('image.galleryEmpty')}</p>
-            : (
-              <ul className={css.galleryGrid}>
-                {images.map(entry => (
-                  <li key={entry.name}>
-                    <button
-                      type="button"
-                      className={css.galleryItem}
-                      data-active={active?.path === (path === '' ? entry.name : `${path}/${entry.name}`) || undefined}
-                      onClick={() => { open(path === '' ? entry.name : `${path}/${entry.name}`) }}
-                    >{entry.name}</button>
-                  </li>
-                ))}
-              </ul>
-            )}
-          {active !== undefined && (
-            <figure className={css.preview}>
-              <img src={active.url} alt={active.path} />
-              <figcaption>{active.path}</figcaption>
-            </figure>
-          )}
-        </div>
-      </div>
-      <HistoryPanel t={t} history={history} onClear={onClear} />
+    <div className={css.gallery}>
+      <p className={css.paneTitle}>{label}</p>
+      <Breadcrumbs t={t} path={path} onNavigate={setPath} />
+      {folders.length > 0 && (
+        <ul className={css.galleryGrid}>
+          {folders.map(folder => (
+            <li key={folder.name}>
+              <button
+                type="button"
+                className={css.galleryItem}
+                data-kind="directory"
+                onClick={() => { setPath(join(folder.name)) }}
+              >▸ {folder.name}</button>
+            </li>
+          ))}
+        </ul>
+      )}
+      {files.length === 0
+        ? <p className={css.mapEmpty}>{emptyLabel}</p>
+        : (
+          <ul className={css.galleryGrid}>
+            {files.map(entry => (
+              <li key={entry.name}>
+                <button
+                  type="button"
+                  className={css.galleryItem}
+                  data-active={active?.path === join(entry.name) || undefined}
+                  onClick={() => { open(join(entry.name)) }}
+                >{entry.name}</button>
+              </li>
+            ))}
+          </ul>
+        )}
+      {active !== undefined && children(active)}
     </div>
   )
 }
@@ -427,9 +412,10 @@ function HistoryPanel({ t, history, onClear }: {
   )
 }
 
-function GenerateSurface({ mode, t, submitPrompt, history, onPush, onClear }: {
-  mode: 'video'
+function GenerateSurface({ mode, t, code, submitPrompt, history, onPush, onClear }: {
+  mode: 'image' | 'video'
   t: StudioRootProps['t']
+  code: StudioCodeApi
   submitPrompt: () => void
   history: readonly StudioGeneration[]
   onPush: (entry: StudioGeneration) => void
@@ -439,6 +425,22 @@ function GenerateSurface({ mode, t, submitPrompt, history, onPush, onClear }: {
     <div className={css.generate}>
       <div className={css.generateForm}>
         <GenerateForm mode={mode} t={t} submitPrompt={submitPrompt} onPush={onPush} />
+        <MediaBrowser
+          t={t}
+          code={code}
+          accept={mode === 'image' ? IMAGE_EXT : VIDEO_EXT}
+          label={t(`${mode}.gallery` as 'image.gallery')}
+          emptyLabel={t(`${mode}.galleryEmpty` as 'image.galleryEmpty')}
+        >
+          {selected => (
+            <figure className={css.preview}>
+              {mode === 'image'
+                ? <img src={selected.url} alt={selected.path} />
+                : <video src={selected.url} controls />}
+              <figcaption>{selected.path}</figcaption>
+            </figure>
+          )}
+        </MediaBrowser>
       </div>
       <HistoryPanel t={t} history={history} onClear={onClear} />
     </div>
