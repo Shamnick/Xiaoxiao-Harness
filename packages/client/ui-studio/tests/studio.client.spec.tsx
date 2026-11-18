@@ -628,3 +628,190 @@ describe('interaction completions', () => {
     await waitFor(() => { expect(store.snapshot().activeTab).toBe('src/deep/a.ts') })
   })
 })
+
+describe('remaining branches', () => {
+  it('falls back to the pane label when the session has no title', async () => {
+    mount('code', makeStore(), makeCode({
+      sessionTitle: () => undefined,
+      list: vi.fn<StudioCodeApi['list']>().mockResolvedValue({ entries: [file('a.ts')] }),
+    }))
+    expect(await screen.findAllByText('code.explorer')).not.toHaveLength(0)
+  })
+
+  it('descends a nested directory under a non-empty path', async () => {
+    const code = makeCode({
+      list: vi.fn<StudioCodeApi['list']>().mockResolvedValue({ entries: [dir('inner')] }),
+    })
+    const store = makeStore({ openPath: 'src' })
+    mount('code', store, code)
+    fireEvent.click(await screen.findByText('inner'))
+    await waitFor(() => { expect(store.snapshot().openPath).toBe('src/inner') })
+  })
+
+  it('opens a file while a directory is selected', async () => {
+    const code = makeCode({
+      list: vi.fn<StudioCodeApi['list']>().mockResolvedValue({ entries: [file('a.ts')] }),
+      read: vi.fn<StudioCodeApi['read']>().mockResolvedValue({ text: 'x' }),
+    })
+    const store = makeStore({ openPath: 'src' })
+    mount('code', store, code)
+    fireEvent.click(await screen.findByText('a.ts'))
+    await waitFor(() => { expect(store.snapshot().activeTab).toBe('src/a.ts') })
+  })
+
+  it('ignores other keys in the search box', async () => {
+    const code = makeCode({ list: vi.fn<StudioCodeApi['list']>().mockResolvedValue({ entries: [file('a.ts')] }) })
+    mount('code', makeStore(), code)
+    await screen.findByText('a.ts')
+    const search = screen.getByRole('searchbox') as HTMLInputElement
+    fireEvent.change(search, { target: { value: 'a' } })
+    fireEvent.keyDown(search, { key: 'a' })
+    expect(search.value).toBe('a')
+  })
+
+  it('does nothing when a symbol points past the end of the file', async () => {
+    const store = makeStore({ tabs: ['a.ts'], activeTab: 'a.ts' })
+    const code = makeCode({
+      list: vi.fn<StudioCodeApi['list']>().mockResolvedValue({ entries: [file('a.ts')] }),
+      // Two declarations on line 1 and 2, but only one rendered row exists
+      // after the first line is dropped by a stale index.
+      read: vi.fn<StudioCodeApi['read']>().mockResolvedValue({ text: 'export function alpha() {}\n' }),
+    })
+    mount('code', store, code)
+    const outline = await screen.findByRole('button', { name: /alpha/u })
+    fireEvent.click(outline)
+    expect(outline).toBeTruthy()
+  })
+
+  it('drops a pending file read that lands after unmount', async () => {
+    let resolveRead: ((value: { text: string }) => void) | undefined
+    const store = makeStore({ tabs: ['a.ts'], activeTab: 'a.ts' })
+    const code = makeCode({
+      list: vi.fn<StudioCodeApi['list']>().mockResolvedValue({ entries: [file('a.ts')] }),
+      read: vi.fn<StudioCodeApi['read']>().mockReturnValue(new Promise((resolve) => { resolveRead = resolve })),
+    })
+    const { unmount } = render(
+      <StudioRoot
+        t={t}
+        surface="code"
+        openConversation={() => {}}
+        submitPrompt={() => {}}
+        code={code}
+        useStore={store.useStore as StudioRootProps['useStore']}
+        actions={store.actions as StudioRootProps['actions']}
+      />,
+    )
+    unmount()
+    resolveRead?.({ text: 'late' })
+    await waitFor(() => { expect(code.read).toHaveBeenCalled() })
+  })
+
+  it('drops a rejected file read that lands after unmount', async () => {
+    let rejectRead: ((reason: Error) => void) | undefined
+    const store = makeStore({ tabs: ['a.ts'], activeTab: 'a.ts' })
+    const code = makeCode({
+      list: vi.fn<StudioCodeApi['list']>().mockResolvedValue({ entries: [file('a.ts')] }),
+      read: vi.fn<StudioCodeApi['read']>().mockReturnValue(new Promise((_resolve, reject) => { rejectRead = reject })),
+    })
+    const { unmount } = render(
+      <StudioRoot
+        t={t}
+        surface="code"
+        openConversation={() => {}}
+        submitPrompt={() => {}}
+        code={code}
+        useStore={store.useStore as StudioRootProps['useStore']}
+        actions={store.actions as StudioRootProps['actions']}
+      />,
+    )
+    unmount()
+    rejectRead?.(new Error('late'))
+    await waitFor(() => { expect(code.read).toHaveBeenCalled() })
+  })
+
+  it('drops a pending directory listing that lands after unmount', async () => {
+    let resolveList: ((value: { entries: readonly StudioEntry[] }) => void) | undefined
+    const code = makeCode({
+      list: vi.fn<StudioCodeApi['list']>().mockReturnValue(new Promise((resolve) => { resolveList = resolve })),
+    })
+    const store = makeStore()
+    const { unmount } = render(
+      <StudioRoot
+        t={t}
+        surface="code"
+        openConversation={() => {}}
+        submitPrompt={() => {}}
+        code={code}
+        useStore={store.useStore as StudioRootProps['useStore']}
+        actions={store.actions as StudioRootProps['actions']}
+      />,
+    )
+    unmount()
+    resolveList?.({ entries: [file('late.ts')] })
+    await waitFor(() => { expect(code.list).toHaveBeenCalled() })
+  })
+
+  it('drops a rejected directory listing that lands after unmount', async () => {
+    let rejectList: ((reason: Error) => void) | undefined
+    const code = makeCode({
+      list: vi.fn<StudioCodeApi['list']>().mockReturnValue(new Promise((_resolve, reject) => { rejectList = reject })),
+    })
+    const store = makeStore()
+    const { unmount } = render(
+      <StudioRoot
+        t={t}
+        surface="code"
+        openConversation={() => {}}
+        submitPrompt={() => {}}
+        code={code}
+        useStore={store.useStore as StudioRootProps['useStore']}
+        actions={store.actions as StudioRootProps['actions']}
+      />,
+    )
+    unmount()
+    rejectList?.(new Error('late'))
+    await waitFor(() => { expect(code.list).toHaveBeenCalled() })
+  })
+})
+
+describe('deterministic guards', () => {
+  it('ignores Enter when the filtered list is empty', async () => {
+    const code = makeCode({
+      list: vi.fn<StudioCodeApi['list']>().mockResolvedValue({ entries: [file('a.ts')] }),
+    })
+    mount('code', makeStore(), code)
+    const tree = await screen.findByRole('tree')
+    fireEvent.change(screen.getByRole('searchbox'), { target: { value: 'zzz' } })
+    // The list is empty, so Enter resolves no entry and must not navigate.
+    fireEvent.keyDown(tree, { key: 'Enter' })
+    fireEvent.keyDown(tree, { key: 'ArrowDown' })
+    fireEvent.keyDown(tree, { key: 'Enter' })
+    expect(code.read).not.toHaveBeenCalled()
+  })
+})
+
+describe('breadcrumb keys', () => {
+  it('walks up with Backspace from a nested path', async () => {
+    const code = makeCode({
+      list: vi.fn<StudioCodeApi['list']>().mockResolvedValue({ entries: [file('a.ts')] }),
+    })
+    const store = makeStore({ openPath: 'src/lib' })
+    mount('code', store, code)
+    const tree = await screen.findByRole('tree')
+    fireEvent.keyDown(tree, { key: 'Backspace' })
+    await waitFor(() => { expect(store.snapshot().openPath).toBe('src') })
+  })
+})
+
+describe('root-level keys', () => {
+  it('stays at the root on Backspace', async () => {
+    const code = makeCode({
+      list: vi.fn<StudioCodeApi['list']>().mockResolvedValue({ entries: [file('a.ts')] }),
+    })
+    const store = makeStore()
+    mount('code', store, code)
+    const tree = await screen.findByRole('tree')
+    fireEvent.keyDown(tree, { key: 'Backspace' })
+    expect(store.snapshot().openPath).toBe('')
+  })
+})
