@@ -12,8 +12,10 @@ import type {} from '@deepseek-ai/dsh-client-ui-renderer/client'
 import type {} from '@deepseek-ai/dsh-client-locale/client'
 // Type-only: pulls the `main` keyed slot declaration.
 import type { MainPanelId } from '@deepseek-ai/dsh-client-ui-layout/client'
+// Type-only: pulls the sidebar panel-list slot declaration.
+import type {} from '@deepseek-ai/dsh-client-ui-sidebar/client'
 import type { StudioKey } from './locales.ts'
-import { StudioRoot } from './StudioRoot.tsx'
+import { StudioPanelIcon, StudioRoot } from './StudioRoot.tsx'
 import { zh, en, ja, es, fr, de, ru, pt } from './locales.ts'
 
 /** Plugin name used by the client assembler. */
@@ -47,4 +49,13 @@ export function apply(ctx: ClientContext): void {
     key: PANEL_ID,
     locale: NS,
   }, StudioRoot))
+  // Sidebar entry: a main panel with no launcher is unreachable.
+  const t = ctx.locale.bind(NS)
+  ctx.slots.inject('sidebar.panellist', () => ctx.slots.register({
+    name: 'sidebar.panellist',
+    id: PANEL_ID,
+    order: 0,
+    locale: NS,
+    label: () => t('rail.aria'),
+  }, StudioPanelIcon))
 }
