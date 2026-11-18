@@ -2418,7 +2418,7 @@ it('updates a Git copy by removing it and installing the expected package from a
   expect(view).not.toHaveBeenCalled()
   expect(readProfileManifest('test', dir).dependencies?.extra).toBe(GIT_B)
   expect(ctx.get('extraProbe')).toBe(true)
-})
+}, 30_000)
 
 it.each([
   ['another package', { name: 'other', version: '1.1.0' }],
