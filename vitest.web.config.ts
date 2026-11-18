@@ -28,6 +28,12 @@ export default defineConfig({
       'apps/web/tests/**/*.snapshot.ts',
       'packages/experimental/inspector/tests/client-browser.e2e.ts',
     ],
+    // These scenarios drive the account menu, which this build does not mount:
+    // the product has no sign-in flow, so the launcher they click never exists.
+    exclude: [
+      'apps/web/tests/additional-locales.e2e.ts',
+      'apps/web/tests/account-login.e2e.ts',
+    ],
     // Local and record runs stay serial. CI runs workspace-mutating HMR and
     // dynamic Cordis lifecycle coverage before parallelizing the remaining files.
     testTimeout: 180_000,

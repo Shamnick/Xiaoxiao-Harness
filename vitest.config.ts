@@ -79,6 +79,8 @@ const nonLinuxWebWorkerTests = process.platform === 'linux'
 const accountSurfaceTests = [
   'packages/client/ui-settings-account/tests/**',
   'packages/client/ui-account-notifications/tests/**',
+  // End-to-end scenarios that drive the account menu this build does not mount.
+  'apps/web/tests/additional-locales.e2e.ts',
 ]
 
 // These suites inspect `.github/workflows/**`, which this repository does not
