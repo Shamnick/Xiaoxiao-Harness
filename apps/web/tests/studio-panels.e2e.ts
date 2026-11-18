@@ -7,8 +7,6 @@
  * mount fails here. The unit suites prove the registration calls happen; this
  * proves the reader can see the result.
  */
-import { writeFile } from 'node:fs/promises'
-import { join } from 'node:path'
 import { chromium } from 'playwright'
 import { expect, it, onTestFinished } from 'vitest'
 import { launchWebScaffold, watchConsole, type WebScaffold } from './scaffold.ts'
@@ -19,9 +17,6 @@ const SURFACES = ['work', 'code', 'image', 'video'] as const
 it('renders every studio surface from the sidebar', async () => {
   const scaffold: WebScaffold = await launchWebScaffold()
   onTestFinished(() => scaffold.close())
-  // A file the code surface can list once a session's workspace is known.
-  await writeFile(join(scaffold.workspaceCwd, 'README.md'), '# Studio fixture\n')
-
   const browser = await chromium.launch()
   onTestFinished(() => browser.close())
   const page = await browser.newPage({ viewport: { width: 1440, height: 900 } })
