@@ -537,3 +537,61 @@
   color: var(--dsw-alias-label-tertiary);
   font-size: 10.5px;
 }
+
+/* Line-addressed source rows: the code map jumps to these. */
+.sourceRows {
+  padding: 10px 0;
+  font-family: var(--dsw-font-family-mono, ui-monospace, monospace);
+  font-size: 12px;
+  line-height: 19px;
+}
+
+.sourceRow {
+  display: flex;
+  gap: 12px;
+  padding: 0 14px 0 0;
+  border-radius: 4px;
+  transition: background-color 0.5s ease;
+}
+
+.sourceRow[data-flash='on'] {
+  background: color-mix(in srgb, var(--dsw-alias-brand-primary) 18%, transparent);
+  transition: background-color 0.08s ease;
+}
+
+.lineNo {
+  flex: none;
+  width: 44px;
+  padding-right: 10px;
+  color: var(--dsw-alias-label-tertiary);
+  text-align: right;
+  user-select: none;
+  font-variant-numeric: tabular-nums;
+}
+
+.lineText {
+  flex: 1;
+  min-width: 0;
+  color: var(--dsw-alias-label-secondary);
+  white-space: pre;
+  tab-size: 2;
+}
+
+/* Outline rows are buttons now that they navigate. */
+.outlineItem {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .outlineItem:hover { background: color-mix(in srgb, var(--dsw-alias-bg-layer-2) 85%, transparent); }
+}
+
+.outlineItem:focus-visible {
+  outline: var(--dsw-focus-ring-width, 2px) solid var(--dsw-focus-ring-color, var(--dsw-alias-state-business-primary));
+  outline-offset: -2px;
+}

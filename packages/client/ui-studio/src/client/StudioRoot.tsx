@@ -300,6 +300,18 @@ function CodeSurface({ t, code, useStore, actions }: {
     () => openFile === undefined || openFile.loading ? [] : outlineSymbols(openFile.text),
     [openFile],
   )
+  const editorRef = useRef<HTMLDivElement | null>(null)
+  const jump = useCallback((line: number) => {
+    const host = editorRef.current
+    if (host === null) return
+    const rows = host.querySelectorAll('[data-line]')
+    const target = rows[line - 1]
+    if (target instanceof HTMLElement) {
+      target.scrollIntoView({ block: 'center', behavior: 'smooth' })
+      target.dataset.flash = 'on'
+      window.setTimeout(() => { delete target.dataset.flash }, 900)
+    }
+  }, [])
   const segments = path === '' ? [] : path.split('/')
 
   return (
@@ -343,12 +355,21 @@ function CodeSurface({ t, code, useStore, actions }: {
         )}
       </aside>
       <PaneHandle label={t('code.resizeExplorer')} value={widths.explorer} onResize={actions.resizeExplorer} />
-      <div className={css.codeEditor}>
+      <div className={css.codeEditor} ref={editorRef}>
         {openFile === undefined
           ? <p className={css.editorEmpty}>{t('code.pickFile')}</p>
           : openFile.loading
             ? <p className={css.editorEmpty}>{t('code.loading')}</p>
-            : <pre className={css.source}>{openFile.text}</pre>}
+            : (
+              <div className={css.sourceRows}>
+                {openFile.text.split('\n').map((line, index) => (
+                  <div key={String(index)} className={css.sourceRow} data-line={String(index + 1)}>
+                    <span className={css.lineNo} aria-hidden="true">{index + 1}</span>
+                    <span className={css.lineText}>{line === '' ? '\u00a0' : line}</span>
+                  </div>
+                ))}
+              </div>
+            )}
       </div>
       <PaneHandle label={t('code.resizeMap')} value={widths.map} onResize={actions.resizeMap} inverted />
       <aside className={css.codeMap} aria-label={t('code.map')}>
@@ -358,10 +379,12 @@ function CodeSurface({ t, code, useStore, actions }: {
           : (
             <ul className={css.outline}>
               {symbols.map(symbol => (
-                <li key={`${String(symbol.line)}-${symbol.name}`} className={css.outlineItem}>
-                  <span className={css.outlineKind} data-kind={symbol.kind}>{symbol.kind.slice(0, 3)}</span>
-                  <span className={css.outlineName}>{symbol.name}</span>
-                  <span className={css.outlineLine}>{symbol.line}</span>
+                <li key={`${String(symbol.line)}-${symbol.name}`}>
+                  <button type="button" className={css.outlineItem} onClick={() => { jump(symbol.line) }}>
+                    <span className={css.outlineKind} data-kind={symbol.kind}>{symbol.kind.slice(0, 3)}</span>
+                    <span className={css.outlineName}>{symbol.name}</span>
+                    <span className={css.outlineLine}>{symbol.line}</span>
+                  </button>
                 </li>
               ))}
             </ul>
