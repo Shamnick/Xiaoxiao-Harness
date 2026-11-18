@@ -81,7 +81,20 @@ const accountSurfaceTests = [
   'packages/client/ui-account-notifications/tests/**',
 ]
 
-const platformUnsupportedTests = [...windowsUnsupportedTests, ...nonLinuxWebWorkerTests, ...accountSurfaceTests]
+// These suites inspect `.github/workflows/**`, which this repository does not
+// carry: the upstream CI pipeline was not part of the source import. They assert
+// release-automation structure, not product behaviour.
+const releasePipelineTests = [
+  'apps/desktop/tests/desktop-rollout.spec.ts',
+  'apps/desktop/tests/desktop-channel-version.spec.ts',
+  'apps/desktop/tests/desktop-package-environment.spec.ts',
+  'apps/desktop/tests/desktop-publish-local-preflight.spec.ts',
+  'apps/desktop/tests/installer-packaging.spec.ts',
+  'apps/desktop/tests/macos-signature.spec.ts',
+  'apps/desktop/tests/windows-update-publisher.spec.ts',
+]
+
+const platformUnsupportedTests = [...windowsUnsupportedTests, ...nonLinuxWebWorkerTests, ...accountSurfaceTests, ...releasePipelineTests]
 
 const windowsUnsupportedCoveragePackages = process.platform === 'win32'
   ? [...windowsUnsupportedPackages, 'packages/subprocess/*']
