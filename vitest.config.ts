@@ -87,6 +87,18 @@ const accountSurfaceTests = [
 // carry: the upstream CI pipeline was not part of the source import. They assert
 // release-automation structure, not product behaviour.
 const releasePipelineTests = [
+  'scripts/ci-compatible-selfhosted.spec.ts',
+  'scripts/client-build-environment.client.spec.ts',
+  'scripts/cua-helper/payload.spec.ts',
+  'scripts/ci-workflow.spec.ts',
+  'scripts/desktop-package-forms.spec.ts',
+  'scripts/desktop-package-source.spec.ts',
+  'scripts/desktop-publish-workflow.spec.ts',
+  'scripts/macos-package-workflow.spec.ts',
+  'scripts/preview-workflow.spec.ts',
+  'scripts/windows-package-workflow.spec.ts',
+  'scripts/tests/ci-master-platforms.spec.ts',
+  'scripts/tests/ci-release-selfhosted.spec.ts',
   'apps/desktop/tests/desktop-rollout.spec.ts',
   'apps/desktop/tests/desktop-channel-version.spec.ts',
   'apps/desktop/tests/desktop-package-environment.spec.ts',

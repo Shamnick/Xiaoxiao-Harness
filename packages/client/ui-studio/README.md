@@ -1,4 +1,21 @@
+---
+description: "Workspace studio surface for the Web GUI: four working areas (Work, Code, Image, Video) registered as main panels with sidebar launchers; for users and maintainers of the studio experience."
+kind: "package-reference"
+---
+
 # @deepseek-ai/dsh-client-ui-studio
+
+## Summary
+
+The studio registers four main-panel seats and four sidebar launchers: Work lists recent sessions, Code pairs a file explorer with an editor and a grouped symbol outline, and Image and Video each pair a prompt form with a workspace media gallery and a request history. Prompts are recorded locally and handed to the conversation; no generation backend is mounted.
+
+## Table of Contents
+
+- [Surfaces](#surfaces)
+- [Verification](#verification)
+- [Model Experience](#model-experience)
+- [Known Limitations and Deferred Work](#known-limitations-and-deferred-work)
+- [Dev Note](#dev-note)
 
 Workspace studio surface: four working areas — Work, Code, Image and Video —
 each registered as its own main panel with a sidebar launcher.
@@ -56,3 +73,7 @@ it on trust.
 - **Visual quality is unverified.** Tokens, radii, scrollbars, focus rings, and
   hover gating all pass the design-system gates, but whether the result looks
   right needs a human looking at it.
+
+## Dev Note
+
+The four panels are keyed by `studio.*` ids registered into the `main` slot; the launchers are `sidebar.panellist` entries, because `shell.leading` is a single-occupant slot already held by the sidebar. The conversation cannot be embedded: `conversation.session` is a single session-scoped slot its own package occupies. File contents stay in component state — only paths enter the persisted store, so a large file never reaches the layout snapshot.
