@@ -414,6 +414,10 @@ export default defineConfig({
         'packages/client/ui-input-trigger/src/core/menu.ts',
         'packages/client/ui-input-trigger/src/core/detect.ts',
         'packages/client/ui-sidebar/src/client/index.ts',
+        // Studio wiring and dictionaries: plugin assembly is covered by the
+        // assembled-bundle smokes, and the dictionaries carry no logic.
+        'packages/client/ui-studio/src/client/index.ts',
+        'packages/client/ui-studio/src/client/locales.ts',
         'packages/client/ui-skill/src/client/index.ts',
         'packages/client/ui-workspace/src/client/index.ts',
         'packages/test-support/client-runtime/src/translate.ts',
