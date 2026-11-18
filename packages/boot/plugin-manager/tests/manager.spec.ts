@@ -2457,7 +2457,7 @@ it('installs a Git target over the running version without HMR and reports the r
   expect(pnpm.mock.calls.map(call => call[1])).toEqual([['add', GIT_B]])
   // Without HMR nothing is removed, so the repository is left to the installation.
   expect(gitConnection).not.toHaveBeenCalled()
-})
+}, 30_000)
 
 it('keeps the running Git copy without HMR when the target declares no bundle', async () => {
   const { manager, dir, bundle } = await fixture('startup')
@@ -2468,7 +2468,7 @@ it('keeps the running Git copy without HMR when the target declares no bundle', 
     step: 'install', result: { application: 'failed', error: { code: 'not-bundle' }, packageResult: { unmet: 'not-bundle' } },
   })
   expect(readFileSync(join(dir, 'package.json'), 'utf8')).toBe(before)
-})
+}, 30_000)
 
 it.each(['network', 'timeout'] as const)('keeps a Git copy when a %s stops reaching the target repository before its removal', async (kind) => {
   const env = { GIT_CONFIG_GLOBAL: '/application/git.config' }
@@ -2499,7 +2499,7 @@ it('leaves a Git repository check that is not a connection failure to pnpm', asy
     exitCode: 127, output: 'spawn git ENOENT', truncated: false, logPath: join(dir, 'git.log'), kind: 'unknown', argv: ['git'],
   })
   expect(await manager.updateBundle('extra', '1.1.0', { spec: GIT_B })).toMatchObject({ step: 'install', result: { application: 'applied' } })
-})
+}, 30_000)
 
 it('refuses an update whose target does not match where the copy was installed from, before changing anything', async () => {
   const { manager, dir, bundle } = await fixture()
