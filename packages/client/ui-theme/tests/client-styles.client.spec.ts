@@ -40,6 +40,8 @@ describe('ui-theme client styles', () => {
     const styles = [...document.head.querySelectorAll<HTMLStyleElement>(`style[data-plugin="${PLUGIN_ID}"]`)]
     expect(styles.map(style => style.dataset.pluginCss)).toEqual([
       `${PLUGIN_ID}/base.css`,
+      // Brand font must precede the theme layer that references it.
+      `${PLUGIN_ID}/brand-font-web.css`,
       `${PLUGIN_ID}/corner-shape.css`,
       `${PLUGIN_ID}/design-platform.css`,
       `${PLUGIN_ID}/focus.css`,
@@ -47,6 +49,8 @@ describe('ui-theme client styles', () => {
       `${PLUGIN_ID}/scrollbar.css`,
       `${PLUGIN_ID}/gradient-shadow-text.css`,
       `${PLUGIN_ID}/shiki.css`,
+      // Xiaoxiao's own layer lands last so it wins the cascade.
+      `${PLUGIN_ID}/xiaoxiao-theme.css`,
     ])
     await fiber.dispose()
     expect(document.head.querySelectorAll(`style[data-plugin="${PLUGIN_ID}"]`)).toHaveLength(0)
@@ -66,7 +70,7 @@ describe('ui-theme client styles', () => {
     try {
       const fiber = await mountStyles()
       expect(detached.defaultView).toBeNull()
-      expect(detached.head.querySelectorAll(`style[data-plugin="${PLUGIN_ID}"]`)).toHaveLength(8)
+      expect(detached.head.querySelectorAll(`style[data-plugin="${PLUGIN_ID}"]`)).toHaveLength(10)
       expect(detached.documentElement.style.getPropertyValue(HAIRLINE_WIDTH)).toBe('')
       await fiber.dispose()
       expect(detached.head.querySelectorAll(`style[data-plugin="${PLUGIN_ID}"]`)).toHaveLength(0)

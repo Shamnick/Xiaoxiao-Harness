@@ -91,7 +91,7 @@ body:not([data-ds-dark-theme]) {
 
 /* Focus rings follow the accent and stay hairline-thin. */
 :focus-visible {
-  outline: 2px solid var(--dsw-alias-brand-primary, #7c7cf5);
+  outline: var(--dsw-focus-ring-width, 2px) solid var(--dsw-focus-ring-color, var(--dsw-alias-state-business-primary));
   outline-offset: 2px;
 }
 
@@ -99,8 +99,10 @@ body:not([data-ds-dark-theme]) {
 body[data-ds-dark-theme] ::-webkit-scrollbar-thumb {
   background-color: rgba(255, 255, 255, 0.10);
 }
-body[data-ds-dark-theme] ::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(255, 255, 255, 0.20);
+@media (hover: hover) {
+  body[data-ds-dark-theme] ::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 255, 255, 0.20);
+  }
 }
 
 /* Respect the system motion preference regardless of component defaults. */

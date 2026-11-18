@@ -484,7 +484,7 @@
   background: color-mix(in srgb, var(--dsw-alias-bg-layer-1) 82%, transparent);
   backdrop-filter: blur(24px) saturate(160%);
   -webkit-backdrop-filter: blur(24px) saturate(160%);
-  border: 1px solid var(--dsw-alias-border-l2);
+  border: 0.5px solid var(--dsw-alias-border-l2);
   box-shadow:
     0 1px 2px rgba(0, 0, 0, 0.28),
     0 8px 24px rgba(0, 0, 0, 0.20);
@@ -500,7 +500,7 @@
   border-color: color-mix(in srgb, var(--dsw-alias-brand-primary) 55%, transparent);
   background: color-mix(in srgb, var(--dsw-alias-bg-layer-1) 94%, transparent);
   box-shadow:
-    0 0 0 3px rgba(124, 124, 245, 0.13),
+    0 0 0 3px color-mix(in srgb, var(--dsw-focus-ring-color, var(--dsw-alias-state-business-primary)) 22%, transparent),
     0 2px 4px rgba(0, 0, 0, 0.24),
     0 12px 36px rgba(0, 0, 0, 0.30);
 }
@@ -540,8 +540,12 @@
 
 @media (prefers-reduced-motion: reduce) {
   .hero .card { animation: none; }
-  .card button:not(:disabled):hover,
   .card button:not(:disabled):active { transform: none; }
+}
+
+/* Hover resets must also require hover capability, or they match touch devices. */
+@media (hover: hover) and (prefers-reduced-motion: reduce) {
+  .card button:not(:disabled):hover { transform: none; }
 }
 
 /* ── Composer signature: travelling light on focus ───────────────────────
@@ -562,8 +566,8 @@
 
 /* Breathing halo under the send button while a draft is worth sending. */
 @keyframes xx-send-halo {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(124, 124, 245, 0.32); }
-  50% { box-shadow: 0 0 0 6px rgba(124, 124, 245, 0); }
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--dsw-alias-brand-primary) 32%, transparent); }
+  50% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--dsw-alias-brand-primary) 0%, transparent); }
 }
 
 .card {
@@ -584,8 +588,8 @@
     from var(--xx-angle),
     transparent 0deg,
     transparent 210deg,
-    rgba(124, 124, 245, 0.85) 250deg,
-    rgba(34, 211, 238, 0.85) 275deg,
+    color-mix(in srgb, var(--dsw-alias-brand-primary) 85%, transparent) 250deg,
+    color-mix(in srgb, var(--dsw-alias-brand-primary) 55%, transparent) 275deg,
     transparent 310deg,
     transparent 360deg
   );
@@ -674,8 +678,12 @@
   .card:focus-within .primary:not(:disabled) {
     animation: none;
   }
-  .primary:not(:disabled):hover,
   .primary:not(:disabled):active {
+    transform: none;
+  }
+}
+@media (hover: hover) and (prefers-reduced-motion: reduce) {
+  .primary:not(:disabled):hover {
     transform: none;
   }
 }

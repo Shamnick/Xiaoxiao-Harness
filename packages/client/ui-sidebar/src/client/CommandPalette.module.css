@@ -18,7 +18,7 @@
   width: 100%;
   padding: 14px 16px;
   border: 0;
-  border-bottom: 1px solid var(--dsw-alias-border-l1);
+  border-bottom: 0.5px solid var(--dsw-alias-border-l1);
   background: transparent;
   color: var(--dsw-alias-label-primary);
   font-family: inherit;

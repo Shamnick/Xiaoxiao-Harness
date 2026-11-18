@@ -14,10 +14,11 @@ afterEach(() => {
   vi.unstubAllGlobals()
 })
 
+// This brand occupies the sidebar pair only; the upstream hero frame is not
+// registered, so it is deliberately absent here.
 const HOLES = [
   'sidebar.brand.mark',
   'sidebar.brand.name',
-  'conversation.hero.frame',
 ] as const
 
 const HERO_HOLE = 'conversation.hero.brand.mark'
@@ -50,9 +51,12 @@ describe('official browser-brand plugin', () => {
     vi.stubEnv('DSH_CLIENT_BUILD_PROFILE', 'local')
     const subject = await bench()
     await subject.ctx.plugin({ inject: [...inject], apply }).await()
-    expect(subject.slots.entries('sidebar.brand.mark')).toHaveLength(0)
-    expect(subject.slots.entries('sidebar.brand.name')).toHaveLength(0)
-    expect(subject.slots.entries('conversation.hero.frame')).toHaveLength(1)
+    // This brand registers unconditionally: gating on the build profile would
+    // let the sidebar fall back to the upstream default visual.
+    expect(subject.slots.entries('sidebar.brand.mark')).toHaveLength(1)
+    expect(subject.slots.entries('sidebar.brand.name')).toHaveLength(1)
+    // Xiaoxiao carries no upstream hero decoration.
+    expect(subject.slots.entries('conversation.hero.frame')).toHaveLength(0)
   })
 
   it('fills declarations before or after apply and removes every occupant on teardown', async () => {
@@ -86,15 +90,13 @@ describe('official browser-brand plugin', () => {
     expect(subject.slots.entries(HERO_HOLE)).toHaveLength(0)
   })
 
-  it('registers the whale as a self-contained frame layer without replacing the hero mark', async () => {
+  it('leaves the hero frame empty: no upstream decoration ships with this brand', async () => {
     vi.stubEnv('DSH_CLIENT_BUILD_PROFILE', 'official')
     const subject = await bench()
     const fiber = subject.ctx.plugin({ inject: [...inject], apply })
     try {
       await fiber.await()
-      const [entry] = subject.slots.entries('conversation.hero.frame')
-      expect(entry?.options.id).toBe('pixel-whale')
-      expect(entry?.inject).toBeUndefined()
+      expect(subject.slots.entries('conversation.hero.frame')).toHaveLength(0)
       expect(subject.slots.entries(HERO_HOLE)).toHaveLength(0)
     } finally {
       await fiber.dispose()

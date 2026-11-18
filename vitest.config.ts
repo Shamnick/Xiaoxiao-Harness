@@ -73,7 +73,15 @@ const nonLinuxWebWorkerTests = process.platform === 'linux'
       'packages/experimental/webworker-runtime/tests/node/sandbox-stack.spec.ts',
     ]
 
-const platformUnsupportedTests = [...windowsUnsupportedTests, ...nonLinuxWebWorkerTests]
+// Xiaoxiao Harness ships no account system: the DeepSeek sign-in flow is gone,
+// so `ui-settings-account` no longer provides the `accountUi` service these two
+// suites build on. Their unit tests exercise a surface this product removed.
+const accountSurfaceTests = [
+  'packages/client/ui-settings-account/tests/**',
+  'packages/client/ui-account-notifications/tests/**',
+]
+
+const platformUnsupportedTests = [...windowsUnsupportedTests, ...nonLinuxWebWorkerTests, ...accountSurfaceTests]
 
 const windowsUnsupportedCoveragePackages = process.platform === 'win32'
   ? [...windowsUnsupportedPackages, 'packages/subprocess/*']

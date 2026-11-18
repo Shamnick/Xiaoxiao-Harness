@@ -837,8 +837,10 @@
   transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.logoRow:hover .brandMark {
-  transform: rotate(-8deg) scale(1.06);
+@media (hover: hover) {
+  .logoRow:hover .brandMark {
+    transform: rotate(-8deg) scale(1.06);
+  }
 }
 
 /* Session rows: hover raises the row almost imperceptibly and warms the text;
@@ -910,9 +912,18 @@
     animation: none;
     transition: none;
   }
+}
+
+/* Active resets are not hover-gated: a press happens on touch too. */
+@media (prefers-reduced-motion: reduce) {
+  .newSession:active {
+    transform: none;
+  }
+}
+
+@media (hover: hover) and (prefers-reduced-motion: reduce) {
   .logoRow:hover .brandMark,
   .newSession:hover,
-  .newSession:active,
   .panelList [role='treeitem']:hover,
   .panelList [role='option']:hover,
   .panelList li > button:hover {

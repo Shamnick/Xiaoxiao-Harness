@@ -38,6 +38,9 @@ export function StateDisplay({
   return (
     <div
       className={clsx(css.root, tone === 'error' && css.error, tone === 'loading' && css.loading, className)}
+      // An absent or pending region is a state worth announcing; a failure is an
+      // alert. Callers that already expose a status of their own should query
+      // this one by its title instead of by role alone.
       role={tone === 'error' ? 'alert' : 'status'}
       aria-busy={tone === 'loading' || undefined}
     >
