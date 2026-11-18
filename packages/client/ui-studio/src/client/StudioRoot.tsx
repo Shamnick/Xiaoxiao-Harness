@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import type { PropsLocale, PropsRuntime, PropsStore } from '@deepseek-ai/dsh-client-ui-slots'
+import type { PropsLocale, PropsStore } from '@deepseek-ai/dsh-client-ui-slots'
 import type { studioStore } from './store.ts'
 import css from './StudioRoot.module.css'
 
@@ -38,7 +38,12 @@ export interface StudioGeneration {
 }
 
 /** Owner props of the studio main panel. */
-export type StudioRootProps = PropsRuntime<'main'> & PropsLocale<'ui-studio'>
+/**
+ * Only the seats this panel reads. The slot's remaining standard hooks are not
+ * named here: a component that ignores them satisfies the registration by
+ * structure, and naming them would force every test to stub hooks it never drives.
+ */
+export type StudioRootProps = PropsLocale<'ui-studio'>
   & PropsStore<typeof studioStore> & {
     /** Which surface this panel renders. */
     surface: StudioSurface

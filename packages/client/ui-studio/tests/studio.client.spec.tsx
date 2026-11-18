@@ -5,6 +5,16 @@ import { useSyncExternalStore } from 'react'
 import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
 import { StudioRoot, outlineSymbols } from '../src/client/StudioRoot.tsx'
 import type { StudioCodeApi, StudioEntry, StudioGeneration, StudioRootProps } from '../src/client/StudioRoot.tsx'
+import type { StudioKey } from '../src/client/locales.ts'
+
+// The panel's locale seat resolves through this map. Declared here rather than
+// by importing the plugin entry, which would also pull every other package's
+// standard-props merge and demand hooks this suite does not drive.
+declare module '@deepseek-ai/dsh-client-ui-slots' {
+  interface LocaleNamespaceMap {
+    'ui-studio': StudioKey
+  }
+}
 
 /** Dictionary stand-in: every key resolves to itself, so assertions read the key. */
 const t = ((key: string) => key) as unknown as StudioRootProps['t']
