@@ -27,7 +27,7 @@
   gap: 4px;
   padding: 8px 4px 6px;
   border: 0;
-  border-radius: 10px;
+  border-radius: var(--dsw-radius-md);
   background: transparent;
   color: var(--dsw-alias-label-tertiary);
   font-family: inherit;
@@ -122,6 +122,9 @@
   min-height: 0;
   padding: 12px;
   background: var(--dsw-alias-bg-layer-1);
+  /* Elevated surface: a revealed scrollbar takes the l2 pair. */
+  --dsh-scrollbar-thumb: var(--dsw-alias-scrollbar-bg-l2);
+  --dsh-scrollbar-thumb-hover: var(--dsw-alias-scrollbar-hover-l2);
 }
 
 .codeExplorer {
@@ -162,7 +165,7 @@
   margin-top: 12px;
   padding: 8px 20px;
   border: 0.5px solid var(--dsw-alias-border-l2);
-  border-radius: 10px;
+  border-radius: var(--dsw-radius-md);
   background: var(--dsw-alias-label-primary);
   color: var(--dsw-alias-label-primary-inverted);
   font-family: inherit;
@@ -191,7 +194,7 @@
 
 .treeItem {
   padding: 3px 6px;
-  border-radius: 6px;
+  border-radius: var(--dsw-radius-sm);
   color: var(--dsw-alias-label-secondary);
   font-size: 12.5px;
   line-height: 18px;
@@ -213,7 +216,7 @@
   margin-top: 8px;
   padding: 4px 10px;
   border: 0.5px solid var(--dsw-alias-border-l2);
-  border-radius: 8px;
+  border-radius: var(--dsw-radius-sm);
   background: transparent;
   color: var(--dsw-alias-label-secondary);
   font-family: inherit;
@@ -232,7 +235,7 @@
 .crumb {
   padding: 1px 4px;
   border: 0;
-  border-radius: 5px;
+  border-radius: var(--dsw-radius-xs);
   background: transparent;
   color: var(--dsw-alias-label-tertiary);
   font-family: inherit;
@@ -258,7 +261,7 @@
   width: 100%;
   padding: 3px 6px;
   border: 0;
-  border-radius: 6px;
+  border-radius: var(--dsw-radius-sm);
   background: transparent;
   color: var(--dsw-alias-label-secondary);
   font-family: inherit;
@@ -327,7 +330,7 @@
   align-items: baseline;
   gap: 6px;
   padding: 3px 4px;
-  border-radius: 5px;
+  border-radius: var(--dsw-radius-xs);
   font-size: 12px;
   line-height: 17px;
 }
@@ -408,6 +411,9 @@
   min-height: 0;
   padding: 16px;
   background: var(--dsw-alias-bg-layer-1);
+  /* Elevated surface: a revealed scrollbar takes the l2 pair. */
+  --dsh-scrollbar-thumb: var(--dsw-alias-scrollbar-bg-l2);
+  --dsh-scrollbar-thumb-hover: var(--dsw-alias-scrollbar-hover-l2);
 }
 
 .field {
@@ -427,7 +433,7 @@
   width: 100%;
   padding: 10px 12px;
   border: 0.5px solid var(--dsw-alias-border-l2);
-  border-radius: 10px;
+  border-radius: var(--dsw-radius-md);
   background: var(--dsw-alias-bg-layer-1);
   color: var(--dsw-alias-label-primary);
   font-family: inherit;
@@ -515,7 +521,7 @@
   flex-direction: column;
   gap: 1px;
   padding: 6px 8px;
-  border-radius: 7px;
+  border-radius: var(--dsw-radius-sm);
 }
 
 @media (hover: hover) {
@@ -602,7 +608,7 @@
   margin-bottom: 6px;
   padding: 5px 9px;
   border: 0.5px solid var(--dsw-alias-border-l1);
-  border-radius: 7px;
+  border-radius: var(--dsw-radius-sm);
   background: var(--dsw-alias-bg-base);
   color: var(--dsw-alias-label-primary);
   font-family: inherit;
@@ -623,7 +629,7 @@
 .tree:focus-visible {
   outline: var(--dsw-focus-ring-width, 2px) solid var(--dsw-focus-ring-color, var(--dsw-alias-state-business-primary));
   outline-offset: -2px;
-  border-radius: 7px;
+  border-radius: var(--dsw-radius-sm);
 }
 
 .treeItem[data-cursor] {
@@ -652,7 +658,7 @@
   padding: 0 4px 0 9px;
   border: 0.5px solid transparent;
   border-bottom: 0;
-  border-radius: 7px 7px 0 0;
+  border-radius: var(--dsw-radius-sm) var(--dsw-radius-sm) 0 0;
   transition: background-color 0.13s ease;
 }
 
@@ -728,7 +734,7 @@
   max-width: 160px;
   padding: 3px 9px;
   border: 0.5px solid var(--dsw-alias-border-l1);
-  border-radius: 7px;
+  border-radius: var(--dsw-radius-sm);
   background: transparent;
   color: var(--dsw-alias-label-secondary);
   font-family: inherit;
@@ -760,7 +766,7 @@
 .preview img {
   max-width: 100%;
   max-height: 320px;
-  border-radius: 8px;
+  border-radius: var(--dsw-radius-sm);
   border: 0.5px solid var(--dsw-alias-border-l1);
   object-fit: contain;
 }
