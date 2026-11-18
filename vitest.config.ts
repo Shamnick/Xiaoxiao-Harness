@@ -416,6 +416,7 @@ export default defineConfig({
         'packages/client/ui-sidebar/src/client/index.ts',
         // Studio wiring and dictionaries: plugin assembly is covered by the
         // assembled-bundle smokes, and the dictionaries carry no logic.
+        'packages/client/ui-studio/src/index.ts',
         'packages/client/ui-studio/src/client/index.ts',
         'packages/client/ui-studio/src/client/locales.ts',
         'packages/client/ui-skill/src/client/index.ts',

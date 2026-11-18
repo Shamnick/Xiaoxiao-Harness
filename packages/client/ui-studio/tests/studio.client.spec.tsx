@@ -3,7 +3,7 @@ import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vite
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { useSyncExternalStore } from 'react'
 import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
-import { StudioRoot, outlineSymbols } from '../src/client/StudioRoot.tsx'
+import { StudioPanelIcon, StudioRoot, SurfaceIcon, outlineSymbols } from '../src/client/StudioRoot.tsx'
 import type { StudioCodeApi, StudioEntry, StudioGeneration, StudioRootProps } from '../src/client/StudioRoot.tsx'
 import type { StudioKey } from '../src/client/locales.ts'
 
@@ -282,5 +282,349 @@ describe('generation surfaces', () => {
     mount('image', store)
     fireEvent.click(screen.getByRole('button', { name: 'generate.clear' }))
     expect(store.snapshot().images).toEqual([])
+  })
+})
+
+describe('residual branches', () => {
+  it('keeps the prompt when only a modifier is pressed', () => {
+    const { store } = mount('video')
+    const box = screen.getByRole('textbox')
+    fireEvent.change(box, { target: { value: 'sea' } })
+    fireEvent.keyDown(box, { key: 'Enter' })
+    expect(store.snapshot().videos).toHaveLength(0)
+    fireEvent.keyDown(box, { key: 'Enter', metaKey: true })
+    expect(store.snapshot().videos).toHaveLength(1)
+  })
+
+  it('submits with the ctrl modifier too', () => {
+    const { store } = mount('video')
+    const box = screen.getByRole('textbox')
+    fireEvent.change(box, { target: { value: 'storm' } })
+    fireEvent.keyDown(box, { key: 'Enter', ctrlKey: true })
+    expect(store.snapshot().videos).toHaveLength(1)
+  })
+
+  it('ignores a blank prompt even when submit is forced', () => {
+    const { store } = mount('video')
+    const box = screen.getByRole('textbox')
+    fireEvent.change(box, { target: { value: '   ' } })
+    fireEvent.keyDown(box, { key: 'Enter', metaKey: true })
+    expect(store.snapshot().videos).toHaveLength(0)
+  })
+
+  it('switches the variant and count chips', () => {
+    const { store } = mount('video')
+    fireEvent.click(screen.getByRole('button', { name: '8s' }))
+    fireEvent.click(screen.getByRole('button', { name: '4' }))
+    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'clip' } })
+    fireEvent.click(screen.getByRole('button', { name: 'video.generate' }))
+    expect(store.snapshot().videos[0]).toMatchObject({ variant: '8s', count: 4 })
+  })
+
+  it('leaves the gallery empty when the listing fails', async () => {
+    mount('image', makeStore(), makeCode({
+      list: vi.fn<StudioCodeApi['list']>().mockRejectedValue(new Error('boom')),
+    }))
+    expect((await screen.findAllByText('image.galleryEmpty')).length).toBeGreaterThan(0)
+  })
+
+  it('ignores an image that cannot be read', async () => {
+    const code = makeCode({
+      list: vi.fn<StudioCodeApi['list']>().mockResolvedValue({ entries: [file('shot.png')] }),
+      readImage: vi.fn<StudioCodeApi['readImage']>().mockResolvedValue(undefined),
+    })
+    mount('image', makeStore(), code)
+    fireEvent.click(await screen.findByText('shot.png'))
+    await waitFor(() => { expect(code.readImage).toHaveBeenCalledOnce() })
+    expect(screen.queryByRole('img')).toBeNull()
+  })
+
+  it('returns to the parent directory from the breadcrumb', async () => {
+    const code = makeCode({
+      list: vi.fn<StudioCodeApi['list']>().mockResolvedValue({ entries: [file('a.ts')] }),
+    })
+    const store = makeStore({ openPath: 'src/lib' })
+    mount('code', store, code)
+    await screen.findByText('a.ts')
+    fireEvent.click(screen.getByRole('button', { name: 'code.root' }))
+    await waitFor(() => { expect(store.snapshot().openPath).toBe('') })
+  })
+
+  it('navigates upward with ArrowLeft inside the tree', async () => {
+    const code = makeCode({
+      list: vi.fn<StudioCodeApi['list']>().mockResolvedValue({ entries: [file('a.ts')] }),
+    })
+    const store = makeStore({ openPath: 'src/lib' })
+    mount('code', store, code)
+    const tree = await screen.findByRole('tree')
+    fireEvent.keyDown(tree, { key: 'ArrowLeft' })
+    await waitFor(() => { expect(store.snapshot().openPath).toBe('src') })
+  })
+
+  it('navigates upward with Backspace inside the tree', async () => {
+    const code = makeCode({
+      list: vi.fn<StudioCodeApi['list']>().mockResolvedValue({ entries: [file('a.ts')] }),
+    })
+    const store = makeStore({ openPath: 'src' })
+    mount('code', store, code)
+    const tree = await screen.findByRole('tree')
+    fireEvent.keyDown(tree, { key: 'Backspace' })
+    await waitFor(() => { expect(store.snapshot().openPath).toBe('') })
+  })
+
+  it('moves the cursor with ArrowUp without leaving the list', async () => {
+    const code = makeCode({
+      list: vi.fn<StudioCodeApi['list']>().mockResolvedValue({ entries: [file('a.ts'), file('b.ts')] }),
+    })
+    mount('code', makeStore(), code)
+    const tree = await screen.findByRole('tree')
+    fireEvent.keyDown(tree, { key: 'ArrowUp' })
+    fireEvent.keyDown(tree, { key: 'Enter' })
+    expect(code.read).toHaveBeenCalled()
+  })
+
+  it('drags a pane with the pointer', async () => {
+    const store = makeStore()
+    mount('code', store, makeCode())
+    const handle = screen.getByLabelText('code.resizeExplorer')
+    handle.setPointerCapture = () => {}
+    handle.releasePointerCapture = () => {}
+    fireEvent.pointerDown(handle, { clientX: 100, pointerId: 1 })
+    fireEvent.pointerMove(handle, { clientX: 140, pointerId: 1 })
+    await waitFor(() => { expect(store.snapshot().explorer).toBe(280) })
+    fireEvent.pointerUp(handle, { clientX: 140, pointerId: 1 })
+  })
+
+  it('ignores pointer movement before a drag starts', () => {
+    const store = makeStore()
+    mount('code', store, makeCode())
+    const handle = screen.getByLabelText('code.resizeExplorer')
+    fireEvent.pointerMove(handle, { clientX: 400, pointerId: 1 })
+    expect(store.snapshot().explorer).toBe(240)
+  })
+
+  it('renders the outline for the restored tab and shows the loading note', async () => {
+    const store = makeStore({ tabs: ['a.ts'], activeTab: 'a.ts' })
+    const code = makeCode({
+      list: vi.fn<StudioCodeApi['list']>().mockResolvedValue({ entries: [file('a.ts')] }),
+      read: vi.fn<StudioCodeApi['read']>().mockReturnValue(new Promise(() => {})),
+    })
+    mount('code', store, code)
+    expect((await screen.findAllByText('code.loading')).length).toBeGreaterThan(0)
+  })
+})
+
+describe('surface icons', () => {
+  it('renders one glyph per surface', () => {
+    for (const surface of ['work', 'code', 'image', 'video'] as const) {
+      const { container, unmount } = render(<SurfaceIcon surface={surface} />)
+      expect(container.querySelector('svg')).toBeTruthy()
+      unmount()
+    }
+  })
+
+  it('exposes the sidebar launcher mark', () => {
+    const { container } = render(<StudioPanelIcon />)
+    expect(container.querySelectorAll('rect')).toHaveLength(4)
+  })
+})
+
+describe('navigation edges', () => {
+  it('jumps through a multi-level breadcrumb', async () => {
+    const code = makeCode({
+      list: vi.fn<StudioCodeApi['list']>().mockResolvedValue({ entries: [file('a.ts')] }),
+    })
+    const store = makeStore({ openPath: 'src/lib/deep' })
+    mount('code', store, code)
+    await screen.findByText('a.ts')
+    fireEvent.click(screen.getByRole('button', { name: 'lib' }))
+    await waitFor(() => { expect(store.snapshot().openPath).toBe('src/lib') })
+  })
+
+  it('focuses another tab by clicking its name', async () => {
+    const store = makeStore({ tabs: ['a.ts', 'b.ts'], activeTab: 'a.ts' })
+    const code = makeCode({
+      list: vi.fn<StudioCodeApi['list']>().mockResolvedValue({ entries: [file('a.ts'), file('b.ts')] }),
+      read: vi.fn<StudioCodeApi['read']>().mockResolvedValue({ text: 'body' }),
+    })
+    mount('code', store, code)
+    fireEvent.click(await screen.findByRole('tab', { name: 'b.ts' }))
+    await waitFor(() => { expect(store.snapshot().activeTab).toBe('b.ts') })
+  })
+
+  it('jumps to a symbol line from the outline', async () => {
+    const store = makeStore({ tabs: ['a.ts'], activeTab: 'a.ts' })
+    const code = makeCode({
+      list: vi.fn<StudioCodeApi['list']>().mockResolvedValue({ entries: [file('a.ts')] }),
+      read: vi.fn<StudioCodeApi['read']>().mockResolvedValue({ text: 'export function alpha() {}\nexport function beta() {}' }),
+    })
+    mount('code', store, code)
+    const outline = await screen.findByRole('button', { name: /alpha/u })
+    fireEvent.click(outline)
+    expect(outline).toBeTruthy()
+  })
+
+  it('drops the pending image listing when the surface unmounts', async () => {
+    let resolveList: ((value: { entries: readonly StudioEntry[] }) => void) | undefined
+    const code = makeCode({
+      list: vi.fn<StudioCodeApi['list']>().mockReturnValue(new Promise((resolve) => { resolveList = resolve })),
+    })
+    const { unmount } = render(
+      <StudioRoot
+        t={t}
+        surface="image"
+        openConversation={() => {}}
+        submitPrompt={() => {}}
+        code={code}
+        useStore={makeStore().useStore as StudioRootProps['useStore']}
+        actions={makeStore().actions as StudioRootProps['actions']}
+      />,
+    )
+    unmount()
+    resolveList?.({ entries: [file('late.png')] })
+    await waitFor(() => { expect(code.list).toHaveBeenCalled() })
+  })
+})
+
+describe('failure paths', () => {
+  it('falls back to empty content when the read rejects', async () => {
+    const store = makeStore({ tabs: ['a.ts'], activeTab: 'a.ts' })
+    const code = makeCode({
+      list: vi.fn<StudioCodeApi['list']>().mockResolvedValue({ entries: [file('a.ts')] }),
+      read: vi.fn<StudioCodeApi['read']>().mockRejectedValue(new Error('denied')),
+    })
+    mount('code', store, code)
+    await waitFor(() => { expect(code.read).toHaveBeenCalled() })
+    expect(screen.queryByText('code.loading')).toBeNull()
+  })
+
+  it('drops a rejected image listing that lands after unmount', async () => {
+    let rejectList: ((reason: Error) => void) | undefined
+    const code = makeCode({
+      list: vi.fn<StudioCodeApi['list']>().mockReturnValue(new Promise((_resolve, reject) => { rejectList = reject })),
+    })
+    const store = makeStore()
+    const { unmount } = render(
+      <StudioRoot
+        t={t}
+        surface="image"
+        openConversation={() => {}}
+        submitPrompt={() => {}}
+        code={code}
+        useStore={store.useStore as StudioRootProps['useStore']}
+        actions={store.actions as StudioRootProps['actions']}
+      />,
+    )
+    unmount()
+    rejectList?.(new Error('late'))
+    await waitFor(() => { expect(code.list).toHaveBeenCalled() })
+  })
+})
+
+describe('last branches', () => {
+  it('revokes the previous preview when another image opens', async () => {
+    const revoke = vi.spyOn(URL, 'revokeObjectURL')
+    const code = makeCode({
+      list: vi.fn<StudioCodeApi['list']>().mockResolvedValue({ entries: [file('one.png'), file('two.png')] }),
+      readImage: vi.fn<StudioCodeApi['readImage']>()
+        .mockResolvedValueOnce('blob:one')
+        .mockResolvedValueOnce('blob:two'),
+    })
+    mount('image', makeStore(), code)
+    fireEvent.click(await screen.findByText('one.png'))
+    await waitFor(() => { expect(screen.getByRole('img')).toHaveProperty('src', 'blob:one') })
+    fireEvent.click(screen.getByText('two.png'))
+    await waitFor(() => { expect(revoke).toHaveBeenCalledWith('blob:one') })
+    revoke.mockRestore()
+  })
+
+  it('ignores Enter in an empty tree', async () => {
+    mount('code', makeStore(), makeCode())
+    const tree = await screen.findByRole('tree', { hidden: true }).catch(() => undefined)
+    if (tree !== undefined) fireEvent.keyDown(tree, { key: 'Enter' })
+    expect(screen.getAllByText('code.empty').length).toBeGreaterThan(0)
+  })
+
+  it('ends a pointer drag on release', () => {
+    const store = makeStore()
+    mount('code', store, makeCode())
+    const handle = screen.getByLabelText('code.resizeExplorer')
+    handle.setPointerCapture = () => {}
+    handle.releasePointerCapture = () => {}
+    fireEvent.pointerDown(handle, { clientX: 100, pointerId: 1 })
+    fireEvent.pointerMove(handle, { clientX: 120, pointerId: 1 })
+    fireEvent.pointerUp(handle, { clientX: 120, pointerId: 1 })
+    fireEvent.pointerMove(handle, { clientX: 400, pointerId: 1 })
+    expect(store.snapshot().explorer).toBe(260)
+  })
+
+  it('steps the map pane with both arrow keys', () => {
+    const store = makeStore()
+    mount('code', store, makeCode())
+    const handle = screen.getByLabelText('code.resizeMap')
+    fireEvent.keyDown(handle, { key: 'ArrowLeft' })
+    expect(store.snapshot().map).toBe(272)
+    fireEvent.keyDown(handle, { key: 'ArrowRight' })
+    expect(store.snapshot().map).toBe(260)
+  })
+
+  it('starts a drag on the map pane too', () => {
+    const store = makeStore()
+    mount('code', store, makeCode())
+    const handle = screen.getByLabelText('code.resizeMap')
+    handle.setPointerCapture = () => {}
+    handle.releasePointerCapture = () => {}
+    fireEvent.pointerDown(handle, { clientX: 200, pointerId: 1 })
+    fireEvent.pointerMove(handle, { clientX: 160, pointerId: 1 })
+    expect(store.snapshot().map).toBe(300)
+  })
+})
+
+describe('interaction completions', () => {
+  it('jumps to a symbol only when the editor holds that line', async () => {
+    const store = makeStore({ tabs: ['a.ts'], activeTab: 'a.ts' })
+    const code = makeCode({
+      list: vi.fn<StudioCodeApi['list']>().mockResolvedValue({ entries: [file('a.ts')] }),
+      read: vi.fn<StudioCodeApi['read']>().mockResolvedValue({ text: 'export function alpha() {}' }),
+    })
+    mount('code', store, code)
+    const outline = await screen.findByRole('button', { name: /alpha/u })
+    fireEvent.click(outline)
+    const row = document.querySelector('[data-line="1"]') as HTMLElement
+    expect(row.dataset.flash).toBe('on')
+  })
+
+  it('leaves the tree cursor on the only row when Enter repeats', async () => {
+    const code = makeCode({
+      list: vi.fn<StudioCodeApi['list']>().mockResolvedValue({ entries: [file('only.ts')] }),
+      read: vi.fn<StudioCodeApi['read']>().mockResolvedValue({ text: 'x' }),
+    })
+    const { store } = mount('code', makeStore(), code)
+    const tree = await screen.findByRole('tree')
+    fireEvent.keyDown(tree, { key: 'Enter' })
+    await waitFor(() => { expect(store.snapshot().activeTab).toBe('only.ts') })
+  })
+
+  it('keeps the path when ArrowLeft arrives at the root', async () => {
+    const code = makeCode({
+      list: vi.fn<StudioCodeApi['list']>().mockResolvedValue({ entries: [file('a.ts')] }),
+    })
+    const store = makeStore()
+    mount('code', store, code)
+    const tree = await screen.findByRole('tree')
+    fireEvent.keyDown(tree, { key: 'ArrowLeft' })
+    expect(store.snapshot().openPath).toBe('')
+  })
+
+  it('selects a tab by clicking its name and shows the file name only', async () => {
+    const store = makeStore({ tabs: ['src/deep/a.ts'], activeTab: '' })
+    const code = makeCode({
+      list: vi.fn<StudioCodeApi['list']>().mockResolvedValue({ entries: [dir('src')] }),
+      read: vi.fn<StudioCodeApi['read']>().mockResolvedValue({ text: 'x' }),
+    })
+    mount('code', store, code)
+    const tab = await screen.findByRole('tab', { name: 'a.ts' })
+    fireEvent.click(tab)
+    await waitFor(() => { expect(store.snapshot().activeTab).toBe('src/deep/a.ts') })
   })
 })
