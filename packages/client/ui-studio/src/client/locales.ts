@@ -9,6 +9,7 @@ export const zh = {
   'rail.video': '视频',
   'work.title': '工作区',
   'work.description': '与代理对话，安排任务，产出结果',
+  'work.open': '打开对话',
   'code.title': '编程',
   'code.description': '浏览代码、编辑文件、查看结构地图',
   'image.title': '图像生成',
@@ -19,6 +20,11 @@ export const zh = {
   'code.explorer': '文件',
   'code.map': '代码地图',
   'code.map.empty': '打开文件后显示结构',
+  'code.noWorkspace': '尚未打开工作区',
+  'code.listFailed': '目录读取失败',
+  'code.loading': '读取中…',
+  'code.empty': '目录为空',
+  'code.retry': '重试',
 } satisfies Record<string, string>
 
 /** The studio namespace key union. */
@@ -33,6 +39,7 @@ export const en: Record<StudioKey, string> = {
   'rail.video': 'Video',
   'work.title': 'Workspace',
   'work.description': 'Talk to the agent, schedule tasks, ship results',
+  'work.open': 'Open conversation',
   'code.title': 'Code',
   'code.description': 'Browse code, edit files, read the structure map',
   'image.title': 'Image generation',
@@ -43,6 +50,11 @@ export const en: Record<StudioKey, string> = {
   'code.explorer': 'Files',
   'code.map': 'Code map',
   'code.map.empty': 'Open a file to see its structure',
+  'code.noWorkspace': 'No workspace open',
+  'code.listFailed': 'Could not read the directory',
+  'code.loading': 'Loading…',
+  'code.empty': 'Empty directory',
+  'code.retry': 'Retry',
 }
 
 /** Japanese dictionary. */
@@ -54,6 +66,7 @@ export const ja: Record<StudioKey, string> = {
   'rail.video': '動画',
   'work.title': 'ワークスペース',
   'work.description': 'エージェントと対話し、タスクを整理し、成果をまとめる',
+  'work.open': '会話を開く',
   'code.title': 'コード',
   'code.description': 'コードを閲覧し、ファイルを編集し、構造マップを見る',
   'image.title': '画像生成',
@@ -64,6 +77,11 @@ export const ja: Record<StudioKey, string> = {
   'code.explorer': 'ファイル',
   'code.map': 'コードマップ',
   'code.map.empty': 'ファイルを開くと構造が表示されます',
+  'code.noWorkspace': 'ワークスペースが開かれていません',
+  'code.listFailed': 'ディレクトリを読めませんでした',
+  'code.loading': '読み込み中…',
+  'code.empty': '空のディレクトリ',
+  'code.retry': '再試行',
 }
 
 /** Spanish dictionary. */
@@ -75,6 +93,7 @@ export const es: Record<StudioKey, string> = {
   'rail.video': 'Vídeo',
   'work.title': 'Espacio de trabajo',
   'work.description': 'Habla con el agente, organiza tareas y entrega resultados',
+  'work.open': 'Abrir conversación',
   'code.title': 'Código',
   'code.description': 'Explora el código, edita archivos y lee el mapa de estructura',
   'image.title': 'Generación de imágenes',
@@ -85,6 +104,11 @@ export const es: Record<StudioKey, string> = {
   'code.explorer': 'Archivos',
   'code.map': 'Mapa de código',
   'code.map.empty': 'Abre un archivo para ver su estructura',
+  'code.noWorkspace': 'Ningún espacio de trabajo abierto',
+  'code.listFailed': 'No se pudo leer el directorio',
+  'code.loading': 'Cargando…',
+  'code.empty': 'Directorio vacío',
+  'code.retry': 'Reintentar',
 }
 
 /** French dictionary. */
@@ -96,6 +120,7 @@ export const fr: Record<StudioKey, string> = {
   'rail.video': 'Vidéo',
   'work.title': 'Espace de travail',
   'work.description': "Dialoguez avec l'agent, planifiez les tâches, livrez les résultats",
+  'work.open': 'Ouvrir la conversation',
   'code.title': 'Code',
   'code.description': 'Parcourez le code, modifiez les fichiers, lisez la carte de structure',
   'image.title': "Génération d'images",
@@ -106,6 +131,11 @@ export const fr: Record<StudioKey, string> = {
   'code.explorer': 'Fichiers',
   'code.map': 'Carte du code',
   'code.map.empty': 'Ouvrez un fichier pour voir sa structure',
+  'code.noWorkspace': 'Aucun espace de travail ouvert',
+  'code.listFailed': 'Impossible de lire le répertoire',
+  'code.loading': 'Chargement…',
+  'code.empty': 'Répertoire vide',
+  'code.retry': 'Réessayer',
 }
 
 /** German dictionary. */
@@ -117,6 +147,7 @@ export const de: Record<StudioKey, string> = {
   'rail.video': 'Video',
   'work.title': 'Arbeitsbereich',
   'work.description': 'Mit dem Agenten sprechen, Aufgaben planen, Ergebnisse liefern',
+  'work.open': 'Unterhaltung öffnen',
   'code.title': 'Code',
   'code.description': 'Code durchsuchen, Dateien bearbeiten, Strukturkarte lesen',
   'image.title': 'Bilderzeugung',
@@ -127,6 +158,11 @@ export const de: Record<StudioKey, string> = {
   'code.explorer': 'Dateien',
   'code.map': 'Codekarte',
   'code.map.empty': 'Datei öffnen, um die Struktur zu sehen',
+  'code.noWorkspace': 'Kein Arbeitsbereich geöffnet',
+  'code.listFailed': 'Verzeichnis konnte nicht gelesen werden',
+  'code.loading': 'Wird geladen…',
+  'code.empty': 'Leeres Verzeichnis',
+  'code.retry': 'Erneut versuchen',
 }
 
 /** Russian dictionary. */
@@ -138,6 +174,7 @@ export const ru: Record<StudioKey, string> = {
   'rail.video': 'Видео',
   'work.title': 'Рабочая область',
   'work.description': 'Общайтесь с агентом, планируйте задачи, получайте результат',
+  'work.open': 'Открыть диалог',
   'code.title': 'Код',
   'code.description': 'Просмотр кода, правка файлов, карта структуры',
   'image.title': 'Генерация изображений',
@@ -148,6 +185,11 @@ export const ru: Record<StudioKey, string> = {
   'code.explorer': 'Файлы',
   'code.map': 'Карта кода',
   'code.map.empty': 'Откройте файл, чтобы увидеть структуру',
+  'code.noWorkspace': 'Рабочая область не открыта',
+  'code.listFailed': 'Не удалось прочитать каталог',
+  'code.loading': 'Загрузка…',
+  'code.empty': 'Каталог пуст',
+  'code.retry': 'Повторить',
 }
 
 /** Portuguese dictionary. */
@@ -159,6 +201,7 @@ export const pt: Record<StudioKey, string> = {
   'rail.video': 'Vídeo',
   'work.title': 'Área de trabalho',
   'work.description': 'Converse com o agente, organize tarefas e entregue resultados',
+  'work.open': 'Abrir conversa',
   'code.title': 'Código',
   'code.description': 'Navegue pelo código, edite arquivos e leia o mapa de estrutura',
   'image.title': 'Geração de imagens',
@@ -169,4 +212,9 @@ export const pt: Record<StudioKey, string> = {
   'code.explorer': 'Arquivos',
   'code.map': 'Mapa de código',
   'code.map.empty': 'Abra um arquivo para ver sua estrutura',
+  'code.noWorkspace': 'Nenhuma área de trabalho aberta',
+  'code.listFailed': 'Não foi possível ler o diretório',
+  'code.loading': 'Carregando…',
+  'code.empty': 'Diretório vazio',
+  'code.retry': 'Tentar novamente',
 }

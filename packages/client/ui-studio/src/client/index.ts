@@ -14,6 +14,10 @@ import type {} from '@deepseek-ai/dsh-client-locale/client'
 import type { MainPanelId } from '@deepseek-ai/dsh-client-ui-layout/client'
 // Type-only: pulls the sidebar panel-list slot declaration.
 import type {} from '@deepseek-ai/dsh-client-ui-sidebar/client'
+// Type-only: pulls the ctx.uiWorkspace directory capability.
+import type {} from '@deepseek-ai/dsh-client-ui-workspace/client'
+// Type-only: pulls the ctx.workspaces service merge.
+import type {} from '@deepseek-ai/dsh-api-workspace-controller/client'
 import type { StudioKey } from './locales.ts'
 import { StudioPanelIcon, StudioRoot } from './StudioRoot.tsx'
 import { zh, en, ja, es, fr, de, ru, pt } from './locales.ts'
@@ -22,7 +26,7 @@ import { zh, en, ja, es, fr, de, ru, pt } from './locales.ts'
 export const name = 'client-ui-studio'
 
 /** Required services: the slot registry and the locale dictionaries. */
-export const inject = ['slots', 'locale']
+export const inject = ['slots', 'locale', 'layout', 'uiWorkspace', 'workspaces']
 
 const NS = 'ui-studio'
 /** Keyed main-panel id; the sidebar lists main entries by this key. */
@@ -48,6 +52,16 @@ export function apply(ctx: ClientContext): void {
     name: 'main',
     key: PANEL_ID,
     locale: NS,
+    // `conversation` is the layout's default entry rather than a keyed panel,
+    // so returning to it means clearing the selected panel.
+    inject: () => ({
+      openConversation: () => { ctx.layout.selectPanel(null) },
+      listDirectory: (path?: string, signal?: AbortSignal) => ctx.uiWorkspace.listDirectory(path, signal),
+      // The studio edits one Workspace: the most recently updated row.
+      workspacePath: ctx.workspaces.list.getSnapshot().items
+        .slice()
+        .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))[0]?.path,
+    }),
   }, StudioRoot))
   // Sidebar entry: a main panel with no launcher is unreachable.
   const t = ctx.locale.bind(NS)

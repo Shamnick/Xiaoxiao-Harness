@@ -1,12 +1,26 @@
-import { useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import css from './StudioRoot.module.css'
 
 /** The four working surfaces the rail switches between. */
 export type StudioSurface = 'work' | 'code' | 'image' | 'video'
 
+/** One directory entry as the client sees it. */
+export interface StudioEntry {
+  name: string
+  path: string
+  hidden: boolean
+}
+
 /** Owner props of the studio main panel. */
-export type StudioRootProps = PropsRuntime<'main'> & PropsLocale<'ui-studio'>
+export type StudioRootProps = PropsRuntime<'main'> & PropsLocale<'ui-studio'> & {
+  /** Return to the conversation surface, which the layout owns as its default entry. */
+  openConversation: () => void
+  /** List one directory of the active Workspace. */
+  listDirectory: (path?: string, signal?: AbortSignal) => Promise<{ entries: readonly StudioEntry[] }>
+  /** Canonical path of the active Workspace, when one is open. */
+  workspacePath?: string | undefined
+}
 
 /** Rail entries in display order. */
 const SURFACES: readonly StudioSurface[] = ['work', 'code', 'image', 'video']
@@ -14,10 +28,10 @@ const SURFACES: readonly StudioSurface[] = ['work', 'code', 'image', 'video']
 /**
  * Render the studio surface: a vertical activity rail plus the selected
  * work area.
- * @param props - locale seat.
+ * @param props - locale seat plus the Workspace directory reader.
  * @returns the studio shell.
  */
-export function StudioRoot({ t }: StudioRootProps) {
+export function StudioRoot({ t, openConversation, listDirectory, workspacePath }: StudioRootProps) {
   const [surface, setSurface] = useState<StudioSurface>('work')
   return (
     <div className={css.root}>
@@ -37,14 +51,20 @@ export function StudioRoot({ t }: StudioRootProps) {
         ))}
       </nav>
       <section className={css.surface} data-surface={surface}>
-        {surface === 'code' ? <CodeSurface t={t} /> : <SurfacePlaceholder id={surface} t={t} />}
+        {surface === 'code'
+          ? <CodeSurface t={t} listDirectory={listDirectory} workspacePath={workspacePath} />
+          : <SurfacePlaceholder id={surface} t={t} openConversation={openConversation} />}
       </section>
     </div>
   )
 }
 
 /** Surface placeholder for areas whose tools are not mounted yet. */
-function SurfacePlaceholder({ id, t }: { id: StudioSurface; t: StudioRootProps['t'] }) {
+function SurfacePlaceholder({ id, t, openConversation }: {
+  id: StudioSurface
+  t: StudioRootProps['t']
+  openConversation: () => void
+}) {
   const title = t(`${id}.title` as 'work.title')
   const description = t(`${id}.description` as 'work.description')
   return (
@@ -52,21 +72,78 @@ function SurfacePlaceholder({ id, t }: { id: StudioSurface; t: StudioRootProps['
       <SurfaceGlyph surface={id} large />
       <h2 className={css.placeholderTitle}>{title}</h2>
       <p className={css.placeholderText}>{description}</p>
-      <span className={css.badge}>{t('common.soon')}</span>
+      {id === 'work'
+        ? <button type="button" className={css.primaryAction} onClick={openConversation}>{t('work.open')}</button>
+        : <span className={css.badge}>{t('common.soon')}</span>}
     </div>
   )
 }
 
 /**
- * Code surface: file explorer, editor area and the structure map.
- * The explorer and map are wired to the workspace later; the layout and the
- * map panel exist now so the surface reads as a complete tool.
+ * Code surface: Workspace explorer, editor area and the structure map.
+ * The explorer lists the Workspace root; nested expansion arrives with the
+ * file-open path that gives the editor something to show.
  */
-function CodeSurface({ t }: { t: StudioRootProps['t'] }) {
+function CodeSurface({ t, listDirectory, workspacePath }: {
+  t: StudioRootProps['t']
+  listDirectory: StudioRootProps['listDirectory']
+  workspacePath?: string | undefined
+}) {
+  const [entries, setEntries] = useState<readonly StudioEntry[]>([])
+  const [state, setState] = useState<'idle' | 'loading' | 'error'>('idle')
+
+  useEffect(() => {
+    if (workspacePath === undefined) {
+      setEntries([])
+      setState('idle')
+      return undefined
+    }
+    const controller = new AbortController()
+    setState('loading')
+    void listDirectory(workspacePath, controller.signal)
+      .then((listing) => {
+        if (controller.signal.aborted) return
+        setEntries(listing.entries)
+        setState('idle')
+      })
+      .catch(() => {
+        if (controller.signal.aborted) return
+        setEntries([])
+        setState('error')
+      })
+    return () => { controller.abort() }
+  }, [listDirectory, workspacePath])
+
+  const visible = useMemo(() => entries.filter(entry => !entry.hidden), [entries])
+
+  const retry = useCallback(() => {
+    if (workspacePath === undefined) return
+    setState('loading')
+    void listDirectory(workspacePath)
+      .then((listing) => { setEntries(listing.entries); setState('idle') })
+      .catch(() => { setState('error') })
+  }, [listDirectory, workspacePath])
+
   return (
     <div className={css.codeGrid}>
       <aside className={css.codeExplorer} aria-label={t('code.explorer')}>
         <p className={css.paneTitle}>{t('code.explorer')}</p>
+        {workspacePath === undefined && <p className={css.mapEmpty}>{t('code.noWorkspace')}</p>}
+        {state === 'error' && <p className={css.mapEmpty}>{t('code.listFailed')}</p>}
+        {state === 'loading' && <p className={css.mapEmpty}>{t('code.loading')}</p>}
+        {state === 'idle' && visible.length > 0 && (
+          <ul className={css.tree}>
+            {visible.map(entry => (
+              <li key={entry.path} className={css.treeItem}>{entry.name}</li>
+            ))}
+          </ul>
+        )}
+        {state === 'idle' && workspacePath !== undefined && visible.length === 0 && (
+          <p className={css.mapEmpty}>{t('code.empty')}</p>
+        )}
+        {state === 'error' && (
+          <button type="button" className={css.retry} onClick={retry}>{t('code.retry')}</button>
+        )}
       </aside>
       <div className={css.codeEditor} />
       <aside className={css.codeMap} aria-label={t('code.map')}>
