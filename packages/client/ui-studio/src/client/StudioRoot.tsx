@@ -22,6 +22,8 @@ export interface StudioCodeApi {
   list: (path: string, signal: AbortSignal) => Promise<{ entries: readonly StudioEntry[] }>
   /** Read one workspace-relative file. */
   read: (path: string, signal: AbortSignal) => Promise<{ text: string }>
+  /** Read one image as an object URL, or undefined when unavailable. */
+  readImage: (path: string, signal: AbortSignal) => Promise<string | undefined>
 }
 
 /** One generation job, as the studio tracks it. */
@@ -111,14 +113,24 @@ export function StudioRoot(props: StudioRootProps) {
             <button type="button" className={css.primaryAction} onClick={openConversation}>{t('work.open')}</button>
           </div>
         )}
-        {(surface === 'image' || surface === 'video') && (
+        {surface === 'image' && (
+          <ImageSurface
+            t={t}
+            code={code}
+            submitPrompt={submitPrompt}
+            history={state.images}
+            onPush={actions.pushImage}
+            onClear={actions.clearImages}
+          />
+        )}
+        {surface === 'video' && (
           <GenerateSurface
-            mode={surface}
+            mode="video"
             t={t}
             submitPrompt={submitPrompt}
-            history={surface === 'image' ? state.images : state.videos}
-            onPush={surface === 'image' ? actions.pushImage : actions.pushVideo}
-            onClear={surface === 'image' ? actions.clearImages : actions.clearVideos}
+            history={state.videos}
+            onPush={actions.pushVideo}
+            onClear={actions.clearVideos}
           />
         )}
       </section>
@@ -132,18 +144,112 @@ const VARIANTS: Record<'image' | 'video', readonly string[]> = {
   video: ['4s', '8s', '12s'],
 }
 
+/** Image extensions the workspace gallery lists. */
+const IMAGE_EXT = /\.(?:png|jpe?g|gif|webp|svg|avif)$/iu
+
+/**
+ * Image surface: the workspace gallery beside the prompt form.
+ * The gallery lists real files the Host resolves, so what it shows exists;
+ * generation itself still goes through the agent.
+ */
+function ImageSurface({ t, code, submitPrompt, history, onPush, onClear }: {
+  t: StudioRootProps['t']
+  code: StudioCodeApi
+  submitPrompt: () => void
+  history: readonly StudioGeneration[]
+  onPush: (entry: StudioGeneration) => void
+  onClear: () => void
+}) {
+  const [images, setImages] = useState<readonly StudioEntry[]>([])
+  const [active, setActive] = useState<{ path: string; url: string } | undefined>()
+
+  useEffect(() => {
+    const controller = new AbortController()
+    void code.list('', controller.signal)
+      .then((result) => {
+        if (!controller.signal.aborted) setImages(result.entries.filter(entry => entry.type === 'file' && IMAGE_EXT.test(entry.name)))
+      })
+      .catch(() => { if (!controller.signal.aborted) setImages([]) })
+    return () => { controller.abort() }
+  }, [code])
+
+  const open = useCallback((path: string) => {
+    const controller = new AbortController()
+    void code.readImage(path, controller.signal).then((url) => {
+      if (controller.signal.aborted || url === undefined) return
+      setActive((current) => {
+        if (current !== undefined) URL.revokeObjectURL(current.url)
+        return { path, url }
+      })
+    })
+  }, [code])
+
+  useEffect(() => () => { if (active !== undefined) URL.revokeObjectURL(active.url) }, [active])
+
+  return (
+    <div className={css.generate}>
+      <div className={css.generateForm}>
+        <GenerateForm t={t} mode="image" submitPrompt={submitPrompt} onPush={onPush} />
+        <div className={css.gallery}>
+          <p className={css.paneTitle}>{t('image.gallery')}</p>
+          {images.length === 0
+            ? <p className={css.mapEmpty}>{t('image.galleryEmpty')}</p>
+            : (
+              <ul className={css.galleryGrid}>
+                {images.map(entry => (
+                  <li key={entry.name}>
+                    <button
+                      type="button"
+                      className={css.galleryItem}
+                      data-active={active?.path === entry.name || undefined}
+                      onClick={() => { open(entry.name) }}
+                    >{entry.name}</button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          {active !== undefined && (
+            <figure className={css.preview}>
+              <img src={active.url} alt={active.path} />
+              <figcaption>{active.path}</figcaption>
+            </figure>
+          )}
+        </div>
+      </div>
+      <div className={css.generateHistory}>
+        <div className={css.historyHead}>
+          <p className={css.paneTitle}>{t('generate.history')}</p>
+          {history.length > 0 && (
+            <button type="button" className={css.retry} onClick={onClear}>{t('generate.clear')}</button>
+          )}
+        </div>
+        {history.length === 0
+          ? <p className={css.mapEmpty}>{t('generate.empty')}</p>
+          : (
+            <ul className={css.historyList}>
+              {history.map(entry => (
+                <li key={entry.id} className={css.historyItem}>
+                  <span className={css.historyPrompt}>{entry.prompt}</span>
+                  <span className={css.historyMeta}>{entry.variant} · ×{String(entry.count)}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+      </div>
+    </div>
+  )
+}
+
 /**
  * Generation surface: prompt, variant, count and the request history.
  * The prompt reaches the agent, which owns whichever generation tool the
  * deployment mounts; this surface never invents a result.
  */
-function GenerateSurface({ mode, t, submitPrompt, history, onPush, onClear }: {
+function GenerateForm({ mode, t, submitPrompt, onPush }: {
   mode: 'image' | 'video'
   t: StudioRootProps['t']
   submitPrompt: () => void
-  history: readonly StudioGeneration[]
   onPush: (entry: StudioGeneration) => void
-  onClear: () => void
 }) {
   const [prompt, setPrompt] = useState('')
   const [variant, setVariant] = useState(VARIANTS[mode][0] as string)
@@ -167,53 +273,68 @@ function GenerateSurface({ mode, t, submitPrompt, history, onPush, onClear }: {
   }, [count, onPush, prompt, submitPrompt, variant])
 
   return (
+    <>
+      <label className={css.field}>
+        <span className={css.fieldLabel}>{t(`${mode}.prompt` as 'image.prompt')}</span>
+        <textarea
+          className={css.textarea}
+          rows={4}
+          value={prompt}
+          placeholder={t(`${mode}.promptPlaceholder` as 'image.promptPlaceholder')}
+          onChange={(event) => { setPrompt(event.target.value) }}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) { submit(); event.preventDefault() }
+          }}
+        />
+      </label>
+      <div className={css.row}>
+        <span className={css.fieldLabel}>{mode === 'image' ? t('image.aspect') : t('video.duration')}</span>
+        <div className={css.chips}>
+          {VARIANTS[mode].map(option => (
+            <button
+              key={option}
+              type="button"
+              className={css.chip}
+              data-active={option === variant || undefined}
+              onClick={() => { setVariant(option) }}
+            >{option}</button>
+          ))}
+        </div>
+      </div>
+      <div className={css.row}>
+        <span className={css.fieldLabel}>{t('image.count')}</span>
+        <div className={css.chips}>
+          {[1, 2, 4].map(option => (
+            <button
+              key={option}
+              type="button"
+              className={css.chip}
+              data-active={option === count || undefined}
+              onClick={() => { setCount(option) }}
+            >{option}</button>
+          ))}
+        </div>
+      </div>
+      <button type="button" className={css.primaryAction} onClick={submit} disabled={prompt.trim() === ''}>
+        {t(`${mode}.generate` as 'image.generate')}
+      </button>
+      <p className={css.hint}>{t('generate.hint')}</p>
+    </>
+  )
+}
+
+function GenerateSurface({ mode, t, submitPrompt, history, onPush, onClear }: {
+  mode: 'video'
+  t: StudioRootProps['t']
+  submitPrompt: () => void
+  history: readonly StudioGeneration[]
+  onPush: (entry: StudioGeneration) => void
+  onClear: () => void
+}) {
+  return (
     <div className={css.generate}>
       <div className={css.generateForm}>
-        <label className={css.field}>
-          <span className={css.fieldLabel}>{t(`${mode}.prompt` as 'image.prompt')}</span>
-          <textarea
-            className={css.textarea}
-            rows={4}
-            value={prompt}
-            placeholder={t(`${mode}.promptPlaceholder` as 'image.promptPlaceholder')}
-            onChange={(event) => { setPrompt(event.target.value) }}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) { submit(); event.preventDefault() }
-            }}
-          />
-        </label>
-        <div className={css.row}>
-          <span className={css.fieldLabel}>{mode === 'image' ? t('image.aspect') : t('video.duration')}</span>
-          <div className={css.chips}>
-            {VARIANTS[mode].map(option => (
-              <button
-                key={option}
-                type="button"
-                className={css.chip}
-                data-active={option === variant || undefined}
-                onClick={() => { setVariant(option) }}
-              >{option}</button>
-            ))}
-          </div>
-        </div>
-        <div className={css.row}>
-          <span className={css.fieldLabel}>{t('image.count')}</span>
-          <div className={css.chips}>
-            {[1, 2, 4].map(option => (
-              <button
-                key={option}
-                type="button"
-                className={css.chip}
-                data-active={option === count || undefined}
-                onClick={() => { setCount(option) }}
-              >{option}</button>
-            ))}
-          </div>
-        </div>
-        <button type="button" className={css.primaryAction} onClick={submit} disabled={prompt.trim() === ''}>
-          {t(`${mode}.generate` as 'image.generate')}
-        </button>
-        <p className={css.hint}>{t('generate.hint')}</p>
+        <GenerateForm mode={mode} t={t} submitPrompt={submitPrompt} onPush={onPush} />
       </div>
       <div className={css.generateHistory}>
         <div className={css.historyHead}>

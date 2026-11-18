@@ -59,7 +59,7 @@ declare module '@deepseek-ai/dsh-client-ui-slots' {
  * @returns the file access the code surface performs.
  */
 function createCodeApi(ctx: ClientContext): StudioCodeApi {
-  const face: Pick<ClientRemote['workspaceFiles'], 'list' | 'read'> = ctx.remote.workspaceFiles
+  const face: Pick<ClientRemote['workspaceFiles'], 'list' | 'read' | 'readBytes'> = ctx.remote.workspaceFiles
   const activeSession = () => {
     const rows = Object.values(ctx.sessions.list.getSnapshot().byId)
       .filter(row => row.origin !== 'subagent' && row.cwd !== undefined)
@@ -79,6 +79,15 @@ function createCodeApi(ctx: ClientContext): StudioCodeApi {
       const result = await face.read(session.id, path, {}, signal)
       if (!result.ok) return { text: '' }
       return { text: result.value.text }
+    },
+    readImage: async (path, signal) => {
+      const session = activeSession()
+      if (session === undefined) return undefined
+      const result = await face.readBytes(session.id, path, {}, signal)
+      if (!result.ok) return undefined
+      // The Host hands back raw bytes; the surface owns the object URL lifetime.
+      const blob = new Blob([result.value.data as unknown as BlobPart])
+      return URL.createObjectURL(blob)
     },
   }
 }
