@@ -51,11 +51,16 @@ it on trust.
 | Claim | Evidence |
 |---|---|
 | Wiring registers four panels and four launchers | `tests/wiring.client.spec.ts` asserts the exact ids, orders, shared store, and per-panel surface |
-| Panes render, controls work | `tests/studio.client.spec.tsx`, 110 cases |
-| Store actions behave | `tests/store.client.spec.ts`, 13 cases |
+| Panes render, controls work | `tests/studio.client.spec.tsx`, 114 cases |
+| Store actions behave | `tests/store.client.spec.ts`, 15 cases |
 | Statement, function, and line coverage | 100% per file; branches 98% |
 | Sidebar launchers exist and open their panel | `apps/web/tests/studio-panels.e2e.ts` in Chromium against the real composition |
 | Code surface draws both side panes, the filter, and both handles | same e2e, second case |
+| Empty panes explain themselves | each pane renders `EmptyState` with a glyph, the reason, and the next action |
+
+Screenshots taken through the same Chromium harness are how the visual
+defects below were found: a near-white selected chip, a duplicate
+"No sessions yet" on one screen, and history rows with no age.
 
 ## Known Limitations and Deferred Work
 
