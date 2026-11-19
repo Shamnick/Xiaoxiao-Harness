@@ -60,7 +60,7 @@ export type StudioRootProps = PropsLocale<'ui-studio'>
     /** Workspace file access. */
     code: StudioCodeApi
     /** Hand the reader to the conversation, which owns submission. */
-    submitPrompt: () => void
+    submitPrompt: (text: string) => void
     /** Sessions the reader was last in, newest first. */
     recentSessions: () => readonly { id: string; title: string; running: boolean }[]
     /** Open an existing session and return to the conversation. */
@@ -429,7 +429,7 @@ function MediaBrowser({ t, code, accept, label, emptyLabel, children }: {
 function GenerateForm({ mode, t, submitPrompt, onPush, draft, onDraftUsed }: {
   mode: 'image' | 'video'
   t: StudioRootProps['t']
-  submitPrompt: () => void
+  submitPrompt: (text: string) => void
   onPush: (entry: StudioGeneration) => void
   /** A previous request to load back into the fields, or undefined. */
   draft: StudioGeneration | undefined
@@ -463,7 +463,9 @@ function GenerateForm({ mode, t, submitPrompt, onPush, draft, onDraftUsed }: {
       count,
       requestedAt: Date.now(),
     })
-    submitPrompt()
+    // The variant and count travel with the text: the agent needs the whole
+    // request, not just the sentence.
+    submitPrompt(`${text}\n\n${t('image.aspect')}: ${variant}, ${t('image.count')}: ${String(count)}`)
     setPrompt('')
   }, [count, onPush, prompt, submitPrompt, variant])
 
@@ -569,7 +571,7 @@ function GenerateSurface({ mode, t, code, submitPrompt, history, onPush, onClear
   mode: 'image' | 'video'
   t: StudioRootProps['t']
   code: StudioCodeApi
-  submitPrompt: () => void
+  submitPrompt: (text: string) => void
   history: readonly StudioGeneration[]
   onPush: (entry: StudioGeneration) => void
   onClear: () => void

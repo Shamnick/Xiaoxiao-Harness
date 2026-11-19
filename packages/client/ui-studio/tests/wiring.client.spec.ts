@@ -134,14 +134,16 @@ describe('studio wiring', () => {
     expect(surfaces).toEqual(['work', 'code', 'image', 'video'])
   })
 
-  it('routes both navigation verbs back to the conversation', () => {
+  it('returns to the conversation for navigation without leaving on submit', () => {
     const { ctx, registrations, selected } = makeContext()
     apply(ctx as never)
     const face = (registrations.find(entry => entry.options.name === 'main')
-      ?.options.inject as () => { openConversation: () => void; submitPrompt: () => void })()
+      ?.options.inject as () => { openConversation: () => void; submitPrompt: (text: string) => void })()
     face.openConversation()
-    face.submitPrompt()
-    expect(selected).toEqual([null, null])
+    // Submitting is work done here, not a navigation: the pane stays put and
+    // the request goes into the session behind it.
+    face.submitPrompt('draw a harbour')
+    expect(selected).toEqual([null])
   })
 
   it('leaves the workspace readers inert until a session exists', async () => {

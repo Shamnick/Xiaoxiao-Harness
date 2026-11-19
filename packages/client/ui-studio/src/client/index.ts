@@ -132,9 +132,20 @@ export function apply(ctx: ClientContext): void {
         // `conversation` is the layout's default entry rather than a keyed panel,
         // so returning to it means clearing the selected panel.
         openConversation: () => { ctx.layout.selectPanel(null) },
-        // Generation surfaces record the request and hand the reader to the
-        // conversation, which owns submission; the studio never fabricates a result.
-        submitPrompt: () => { ctx.layout.selectPanel(null) },
+        // Submit in place. Sending the reader to another surface to press a
+        // second button is what made these panes feel like launchers rather
+        // than working areas: the work happens here, so the request goes from
+        // here into the session behind this surface.
+        submitPrompt: (text: string) => {
+          const session = Object.values(ctx.sessions.list.getSnapshot().byId)
+            .filter(row => row.origin !== 'subagent'
+              && (row.projectionValues?.agentPreset ?? undefined) === PRESETS[surface])
+            .sort((a, b) => b.updatedAt - a.updatedAt)[0]
+          if (session === undefined) return
+          const binding = ctx.sessions.binding(session.id as SessionId)
+          if (binding === undefined) return
+          void binding.session.prompt([{ type: 'text', text }], 'queue').catch(() => undefined)
+        },
         // The work surface lists what this mode was last in, newest first.
         // The mode owns its list: sessions opened under another preset belong
         // to that other working area, not this one.
