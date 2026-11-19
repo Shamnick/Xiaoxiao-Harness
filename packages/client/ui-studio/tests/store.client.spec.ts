@@ -21,6 +21,7 @@ describe('studioStore', () => {
       openPath: '',
       tabs: [],
       activeTab: '',
+      models: {},
     })
   })
 
@@ -133,5 +134,24 @@ describe('removing one generation', () => {
     instance.actions.pushVideo(entry('a'))
     instance.actions.removeVideo('missing')
     expect(instance.getSnapshot().videos).toHaveLength(1)
+  })
+})
+
+describe('per-area model memory', () => {
+  it('remembers a model per working area without touching the others', () => {
+    const instance = studioStore.create()
+    instance.actions.setModel('coding', { providerId: 'p', modelId: 'm1' })
+    instance.actions.setModel('image', { providerId: 'p', modelId: 'm2' })
+    expect(instance.getSnapshot().models).toEqual({
+      coding: { providerId: 'p', modelId: 'm1' },
+      image: { providerId: 'p', modelId: 'm2' },
+    })
+  })
+
+  it('clears one area back to the composition default', () => {
+    const instance = studioStore.create()
+    instance.actions.setModel('coding', { providerId: 'p', modelId: 'm1' })
+    instance.actions.setModel('coding', undefined)
+    expect(instance.getSnapshot().models).toEqual({})
   })
 })

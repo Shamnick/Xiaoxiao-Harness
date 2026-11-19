@@ -154,8 +154,24 @@ export function apply(ctx: ClientContext): void {
         // carries, and the conversation is where the work happens.
         newSession: () => {
           const preset = PRESETS[surface]
+          // The model this area last ran: read from its most recent session's
+          // projection rather than a private copy, so a change made in the
+          // composer carries over without the studio watching it separately.
+          const remembered = Object.values(ctx.sessions.list.getSnapshot().byId)
+            .filter(row => row.origin !== 'subagent'
+              && (row.projectionValues?.agentPreset ?? undefined) === PRESETS[surface])
+            .sort((a, b) => b.updatedAt - a.updatedAt)
+            .map(row => row.projectionValues?.modelSelection?.lastUsed)
+            .find(selection => selection !== null && selection !== undefined)
           void ctx.sessions.create(preset === undefined ? {} : { agentPreset: preset })
-            .then((id) => {
+            .then(async (id) => {
+              // The model this working area last used follows it into the new
+              // session: a palette of models is only useful if the choice
+              // survives the session it was made in.
+              if (remembered !== undefined) {
+                const directories = ctx.get('modelDirectories')
+                await directories?.directoryFor(id).select(remembered).catch(() => undefined)
+              }
               ctx.layout.selectPanel(null)
               ctx.uiWorkspace.openSession(id as SessionId)
             })

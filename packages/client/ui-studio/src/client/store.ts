@@ -23,6 +23,11 @@ export const studioStore = defineStore({
     tabs: [] as readonly string[],
     /** Which tab the editor is showing. */
     activeTab: '',
+    /**
+     * Model each working area last used, so a new session in that area starts
+     * with the model its work needs instead of the composition default.
+     */
+    models: {} as Readonly<Record<string, { providerId: string; modelId: string } | undefined>>,
   }),
   persist: 'ui-studio.state',
   actions: {
@@ -39,6 +44,16 @@ export const studioStore = defineStore({
     clearImages: (state) => { state.images = [] },
     clearVideos: (state) => { state.videos = [] },
     setOpenPath: (state, value: string) => { state.openPath = value },
+    /** Remember one working area's model; `undefined` clears it back to the default. */
+    setModel: (state, surface: string, selection: { providerId: string; modelId: string } | undefined) => {
+      // Rebuild instead of deleting: a dynamic `delete` moves the object to
+      // dictionary mode, and this map is read on every render of four panes.
+      state.models = Object.fromEntries(
+        Object.entries(state.models)
+          .filter(([key]) => key !== surface)
+          .concat(selection === undefined ? [] : [[surface, selection]]),
+      )
+    },
     /** Open a file in a tab, or focus its existing tab. */
     openTab: (state, value: string) => {
       if (value === '') return
