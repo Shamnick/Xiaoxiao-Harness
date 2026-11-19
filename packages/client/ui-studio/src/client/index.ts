@@ -23,7 +23,7 @@ import type {} from '@deepseek-ai/dsh-api-session-controller/client'
 import type { ClientRemote } from '@deepseek-ai/dsh-api-remotes/client'
 import { studioStore } from './store.ts'
 import type { StudioKey } from './locales.ts'
-import type { StudioCodeApi, StudioSurface } from './StudioRoot.tsx'
+import type { StudioCodeApi, StudioPicture, StudioSurface } from './StudioRoot.tsx'
 import { SurfaceIcon, StudioRoot } from './StudioRoot.tsx'
 import { zh, en, ja, es, fr, de, ru, pt } from './locales.ts'
 
@@ -165,6 +165,47 @@ export function apply(ctx: ClientContext): void {
             out.push({ id: String(event.seq), role: event.type === 'user/message' ? 'user' : 'assistant', text })
           }
           return out.slice(-40)
+        },
+        // Images the assistant has produced, so a generated picture lands in
+        // this pane instead of only being described in text. Inline data is
+        // rendered directly; an attachment reference only carries identity and
+        // size here, which is still enough to show that something came back.
+        pictures: () => {
+          const rows = Object.values(ctx.sessions.list.getSnapshot().byId)
+            .filter(row => row.origin !== 'subagent')
+          const byRecency = [...rows].sort((a, b) => b.updatedAt - a.updatedAt)
+          const target = byRecency.find(row =>
+            (row.projectionValues?.agentPreset ?? undefined) === PRESETS[surface]) ?? byRecency[0]
+          if (target === undefined) return []
+          const binding = ctx.sessions.binding(target.id as SessionId)
+          if (binding === undefined) return []
+          const out: StudioPicture[] = []
+          for (const entry of binding.eventSource.getSnapshot().entries) {
+            if (entry.type !== 'event') continue
+            const event = entry.event
+            if (event.type !== 'assistant/message') continue
+            const data = event.data as { content?: unknown; message?: { content?: unknown } }
+            const blocks = Array.isArray(data.content)
+              ? data.content
+              : Array.isArray(data.message?.content) ? data.message.content : []
+            for (const block of blocks as readonly Record<string, unknown>[]) {
+              if (block.type !== 'image') continue
+              const id = `p-${String(out.length)}-${String(event.seq)}`
+              if (typeof block.data === 'string' && typeof block.mediaType === 'string') {
+                out.push({ id, kind: 'inline', src: `data:${block.mediaType};base64,${block.data}`, label: '' })
+                continue
+              }
+              const ref = block.attachment as { attachmentId?: unknown; width?: unknown; height?: unknown } | undefined
+              if (typeof ref?.attachmentId !== 'string') continue
+              out.push({
+                id,
+                kind: 'ref',
+                src: '',
+                label: `${String(ref.width ?? '?')}×${String(ref.height ?? '?')}`,
+              })
+            }
+          }
+          return out.slice(-12)
         },
         // Submit in place. Sending the reader to another surface to press a
         // second button is what made these panes feel like launchers rather

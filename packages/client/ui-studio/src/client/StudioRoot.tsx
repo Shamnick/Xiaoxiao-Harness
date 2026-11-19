@@ -35,6 +35,18 @@ export interface StudioCodeApi {
 }
 
 /** One generation job, as the studio tracks it. */
+/** One image the assistant returned for this working area. */
+export interface StudioPicture {
+  /** Stable list identity. */
+  id: string
+  /** `inline` carries renderable data; `ref` only identity and size. */
+  kind: string
+  /** Ready-to-render source for `inline` pictures. */
+  src: string
+  /** Size caption for `ref` pictures. */
+  label: string
+}
+
 /** One text message of the session behind a working area. */
 export interface StudioMessage {
   /** Durable event sequence, used as the list identity. */
@@ -81,6 +93,8 @@ export type StudioRootProps = PropsLocale<'ui-studio'>
     newSession: () => void
     /** Text messages in the session behind this surface, oldest first. */
     thread: () => readonly StudioMessage[]
+    /** Images the assistant returned for this surface, oldest first. */
+    pictures?: () => readonly StudioPicture[]
   }
 
 /** Narrowest a resizable pane may become, in pixels. */
@@ -158,6 +172,20 @@ export function StudioRoot(props: StudioRootProps) {
         )}
         {(surface === 'image' || surface === 'video') && (
           <Thread messages={thread()} t={t} />
+        )}
+        {(surface === 'image' || surface === 'video') && (props.pictures?.() ?? []).length > 0 && (
+          <section className={css.pictures} aria-label={t('pictures.title')}>
+            <h3 className={css.sectionTitle}>{t('pictures.title')}</h3>
+            <div className={css.pictureGrid}>
+              {(props.pictures?.() ?? []).map(picture => (
+                <figure key={picture.id} className={css.picture}>
+                  {picture.kind === 'inline'
+                    ? <img className={css.pictureImage} src={picture.src} alt={t('pictures.title')} />
+                    : <div className={css.pictureRef}>{picture.label}</div>}
+                </figure>
+              ))}
+            </div>
+          </section>
         )}
         {(surface === 'image' || surface === 'video') && (
           <GenerateSurface

@@ -1406,3 +1406,50 @@ describe('per-surface composer', () => {
     expect((screen.getByRole('button', { name: /send/i }) as HTMLButtonElement).disabled).toBe(true)
   })
 })
+
+describe('returned pictures', () => {
+  it('shows an inline picture the assistant produced', () => {
+    const store = makeStore()
+    render(
+      <StudioRoot
+        t={t}
+        surface="image"
+        openConversation={vi.fn()}
+        submitPrompt={vi.fn()}
+        recentSessions={() => []}
+        workspaces={() => []}
+        newSession={vi.fn()}
+        thread={() => []}
+        pictures={() => [{ id: 'p1', kind: 'inline', src: 'data:image/png;base64,AAA', label: '' }]}
+        openSession={vi.fn()}
+        code={makeCode()}
+        useStore={store.useStore as StudioRootProps['useStore']}
+        actions={store.actions as StudioRootProps['actions']}
+      />,
+    )
+    const image = document.querySelector('img')
+    expect(image?.getAttribute('src')).toBe('data:image/png;base64,AAA')
+  })
+
+  it('captions an attachment reference it cannot render', () => {
+    const store = makeStore()
+    render(
+      <StudioRoot
+        t={t}
+        surface="video"
+        openConversation={vi.fn()}
+        submitPrompt={vi.fn()}
+        recentSessions={() => []}
+        workspaces={() => []}
+        newSession={vi.fn()}
+        thread={() => []}
+        pictures={() => [{ id: 'p2', kind: 'ref', src: '', label: '1024×768' }]}
+        openSession={vi.fn()}
+        code={makeCode()}
+        useStore={store.useStore as StudioRootProps['useStore']}
+        actions={store.actions as StudioRootProps['actions']}
+      />,
+    )
+    expect(screen.getByText('1024×768')).toBeDefined()
+  })
+})

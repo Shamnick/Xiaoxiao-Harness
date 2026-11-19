@@ -4,6 +4,7 @@
 export const zh = {
   'rail.aria': '功能区',
   'rail.work': '工作',
+  'pictures.title': '生成的图片',
   'composer.code': '给编程助手发指令…',
   'composer.work': '向工作助手发指令…',
   'composer.send': '发送',
@@ -85,6 +86,7 @@ export type StudioKey = keyof typeof zh
 export const en: Record<StudioKey, string> = {
   'rail.aria': 'Workspaces',
   'rail.work': 'Work',
+  'pictures.title': 'Generated images',
   'composer.code': 'Instruct the coding agent…',
   'composer.work': 'Instruct the work agent…',
   'composer.send': 'Send',
@@ -163,6 +165,7 @@ export const en: Record<StudioKey, string> = {
 export const ja: Record<StudioKey, string> = {
   'rail.aria': 'ワークスペース',
   'rail.work': '作業',
+  'pictures.title': '生成された画像',
   'composer.code': 'コーディングに指示…',
   'composer.work': '作業に指示…',
   'composer.send': '送信',
@@ -241,6 +244,7 @@ export const ja: Record<StudioKey, string> = {
 export const es: Record<StudioKey, string> = {
   'rail.aria': 'Espacios de trabajo',
   'rail.work': 'Trabajo',
+  'pictures.title': 'Imágenes generadas',
   'composer.code': 'Instruye al agente de código…',
   'composer.work': 'Instruye al agente…',
   'composer.send': 'Enviar',
@@ -319,6 +323,7 @@ export const es: Record<StudioKey, string> = {
 export const fr: Record<StudioKey, string> = {
   'rail.aria': 'Espaces de travail',
   'rail.work': 'Travail',
+  'pictures.title': 'Images générées',
   'composer.code': 'Consigne au agent de code…',
   'composer.work': 'Consigne à l’agent…',
   'composer.send': 'Envoyer',
@@ -397,6 +402,7 @@ export const fr: Record<StudioKey, string> = {
 export const de: Record<StudioKey, string> = {
   'rail.aria': 'Arbeitsbereiche',
   'rail.work': 'Arbeit',
+  'pictures.title': 'Erzeugte Bilder',
   'composer.code': 'Anweisung an den Coding-Agent…',
   'composer.work': 'Anweisung an den Agent…',
   'composer.send': 'Senden',
@@ -475,6 +481,7 @@ export const de: Record<StudioKey, string> = {
 export const ru: Record<StudioKey, string> = {
   'rail.aria': 'Рабочие области',
   'rail.work': 'Работа',
+  'pictures.title': 'Созданные изображения',
   'composer.code': 'Указание агенту кода…',
   'composer.work': 'Указание агенту…',
   'composer.send': 'Отправить',
@@ -553,6 +560,7 @@ export const ru: Record<StudioKey, string> = {
 export const pt: Record<StudioKey, string> = {
   'rail.aria': 'Áreas de trabalho',
   'rail.work': 'Trabalho',
+  'pictures.title': 'Imagens geradas',
   'composer.code': 'Instrua o agente de código…',
   'composer.work': 'Instrua o agente…',
   'composer.send': 'Enviar',

@@ -1373,3 +1373,43 @@
   outline: var(--dsw-focus-ring-width, 2px) solid var(--dsw-focus-ring-color, var(--dsw-alias-state-business-primary));
   outline-offset: 1px;
 }
+
+/* Pictures the assistant returned, shown above the workspace gallery. */
+.pictures {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 0 14px;
+}
+
+.pictureGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.picture {
+  margin: 0;
+  border: 0.5px solid var(--dsw-alias-border-l1);
+  border-radius: var(--dsw-radius-md);
+  overflow: hidden;
+  background: var(--dsw-alias-bg-layer-2);
+}
+
+.pictureImage {
+  display: block;
+  width: 160px;
+  height: 160px;
+  object-fit: cover;
+}
+
+.pictureRef {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 160px;
+  height: 160px;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 12px;
+}
