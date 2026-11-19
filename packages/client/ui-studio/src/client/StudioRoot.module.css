@@ -1203,3 +1203,29 @@
   line-height: 16px;
   font-variant-numeric: tabular-nums;
 }
+
+/* The prompt doubles as the reuse control: clicking it loads the whole
+   request back into the form, which is what a reader retrying wants. */
+.historyReuse {
+  border: none;
+  padding: 0;
+  background: transparent;
+  color: var(--dsw-alias-label-secondary);
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 17px;
+  text-align: left;
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .historyReuse:hover {
+    color: var(--dsw-alias-label-primary);
+  }
+}
+
+.historyReuse:focus-visible {
+  outline: var(--dsw-focus-ring-width, 2px) solid var(--dsw-focus-ring-color, var(--dsw-alias-state-business-primary));
+  outline-offset: 1px;
+  border-radius: var(--dsw-radius-xs);
+}

@@ -43,6 +43,7 @@ function makeContext() {
     layout: { selectPanel: (id: string | null) => { selected.push(id) } },
     uiWorkspace: { openSession: (_id: unknown) => {} },
     sessions: { list: { getSnapshot: () => ({ ids: [], byId: {} }) } },
+    workspaces: { list: { getSnapshot: () => ({ items: [] }) } },
     remote: {
       workspaceFiles: {
         list: vi.fn(async () => ({ ok: false })),
@@ -276,5 +277,24 @@ describe('work surface wiring', () => {
     face.openSession('s1')
     expect(opened).toEqual(['s1'])
     expect(made.selected).toEqual([null])
+  })
+})
+
+describe('workspace projection', () => {
+  it('maps registry rows into the work surface model', () => {
+    const { ctx, registrations } = makeContext()
+    ctx.workspaces.list.getSnapshot = (() => ({
+      items: [
+        { workspaceId: 'w1', title: 'harness', path: '/src/harness', sessionIds: ['s1', 's2'] },
+        { workspaceId: 'w2', title: 'docs', path: '/src/docs', sessionIds: [] },
+      ],
+    })) as never
+    apply(ctx as never)
+    const face = (registrations.find(entry => entry.options.name === 'main')
+      ?.options.inject as () => { workspaces: () => { workspaceId: string; title: string; path: string; sessionIds: string[] }[] })()
+    expect(face.workspaces()).toEqual([
+      { workspaceId: 'w1', title: 'harness', path: '/src/harness', sessionIds: ['s1', 's2'] },
+      { workspaceId: 'w2', title: 'docs', path: '/src/docs', sessionIds: [] },
+    ])
   })
 })

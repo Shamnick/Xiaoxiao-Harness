@@ -1202,3 +1202,29 @@ describe('work surface projects', () => {
     expect(screen.queryByText('work.projects')).toBeNull()
   })
 })
+
+describe('reusing a past request', () => {
+  it('loads the prompt, variant and count back into the form', async () => {
+    const store = makeStore({
+      images: [{ id: 'a', prompt: 'a quiet harbour', variant: '16:9', count: 4, requestedAt: 0 }],
+    })
+    mount('image', store, makeCode())
+    fireEvent.click(await screen.findByText('a quiet harbour'))
+    // The prompt lands in the textarea and the two chips follow it.
+    expect((screen.getByPlaceholderText('image.promptPlaceholder') as HTMLTextAreaElement).value)
+      .toBe('a quiet harbour')
+    expect(screen.getByRole('button', { name: '16:9' }).getAttribute('data-active')).toBe('true')
+    expect(screen.getByRole('button', { name: '4' }).getAttribute('data-active')).toBe('true')
+  })
+
+  it('does not overwrite what the reader typed afterwards', async () => {
+    const store = makeStore({
+      images: [{ id: 'a', prompt: 'first', variant: '1:1', count: 1, requestedAt: 0 }],
+    })
+    mount('image', store, makeCode())
+    fireEvent.click(await screen.findByText('first'))
+    const area = screen.getByPlaceholderText('image.promptPlaceholder') as HTMLTextAreaElement
+    fireEvent.change(area, { target: { value: 'edited' } })
+    expect(area.value).toBe('edited')
+  })
+})

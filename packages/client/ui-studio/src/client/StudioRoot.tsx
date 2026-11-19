@@ -413,11 +413,15 @@ function MediaBrowser({ t, code, accept, label, emptyLabel, children }: {
  * The prompt reaches the agent, which owns whichever generation tool the
  * deployment mounts; this surface never invents a result.
  */
-function GenerateForm({ mode, t, submitPrompt, onPush }: {
+function GenerateForm({ mode, t, submitPrompt, onPush, draft, onDraftUsed }: {
   mode: 'image' | 'video'
   t: StudioRootProps['t']
   submitPrompt: () => void
   onPush: (entry: StudioGeneration) => void
+  /** A previous request to load back into the fields, or undefined. */
+  draft: StudioGeneration | undefined
+  /** Clear the draft once it has been loaded, so it does not reload on re-render. */
+  onDraftUsed: () => void
 }) {
   const [prompt, setPrompt] = useState('')
   const [variant, setVariant] = useState(VARIANTS[mode][0] as string)
@@ -425,6 +429,16 @@ function GenerateForm({ mode, t, submitPrompt, onPush }: {
   const idRef = useRef(0)
 
   useEffect(() => { setVariant(VARIANTS[mode][0] as string) }, [mode])
+
+  // Reusing a past request fills all three fields: a prompt without the
+  // variant it was written for is a different request.
+  useEffect(() => {
+    if (draft === undefined) return
+    setPrompt(draft.prompt)
+    setVariant(draft.variant)
+    setCount(draft.count)
+    onDraftUsed()
+  }, [draft, onDraftUsed])
 
   const submit = useCallback(() => {
     const text = prompt.trim()
@@ -495,11 +509,12 @@ function GenerateForm({ mode, t, submitPrompt, onPush }: {
  * Recorded requests beside a generation form, newest first.
  * Both surfaces show the same list; only the history they pass in differs.
  */
-function HistoryPanel({ t, history, onClear, onRemove }: {
+function HistoryPanel({ t, history, onClear, onRemove, onReuse }: {
   t: StudioRootProps['t']
   history: readonly StudioGeneration[]
   onClear: () => void
   onRemove: (id: string) => void
+  onReuse: (entry: StudioGeneration) => void
 }) {
   return (
     <div className={css.generateHistory}>
@@ -515,7 +530,11 @@ function HistoryPanel({ t, history, onClear, onRemove }: {
           <ul className={css.historyList}>
             {history.map(entry => (
               <li key={entry.id} className={css.historyItem}>
-                <span className={css.historyPrompt}>{entry.prompt}</span>
+                <button
+                  type="button"
+                  className={css.historyReuse}
+                  onClick={() => { onReuse(entry) }}
+                >{entry.prompt}</button>
                 <span className={css.historyMeta}>
                   {entry.variant} · ×{String(entry.count)} · {ageOf(entry.requestedAt)}
                 </span>
@@ -543,10 +562,19 @@ function GenerateSurface({ mode, t, code, submitPrompt, history, onPush, onClear
   onClear: () => void
   onRemove: (id: string) => void
 }) {
+  const [draft, setDraft] = useState<StudioGeneration | undefined>(undefined)
+  const clearDraft = useCallback(() => { setDraft(undefined) }, [])
   return (
     <div className={css.generate}>
       <div className={css.generateForm}>
-        <GenerateForm mode={mode} t={t} submitPrompt={submitPrompt} onPush={onPush} />
+        <GenerateForm
+          mode={mode}
+          t={t}
+          submitPrompt={submitPrompt}
+          onPush={onPush}
+          draft={draft}
+          onDraftUsed={clearDraft}
+        />
         <MediaBrowser
           t={t}
           code={code}
@@ -564,7 +592,13 @@ function GenerateSurface({ mode, t, code, submitPrompt, history, onPush, onClear
           )}
         </MediaBrowser>
       </div>
-      <HistoryPanel t={t} history={history} onClear={onClear} onRemove={onRemove} />
+      <HistoryPanel
+        t={t}
+        history={history}
+        onClear={onClear}
+        onRemove={onRemove}
+        onReuse={setDraft}
+      />
     </div>
   )
 }
