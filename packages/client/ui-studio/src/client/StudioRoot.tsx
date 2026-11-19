@@ -189,9 +189,11 @@ function ageOf(at: number): string {
  * The outline lists what is in the file; this shows where it sits, which is
  * what a map is for.
  */
-function Minimap({ text, symbols, onJump }: {
+function Minimap({ text, symbols, visible, onJump }: {
   text: string
   symbols: readonly StudioSymbol[]
+  /** First and last line currently on screen, or null before either is known. */
+  visible: { readonly from: number; readonly to: number } | null
   onJump: (line: number) => void
 }) {
   const lines = useMemo(() => text.split('\n'), [text])
@@ -210,6 +212,9 @@ function Minimap({ text, symbols, onJump }: {
             tabIndex={-1}
             className={css.minimapLine}
             data-symbol={marked.has(number) || undefined}
+            data-visible={
+              visible !== null && number >= visible.from && number <= visible.to || undefined
+            }
             style={{
               width: `${String(Math.max(4, Math.round((line.length / widest) * 100)))}%`,
               marginLeft: `${String(Math.min(40, Math.round((indent / widest) * 100)))}%`,
@@ -626,6 +631,7 @@ function CodeSurface({ t, code, useStore, actions }: {
   const [query, setQuery] = useState('')
   const [cursor, setCursor] = useState(0)
   const [find, setFind] = useState('')
+  const [viewport, setViewport] = useState<{ from: number; to: number } | null>(null)
   // File contents stay in the component: the store holds paths only, so a
   // large file never lands in the persisted snapshot.
   const [fileCache, setFileCache] = useState<Record<string, string>>({})
@@ -725,6 +731,23 @@ function CodeSurface({ t, code, useStore, actions }: {
     }
     /* v8 ignore next -- a rendered file always has at least one row, so the loop returns first */
     return 0
+  }, [])
+
+  /** Recompute which lines the editor is showing, so the minimap can mark them. */
+  const syncViewport = useCallback(() => {
+    const host = editorRef.current
+    if (host === null) return
+    const top = host.scrollTop
+    const bottom = top + host.clientHeight
+    const rows = host.querySelectorAll<HTMLElement>('[data-line]')
+    let from = 0
+    let to = 0
+    for (const row of rows) {
+      const line = Number(row.dataset.line ?? '0')
+      if (row.offsetTop + row.offsetHeight >= top && from === 0) from = line
+      if (row.offsetTop <= bottom) to = line
+    }
+    if (from > 0 && to > 0) setViewport({ from, to })
   }, [])
 
   const editorRef = useRef<HTMLDivElement | null>(null)
@@ -892,7 +915,7 @@ function CodeSurface({ t, code, useStore, actions }: {
           : openFile.loading
             ? <p className={css.editorEmpty}>{t('code.loading')}</p>
             : (
-              <div className={css.sourceRows}>
+              <div className={css.sourceRows} onScroll={syncViewport}>
                 {openFile.text.split('\n').map((line, index) => (
                   <div
                     key={String(index)}
@@ -911,7 +934,7 @@ function CodeSurface({ t, code, useStore, actions }: {
       <aside className={css.codeMap} aria-label={t('code.map')}>
         <p className={css.paneTitle}>{t('code.map')}</p>
         {openFile !== undefined && !openFile.loading && (
-          <Minimap text={openFile.text} symbols={symbols} onJump={jump} />
+          <Minimap text={openFile.text} symbols={symbols} visible={viewport} onJump={jump} />
         )}
         {symbols.length === 0
           ? <p className={css.mapEmpty}>{t('code.map.empty')}</p>

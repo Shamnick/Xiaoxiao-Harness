@@ -1228,3 +1228,37 @@ describe('reusing a past request', () => {
     expect(area.value).toBe('edited')
   })
 })
+
+describe('minimap viewport', () => {
+  it('marks the band the editor is showing after a scroll', async () => {
+    const store = makeStore({ tabs: ['a.ts'], activeTab: 'a.ts' })
+    mount('code', store, makeCode({
+      list: vi.fn().mockResolvedValue({ entries: [file('a.ts')] }),
+      read: vi.fn().mockResolvedValue({ text: 'a\nb\nc\nd' }),
+    }))
+    await screen.findByText('a')
+    const rows = document.querySelector('[class*="sourceRows"]') as HTMLElement
+    // jsdom reports zero geometry; drive the handler with a stub so the
+    // branch that computes the band runs.
+    Object.defineProperty(rows, 'clientHeight', { value: 40, configurable: true })
+    rows.querySelectorAll('[data-line]').forEach((row, index) => {
+      Object.defineProperty(row, 'offsetTop', { value: index * 20, configurable: true })
+      Object.defineProperty(row, 'offsetHeight', { value: 20, configurable: true })
+    })
+    fireEvent.scroll(rows)
+    await waitFor(() => {
+      expect(document.querySelectorAll('[class*="minimapLine"][data-visible]').length)
+        .toBeGreaterThan(0)
+    })
+  })
+
+  it('leaves the map unmarked before any scroll', async () => {
+    const store = makeStore({ tabs: ['a.ts'], activeTab: 'a.ts' })
+    mount('code', store, makeCode({
+      list: vi.fn().mockResolvedValue({ entries: [file('a.ts')] }),
+      read: vi.fn().mockResolvedValue({ text: 'a\nb' }),
+    }))
+    await screen.findByText('a')
+    expect(document.querySelectorAll('[class*="minimapLine"][data-visible]')).toHaveLength(0)
+  })
+})

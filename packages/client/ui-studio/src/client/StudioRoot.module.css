@@ -1229,3 +1229,10 @@
   outline-offset: 1px;
   border-radius: var(--dsw-radius-xs);
 }
+
+/* The band the editor is showing. Without it the map tells you where code is
+   but not where you are. */
+.minimapLine[data-visible] {
+  opacity: 1;
+  background: var(--dsw-alias-label-secondary);
+}
