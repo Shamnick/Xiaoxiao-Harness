@@ -96,6 +96,7 @@ function mount(surface: StudioRootProps['surface'], store = makeStore(), code = 
       submitPrompt={submitPrompt}
       recentSessions={sessions}
       workspaces={() => []}
+      newSession={vi.fn()}
       openSession={openSession}
       code={code}
       useStore={store.useStore as StudioRootProps['useStore']}
@@ -483,6 +484,7 @@ describe('navigation edges', () => {
         submitPrompt={() => {}}
         recentSessions={() => []}
         workspaces={() => []}
+        newSession={vi.fn()}
         openSession={() => {}}
         code={code}
         useStore={makeStore().useStore as StudioRootProps['useStore']}
@@ -521,6 +523,7 @@ describe('failure paths', () => {
         submitPrompt={() => {}}
         recentSessions={() => []}
         workspaces={() => []}
+        newSession={vi.fn()}
         openSession={() => {}}
         code={code}
         useStore={store.useStore as StudioRootProps['useStore']}
@@ -710,6 +713,7 @@ describe('remaining branches', () => {
         submitPrompt={() => {}}
         recentSessions={() => []}
         workspaces={() => []}
+        newSession={vi.fn()}
         openSession={() => {}}
         code={code}
         useStore={store.useStore as StudioRootProps['useStore']}
@@ -736,6 +740,7 @@ describe('remaining branches', () => {
         submitPrompt={() => {}}
         recentSessions={() => []}
         workspaces={() => []}
+        newSession={vi.fn()}
         openSession={() => {}}
         code={code}
         useStore={store.useStore as StudioRootProps['useStore']}
@@ -761,6 +766,7 @@ describe('remaining branches', () => {
         submitPrompt={() => {}}
         recentSessions={() => []}
         workspaces={() => []}
+        newSession={vi.fn()}
         openSession={() => {}}
         code={code}
         useStore={store.useStore as StudioRootProps['useStore']}
@@ -786,6 +792,7 @@ describe('remaining branches', () => {
         submitPrompt={() => {}}
         recentSessions={() => []}
         workspaces={() => []}
+        newSession={vi.fn()}
         openSession={() => {}}
         code={code}
         useStore={store.useStore as StudioRootProps['useStore']}
@@ -1181,6 +1188,7 @@ describe('work surface projects', () => {
         submitPrompt={vi.fn()}
         recentSessions={() => []}
         openSession={vi.fn()}
+        newSession={vi.fn()}
         workspaces={() => [
           { workspaceId: 'w1', title: 'harness', path: '/src/harness', sessionIds: ['a', 'b'] },
           { workspaceId: 'w2', title: 'docs', path: '/src/docs', sessionIds: [] },

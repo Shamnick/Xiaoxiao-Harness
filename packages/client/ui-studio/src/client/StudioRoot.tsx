@@ -67,6 +67,8 @@ export type StudioRootProps = PropsLocale<'ui-studio'>
     openSession: (id: string) => void
     /** The registry's Workspace rows, in Host order. */
     workspaces: () => readonly StudioWorkspace[]
+    /** Open a new session under this surface's agent preset. */
+    newSession: () => void
   }
 
 /** Narrowest a resizable pane may become, in pixels. */
@@ -131,6 +133,7 @@ export function StudioRoot(props: StudioRootProps) {
             recentSessions={props.recentSessions}
             openSession={props.openSession}
             workspaces={props.workspaces}
+            newSession={props.newSession}
           />
         )}
         {(surface === 'image' || surface === 'video') && (
@@ -276,12 +279,13 @@ function Breadcrumbs({ t, path, onNavigate }: {
  * conversation. The list is read once at mount; live session subscription
  * belongs to the conversation, which owns that projection.
  */
-function WorkSurface({ t, openConversation, recentSessions, openSession, workspaces }: {
+function WorkSurface({ t, openConversation, recentSessions, openSession, workspaces, newSession }: {
   t: StudioRootProps['t']
   openConversation: () => void
   recentSessions: StudioRootProps['recentSessions']
   openSession: StudioRootProps['openSession']
   workspaces: StudioRootProps['workspaces']
+  newSession: () => void
 }) {
   const sessions = useMemo(() => recentSessions(), [recentSessions])
   const registry = useMemo(() => workspaces(), [workspaces])
@@ -289,7 +293,11 @@ function WorkSurface({ t, openConversation, recentSessions, openSession, workspa
     <div className={css.work}>
       <header className={css.workHead}>
         <h2 className={css.workTitle}>{t('work.title')}</h2>
-        <button type="button" className={css.primaryAction} onClick={openConversation}>{t('work.open')}</button>
+        <div className={css.workActions}>
+          {/* The mode's own session: its preset decides the tools and the prompt. */}
+          <button type="button" className={css.primaryAction} onClick={newSession}>{t('work.new')}</button>
+          <button type="button" className={css.secondaryAction} onClick={openConversation}>{t('work.open')}</button>
+        </div>
       </header>
       {registry.length > 0 && (
         <>

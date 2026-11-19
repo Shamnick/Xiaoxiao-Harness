@@ -44,6 +44,19 @@ export const PANEL_IDS: Readonly<Record<StudioSurface, MainPanelId>> = {
 
 /** Sidebar order: Work first, then the three tool surfaces. */
 const ORDER: Readonly<Record<StudioSurface, number>> = { work: -10, code: -9, image: -8, video: -7 }
+
+/**
+ * Agent preset each surface opens its sessions with. A working mode is a
+ * different set of instructions, not just a different colour: coding needs the
+ * file tools, image work needs the generator, and neither should inherit the
+ * other's prompt. `work` keeps the composition default by leaving it undefined.
+ */
+const PRESETS: Readonly<Record<StudioSurface, string | undefined>> = {
+  work: undefined,
+  code: 'coding',
+  image: 'image',
+  video: 'video',
+}
 const SURFACES: readonly StudioSurface[] = ['work', 'code', 'image', 'video']
 
 declare module '@deepseek-ai/dsh-client-ui-slots' {
@@ -128,6 +141,18 @@ export function apply(ctx: ClientContext): void {
           .slice(0, 20)
           .map(row => ({ id: String(row.id), title: row.displayTitle, running: row.running })),
         openSession: (id: string) => { ctx.layout.selectPanel(null); ctx.uiWorkspace.openSession(id as never) },
+        // Open a fresh session under this surface's preset, then hand the
+        // reader to the conversation — the working mode is what the preset
+        // carries, and the conversation is where the work happens.
+        newSession: () => {
+          const preset = PRESETS[surface]
+          void ctx.sessions.create(preset === undefined ? {} : { agentPreset: preset })
+            .then((id) => {
+              ctx.layout.selectPanel(null)
+              ctx.uiWorkspace.openSession(id as never)
+            })
+            .catch(() => undefined)
+        },
         // Workspace rows give the work surface something to switch between;
         // sessions alone leave it with no project context.
         // The registry is a separate service; a composition without it keeps
