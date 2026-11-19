@@ -137,14 +137,27 @@ export function apply(ctx: ClientContext): void {
         // than working areas: the work happens here, so the request goes from
         // here into the session behind this surface.
         submitPrompt: (text: string) => {
-          const session = Object.values(ctx.sessions.list.getSnapshot().byId)
-            .filter(row => row.origin !== 'subagent'
-              && (row.projectionValues?.agentPreset ?? undefined) === PRESETS[surface])
-            .sort((a, b) => b.updatedAt - a.updatedAt)[0]
-          if (session === undefined) return
-          const binding = ctx.sessions.binding(session.id as SessionId)
-          if (binding === undefined) return
-          void binding.session.prompt([{ type: 'text', text }], 'queue').catch(() => undefined)
+          const rows = Object.values(ctx.sessions.list.getSnapshot().byId)
+            .filter(row => row.origin !== 'subagent')
+          const byRecency = [...rows].sort((a, b) => b.updatedAt - a.updatedAt)
+          // Prefer this mode's own session; fall back to whatever the reader was
+          // last in. A pane that silently does nothing because no session
+          // carried its preset is worse than one that uses the session already
+          // open — the reader pressed a button and expects a result.
+          const target = byRecency.find(row =>
+            (row.projectionValues?.agentPreset ?? undefined) === PRESETS[surface]) ?? byRecency[0]
+          const send = (id: SessionId) => {
+            const binding = ctx.sessions.binding(id)
+            if (binding === undefined) return
+            void binding.session.prompt([{ type: 'text', text }], 'queue').catch(() => undefined)
+          }
+          if (target !== undefined) { send(target.id as SessionId); return }
+          // Nothing open yet: mint this mode's session and submit into it, so
+          // the first use of a pane is not a dead end.
+          const preset = PRESETS[surface]
+          void ctx.sessions.create(preset === undefined ? {} : { agentPreset: preset })
+            .then((id) => { send(id) })
+            .catch(() => undefined)
         },
         // The work surface lists what this mode was last in, newest first.
         // The mode owns its list: sessions opened under another preset belong

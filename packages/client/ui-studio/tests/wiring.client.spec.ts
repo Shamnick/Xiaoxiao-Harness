@@ -45,7 +45,16 @@ function makeContext() {
     },
     layout: { selectPanel: (id: string | null) => { selected.push(id) } },
     uiWorkspace: { openSession: (_id: unknown) => {} },
-    sessions: { list: { getSnapshot: () => ({ ids: [], byId: {} }) } },
+    sessions: {
+      list: { getSnapshot: () => ({ ids: [], byId: {} }) },
+      // A pane whose first use creates its session: without this the submit
+      // path stops at "nothing open" and the suite cannot see the fallback.
+      create: async () => 'created-session',
+      binding: (id: string) => ({
+        sessionId: id,
+        session: { prompt: async () => ({ ok: true, value: { accepted: true } }) },
+      }),
+    },
     // Only the services this plugin declares are present. Anything else must
     // be reached through ctx.get and survive its absence — a mock that answers
     // every name hides exactly the bug this shape is here to catch.
