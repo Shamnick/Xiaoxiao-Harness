@@ -4,6 +4,9 @@
 export const zh = {
   'rail.aria': '功能区',
   'rail.work': '工作',
+  'composer.code': '给编程助手发指令…',
+  'composer.work': '向工作助手发指令…',
+  'composer.send': '发送',
   'thread.empty': '会话',
   'thread.label': '会话',
   'thread.you': '你',
@@ -82,6 +85,9 @@ export type StudioKey = keyof typeof zh
 export const en: Record<StudioKey, string> = {
   'rail.aria': 'Workspaces',
   'rail.work': 'Work',
+  'composer.code': 'Instruct the coding agent…',
+  'composer.work': 'Instruct the work agent…',
+  'composer.send': 'Send',
   'thread.empty': 'Conversation',
   'thread.label': 'Conversation',
   'thread.you': 'You',
@@ -157,6 +163,9 @@ export const en: Record<StudioKey, string> = {
 export const ja: Record<StudioKey, string> = {
   'rail.aria': 'ワークスペース',
   'rail.work': '作業',
+  'composer.code': 'コーディングに指示…',
+  'composer.work': '作業に指示…',
+  'composer.send': '送信',
   'thread.empty': '会話',
   'thread.label': '会話',
   'thread.you': 'あなた',
@@ -232,6 +241,9 @@ export const ja: Record<StudioKey, string> = {
 export const es: Record<StudioKey, string> = {
   'rail.aria': 'Espacios de trabajo',
   'rail.work': 'Trabajo',
+  'composer.code': 'Instruye al agente de código…',
+  'composer.work': 'Instruye al agente…',
+  'composer.send': 'Enviar',
   'thread.empty': 'Conversación',
   'thread.label': 'Conversación',
   'thread.you': 'Tú',
@@ -307,6 +319,9 @@ export const es: Record<StudioKey, string> = {
 export const fr: Record<StudioKey, string> = {
   'rail.aria': 'Espaces de travail',
   'rail.work': 'Travail',
+  'composer.code': 'Consigne au agent de code…',
+  'composer.work': 'Consigne à l’agent…',
+  'composer.send': 'Envoyer',
   'thread.empty': 'Conversation',
   'thread.label': 'Conversation',
   'thread.you': 'Vous',
@@ -382,6 +397,9 @@ export const fr: Record<StudioKey, string> = {
 export const de: Record<StudioKey, string> = {
   'rail.aria': 'Arbeitsbereiche',
   'rail.work': 'Arbeit',
+  'composer.code': 'Anweisung an den Coding-Agent…',
+  'composer.work': 'Anweisung an den Agent…',
+  'composer.send': 'Senden',
   'thread.empty': 'Unterhaltung',
   'thread.label': 'Unterhaltung',
   'thread.you': 'Du',
@@ -457,6 +475,9 @@ export const de: Record<StudioKey, string> = {
 export const ru: Record<StudioKey, string> = {
   'rail.aria': 'Рабочие области',
   'rail.work': 'Работа',
+  'composer.code': 'Указание агенту кода…',
+  'composer.work': 'Указание агенту…',
+  'composer.send': 'Отправить',
   'thread.empty': 'Диалог',
   'thread.label': 'Диалог',
   'thread.you': 'Вы',
@@ -532,6 +553,9 @@ export const ru: Record<StudioKey, string> = {
 export const pt: Record<StudioKey, string> = {
   'rail.aria': 'Áreas de trabalho',
   'rail.work': 'Trabalho',
+  'composer.code': 'Instrua o agente de código…',
+  'composer.work': 'Instrua o agente…',
+  'composer.send': 'Enviar',
   'thread.empty': 'Conversa',
   'thread.label': 'Conversa',
   'thread.you': 'Você',

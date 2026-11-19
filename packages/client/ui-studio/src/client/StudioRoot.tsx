@@ -137,7 +137,15 @@ export function StudioRoot(props: StudioRootProps) {
   return (
     <div className={css.root}>
       <section className={css.surface} data-surface={surface}>
+        {surface === 'code' && <Thread messages={thread()} t={t} />}
+        {surface === 'code' && (
+          <Composer t={t} submitPrompt={submitPrompt} placeholder={t('composer.code')} />
+        )}
         {surface === 'code' && <CodeSurface t={t} code={code} useStore={useStore} actions={actions} />}
+        {surface === 'work' && <Thread messages={thread()} t={t} />}
+        {surface === 'work' && (
+          <Composer t={t} submitPrompt={submitPrompt} placeholder={t('composer.work')} />
+        )}
         {surface === 'work' && (
           <WorkSurface
             t={t}
@@ -294,6 +302,41 @@ function Breadcrumbs({ t, path, onNavigate }: {
  * conversation. The list is read once at mount; live session subscription
  * belongs to the conversation, which owns that projection.
  */
+/**
+ * A one-line composer for surfaces that do not own a prompt form. Work and
+ * Code have nothing to configure, so they only need somewhere to type.
+ */
+function Composer({ t, submitPrompt, placeholder }: {
+  t: StudioRootProps['t']
+  submitPrompt: (text: string) => void
+  placeholder: string
+}) {
+  const [draft, setDraft] = useState('')
+  const send = useCallback(() => {
+    const text = draft.trim()
+    if (text === '') return
+    submitPrompt(text)
+    setDraft('')
+  }, [draft, submitPrompt])
+  return (
+    <form
+      className={css.composer}
+      onSubmit={(event) => { event.preventDefault(); send() }}
+    >
+      <input
+        className={css.composerInput}
+        value={draft}
+        placeholder={placeholder}
+        aria-label={placeholder}
+        onChange={(event) => { setDraft(event.target.value) }}
+      />
+      <button type="submit" className={css.composerSend} disabled={draft.trim() === ''}>
+        {t('composer.send')}
+      </button>
+    </form>
+  )
+}
+
 /** The transcript behind a working area, newest at the bottom. */
 function Thread({ messages, t }: { messages: readonly StudioMessage[]; t: StudioRootProps['t'] }) {
   if (messages.length === 0) {

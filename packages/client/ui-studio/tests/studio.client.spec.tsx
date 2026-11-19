@@ -1366,3 +1366,43 @@ describe('working-area transcript', () => {
     expect(screen.queryByRole('log')).toBeNull()
   })
 })
+
+describe('per-surface composer', () => {
+  const mountWork = (submitPrompt = vi.fn()) => {
+    const store = makeStore()
+    render(
+      <StudioRoot
+        t={t}
+        surface="work"
+        openConversation={vi.fn()}
+        submitPrompt={submitPrompt}
+        recentSessions={() => []}
+        workspaces={() => []}
+        newSession={vi.fn()}
+        thread={() => []}
+        openSession={vi.fn()}
+        code={makeCode()}
+        useStore={store.useStore as StudioRootProps['useStore']}
+        actions={store.actions as StudioRootProps['actions']}
+      />,
+    )
+    return submitPrompt
+  }
+
+  it('sends what was typed on a surface that owns no prompt form', async () => {
+    const submitPrompt = mountWork()
+    const input = screen.getByRole('textbox')
+    fireEvent.change(input, { target: { value: 'summarize the repo' } })
+    fireEvent.submit(input)
+    expect(submitPrompt).toHaveBeenCalledWith('summarize the repo')
+  })
+
+  it('ignores an empty draft and keeps the button disabled', () => {
+    const submitPrompt = mountWork()
+    const input = screen.getByRole('textbox')
+    fireEvent.change(input, { target: { value: '   ' } })
+    fireEvent.submit(input)
+    expect(submitPrompt).not.toHaveBeenCalled()
+    expect((screen.getByRole('button', { name: /send/i }) as HTMLButtonElement).disabled).toBe(true)
+  })
+})

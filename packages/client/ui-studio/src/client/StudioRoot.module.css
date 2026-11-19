@@ -1319,3 +1319,57 @@
 .message[data-role='user'] .messageText {
   color: var(--dsw-alias-label-primary);
 }
+
+/* Compact composer for surfaces that own no prompt form. */
+.composer {
+  display: flex;
+  flex: none;
+  gap: 8px;
+  align-items: center;
+  padding: 0 0 14px;
+}
+
+.composerInput {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 12px;
+  border: 0.5px solid var(--dsw-alias-border-l2);
+  border-radius: var(--dsw-radius-md);
+  background: var(--dsw-alias-bg-layer-2);
+  color: var(--dsw-alias-label-primary);
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.composerInput::placeholder {
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.composerInput:focus-visible {
+  outline: var(--dsw-focus-ring-width, 2px) solid var(--dsw-focus-ring-color, var(--dsw-alias-state-business-primary));
+  outline-offset: -1px;
+}
+
+.composerSend {
+  flex: none;
+  padding: 8px 16px;
+  border: 0.5px solid var(--dsw-alias-border-l2);
+  border-radius: var(--dsw-radius-md);
+  background: var(--dsw-alias-label-primary);
+  color: var(--dsw-alias-label-primary-inverted);
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 20px;
+  cursor: pointer;
+}
+
+.composerSend:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.composerSend:focus-visible {
+  outline: var(--dsw-focus-ring-width, 2px) solid var(--dsw-focus-ring-color, var(--dsw-alias-state-business-primary));
+  outline-offset: 1px;
+}
