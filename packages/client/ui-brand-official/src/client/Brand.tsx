@@ -5,8 +5,11 @@ import { BrandWordmark } from '@deepseek-ai/dsh-client-ui-primitives'
 const BRAND_NAME = 'Xiaoxiao'
 
 /**
- * 渲染品牌图标（侧栏 mark 插槽）：三层同心环 + 实心核心。
- * viewBox 固定 0 0 24 24 以适配宿主给出的任意 size。
+ * 渲染品牌图标（侧栏 mark 插槽）：开放的方框包住实心核心。
+ *
+ * 同心环是通用靶心，和「容器 + 容器里的东西」这个产品意象无关；方框与核心
+ * 的嵌套直接说出 harness 与它承载的工作。viewBox 固定 0 0 24 24 以适配宿主
+ * 给出的任意 size。
  * @param props - 宿主提供的 mark 展示参数。
  */
 export function OfficialBrandMark({ size }: SidebarBrandMarkOwnerProps) {
@@ -21,9 +24,8 @@ export function OfficialBrandMark({ size }: SidebarBrandMarkOwnerProps) {
       aria-label={BRAND_NAME}
       style={{ flex: '0 0 auto' }}
     >
-      <circle cx="12" cy="12" r="9.5" stroke="currentColor" strokeWidth="1.9" />
-      <circle cx="12" cy="12" r="5.2" stroke="currentColor" strokeWidth="1.2" opacity="0.5" />
-      <circle cx="12" cy="12" r="2.1" fill="currentColor" />
+      <rect x="3.1" y="3.1" width="17.8" height="17.8" rx="5.2" stroke="currentColor" strokeWidth="1.9" />
+      <rect x="8.4" y="8.4" width="7.2" height="7.2" rx="2.2" fill="currentColor" />
     </svg>
   )
 }
