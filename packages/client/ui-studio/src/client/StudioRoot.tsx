@@ -166,6 +166,47 @@ function ageOf(at: number): string {
 }
 
 /**
+ * Line-level minimap of the open file: one bar per source line, its width
+ * proportional to that line's length, with symbol lines marked. A click
+ * scrolls to that line.
+ *
+ * The outline lists what is in the file; this shows where it sits, which is
+ * what a map is for.
+ */
+function Minimap({ text, symbols, onJump }: {
+  text: string
+  symbols: readonly StudioSymbol[]
+  onJump: (line: number) => void
+}) {
+  const lines = useMemo(() => text.split('\n'), [text])
+  const marked = useMemo(() => new Set(symbols.map(symbol => symbol.line)), [symbols])
+  // Longest line sets the scale, so a 200-character line does not overflow.
+  const widest = useMemo(() => Math.max(1, ...lines.map(line => line.length)), [lines])
+  return (
+    <div className={css.minimap} aria-hidden="true">
+      {lines.map((line, index) => {
+        const number = index + 1
+        const indent = line.length - line.trimStart().length
+        return (
+          <button
+            key={number}
+            type="button"
+            tabIndex={-1}
+            className={css.minimapLine}
+            data-symbol={marked.has(number) || undefined}
+            style={{
+              width: `${String(Math.max(4, Math.round((line.length / widest) * 100)))}%`,
+              marginLeft: `${String(Math.min(40, Math.round((indent / widest) * 100)))}%`,
+            }}
+            onClick={() => { onJump(number) }}
+          />
+        )
+      })}
+    </div>
+  )
+}
+
+/**
  * Empty state for a pane with nothing to show yet: a quiet glyph, the reason,
  * and what to do next. A bare line of grey text leaves the pane reading as
  * broken rather than empty.
@@ -799,6 +840,9 @@ function CodeSurface({ t, code, useStore, actions }: {
       <PaneHandle label={t('code.resizeMap')} value={widths.map} onResize={actions.resizeMap} inverted />
       <aside className={css.codeMap} aria-label={t('code.map')}>
         <p className={css.paneTitle}>{t('code.map')}</p>
+        {openFile !== undefined && !openFile.loading && (
+          <Minimap text={openFile.text} symbols={symbols} onJump={jump} />
+        )}
         {symbols.length === 0
           ? <p className={css.mapEmpty}>{t('code.map.empty')}</p>
           : (

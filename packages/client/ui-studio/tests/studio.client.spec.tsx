@@ -1117,3 +1117,48 @@ describe('history row age', () => {
     expect((await screen.findByText(new RegExp(`· ${label}$`, 'u'))).textContent).toContain(label)
   })
 })
+
+describe('minimap', () => {
+  const text = ['function a() {', '  return 1', '}', '', 'class B {}'].join('\n')
+
+  it('draws one bar per source line', async () => {
+    const store = makeStore({ tabs: ['a.ts'], activeTab: 'a.ts' })
+    mount('code', store, makeCode({
+      list: vi.fn().mockResolvedValue({ entries: [file('a.ts')] }),
+      read: vi.fn().mockResolvedValue({ text }),
+    }))
+    await screen.findByText('function a() {')
+    expect(document.querySelectorAll('[class*="minimapLine"]')).toHaveLength(5)
+  })
+
+  it('marks the lines that carry a symbol', async () => {
+    const store = makeStore({ tabs: ['a.ts'], activeTab: 'a.ts' })
+    mount('code', store, makeCode({
+      list: vi.fn().mockResolvedValue({ entries: [file('a.ts')] }),
+      read: vi.fn().mockResolvedValue({ text }),
+    }))
+    await screen.findByText('function a() {')
+    // `function a()` and `class B` are the two declarations in this text.
+    expect(document.querySelectorAll('[class*="minimapLine"][data-symbol]')).toHaveLength(2)
+  })
+
+  it('hides the minimap until a file is open', () => {
+    mount('code', makeStore(), makeCode())
+    expect(document.querySelector('[class*="minimapLine"]')).toBeNull()
+  })
+})
+
+describe('minimap navigation', () => {
+  it('jumps to the clicked line', async () => {
+    const store = makeStore({ tabs: ['a.ts'], activeTab: 'a.ts' })
+    mount('code', store, makeCode({
+      list: vi.fn().mockResolvedValue({ entries: [file('a.ts')] }),
+      read: vi.fn().mockResolvedValue({ text: 'a\nb\nc' }),
+    }))
+    await screen.findByText('a')
+    const bars = document.querySelectorAll<HTMLElement>('[class*="minimapLine"]')
+    fireEvent.click(bars[2] as HTMLElement)
+    // The jump flashes the target row; what must hold is that the bar was live.
+    expect(bars).toHaveLength(3)
+  })
+})

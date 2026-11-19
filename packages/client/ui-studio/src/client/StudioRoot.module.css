@@ -1116,3 +1116,47 @@
 .editorWelcomeGlyph {
   color: var(--dsw-alias-label-tertiary);
 }
+
+/* ── Minimap ──────────────────────────────────────────────────────────── */
+
+/* The outline answers "what is in this file"; the minimap answers "where".
+   Bars are inert to the pointer until hovered so the outline stays the
+   primary target. */
+.minimap {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  gap: 1px;
+  max-height: 180px;
+  margin-bottom: 10px;
+  padding: 4px 0;
+  overflow: hidden;
+  border-bottom: 0.5px solid var(--dsw-alias-border-l1);
+}
+
+.minimapLine {
+  height: 2px;
+  min-width: 4px;
+  border: none;
+  border-radius: 1px;
+  padding: 0;
+  background: var(--dsw-alias-label-quaternary, var(--dsw-alias-label-tertiary));
+  opacity: 0.45;
+  cursor: pointer;
+}
+
+.minimapLine[data-symbol] {
+  background: var(--dsw-alias-brand-primary);
+  opacity: 0.85;
+}
+
+@media (hover: hover) {
+  .minimapLine:hover {
+    opacity: 1;
+  }
+}
+
+.minimapLine:focus-visible {
+  outline: var(--dsw-focus-ring-width, 2px) solid var(--dsw-focus-ring-color, var(--dsw-alias-state-business-primary));
+  outline-offset: 1px;
+}
