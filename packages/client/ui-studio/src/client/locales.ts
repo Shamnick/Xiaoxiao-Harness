@@ -12,6 +12,7 @@ export const zh = {
   'work.open': '打开对话',
   'work.recent': '最近的会话',
   'work.noSessions': '还没有会话',
+  'work.noSessionsHint': '新建一个会话开始，或从左侧工作区打开已有项目',
   'work.running': '进行中',
   'code.title': '编程',
   'code.description': '浏览代码、编辑文件、查看结构地图',
@@ -60,6 +61,10 @@ export const zh = {
   'generate.empty': '还没有请求',
   'generate.clear': '清空',
   'generate.remove': '删除',
+  'generate.emptyHint': '提交提示词后，请求会出现在这里',
+  'image.galleryHint': '连接工作区后，这里的图片可供预览',
+  'code.pickFileHint': '从左侧选择一个文件开始阅读',
+  'code.mapEmptyHint': '打开文件后，这里显示它的结构',
 } satisfies Record<string, string>
 
 /** The studio namespace key union. */
@@ -77,6 +82,7 @@ export const en: Record<StudioKey, string> = {
   'work.open': 'Open conversation',
   'work.recent': 'Recent sessions',
   'work.noSessions': 'No sessions yet',
+  'work.noSessionsHint': 'Start a new session, or open a project from the sidebar',
   'work.running': 'Running',
   'code.title': 'Code',
   'code.description': 'Browse code, edit files, read the structure map',
@@ -125,6 +131,10 @@ export const en: Record<StudioKey, string> = {
   'generate.empty': 'No requests yet',
   'generate.clear': 'Clear',
   'generate.remove': 'Remove',
+  'generate.emptyHint': 'Submitted prompts appear here',
+  'image.galleryHint': 'Connect a workspace to preview its images here',
+  'code.pickFileHint': 'Pick a file on the left to start reading',
+  'code.mapEmptyHint': 'Open a file to see its structure',
 }
 
 /** Japanese dictionary. */
@@ -139,6 +149,7 @@ export const ja: Record<StudioKey, string> = {
   'work.open': '会話を開く',
   'work.recent': '最近のセッション',
   'work.noSessions': 'セッションはまだありません',
+  'work.noSessionsHint': '新規セッションを開始するか、サイドバーからプロジェクトを開いてください',
   'work.running': '実行中',
   'code.title': 'コード',
   'code.description': 'コードを閲覧し、ファイルを編集し、構造マップを見る',
@@ -187,6 +198,10 @@ export const ja: Record<StudioKey, string> = {
   'generate.empty': 'リクエストはまだありません',
   'generate.clear': 'クリア',
   'generate.remove': '削除',
+  'generate.emptyHint': '送信したプロンプトがここに表示されます',
+  'image.galleryHint': 'ワークスペースを接続すると画像をプレビューできます',
+  'code.pickFileHint': '左からファイルを選んでください',
+  'code.mapEmptyHint': 'ファイルを開くと構造が表示されます',
 }
 
 /** Spanish dictionary. */
@@ -201,6 +216,7 @@ export const es: Record<StudioKey, string> = {
   'work.open': 'Abrir conversación',
   'work.recent': 'Sesiones recientes',
   'work.noSessions': 'Aún no hay sesiones',
+  'work.noSessionsHint': 'Inicia una sesión o abre un proyecto desde la barra lateral',
   'work.running': 'En curso',
   'code.title': 'Código',
   'code.description': 'Explora el código, edita archivos y lee el mapa de estructura',
@@ -249,6 +265,10 @@ export const es: Record<StudioKey, string> = {
   'generate.empty': 'Aún no hay solicitudes',
   'generate.clear': 'Limpiar',
   'generate.remove': 'Eliminar',
+  'generate.emptyHint': 'Los prompts enviados aparecen aquí',
+  'image.galleryHint': 'Conecta un espacio para previsualizar imágenes',
+  'code.pickFileHint': 'Elige un archivo a la izquierda',
+  'code.mapEmptyHint': 'Abre un archivo para ver su estructura',
 }
 
 /** French dictionary. */
@@ -263,6 +283,7 @@ export const fr: Record<StudioKey, string> = {
   'work.open': 'Ouvrir la conversation',
   'work.recent': 'Sessions récentes',
   'work.noSessions': 'Aucune session',
+  'work.noSessionsHint': 'Démarrez une session ou ouvrez un projet depuis la barre latérale',
   'work.running': 'En cours',
   'code.title': 'Code',
   'code.description': 'Parcourez le code, modifiez les fichiers, lisez la carte de structure',
@@ -311,6 +332,10 @@ export const fr: Record<StudioKey, string> = {
   'generate.empty': 'Aucune demande',
   'generate.clear': 'Effacer',
   'generate.remove': 'Remove',
+  'generate.emptyHint': 'Les prompts envoyés apparaissent ici',
+  'image.galleryHint': 'Connectez un espace pour prévisualiser les images',
+  'code.pickFileHint': 'Choisissez un fichier à gauche',
+  'code.mapEmptyHint': 'Ouvrez un fichier pour voir sa structure',
 }
 
 /** German dictionary. */
@@ -325,6 +350,7 @@ export const de: Record<StudioKey, string> = {
   'work.open': 'Unterhaltung öffnen',
   'work.recent': 'Letzte Sitzungen',
   'work.noSessions': 'Noch keine Sitzungen',
+  'work.noSessionsHint': 'Starte eine Sitzung oder öffne ein Projekt aus der Seitenleiste',
   'work.running': 'Läuft',
   'code.title': 'Code',
   'code.description': 'Code durchsuchen, Dateien bearbeiten, Strukturkarte lesen',
@@ -373,6 +399,10 @@ export const de: Record<StudioKey, string> = {
   'generate.empty': 'Noch keine Anfragen',
   'generate.clear': 'Leeren',
   'generate.remove': 'Entfernen',
+  'generate.emptyHint': 'Gesendete Prompts erscheinen hier',
+  'image.galleryHint': 'Verbinde einen Arbeitsbereich zur Vorschau',
+  'code.pickFileHint': 'Wähle links eine Datei',
+  'code.mapEmptyHint': 'Öffne eine Datei für die Struktur',
 }
 
 /** Russian dictionary. */
@@ -387,6 +417,7 @@ export const ru: Record<StudioKey, string> = {
   'work.open': 'Открыть диалог',
   'work.recent': 'Недавние сеансы',
   'work.noSessions': 'Сеансов пока нет',
+  'work.noSessionsHint': 'Начните сессию или откройте проект на боковой панели',
   'work.running': 'Выполняется',
   'code.title': 'Код',
   'code.description': 'Просмотр кода, правка файлов, карта структуры',
@@ -435,6 +466,10 @@ export const ru: Record<StudioKey, string> = {
   'generate.empty': 'Запросов пока нет',
   'generate.clear': 'Очистить',
   'generate.remove': 'Удалить',
+  'generate.emptyHint': 'Отправленные запросы появятся здесь',
+  'image.galleryHint': 'Подключите рабочую область для просмотра',
+  'code.pickFileHint': 'Выберите файл слева',
+  'code.mapEmptyHint': 'Откройте файл, чтобы увидеть структуру',
 }
 
 /** Portuguese dictionary. */
@@ -449,6 +484,7 @@ export const pt: Record<StudioKey, string> = {
   'work.open': 'Abrir conversa',
   'work.recent': 'Sessões recentes',
   'work.noSessions': 'Nenhuma sessão ainda',
+  'work.noSessionsHint': 'Inicie uma sessão ou abra um projeto na barra lateral',
   'work.running': 'Em execução',
   'code.title': 'Código',
   'code.description': 'Navegue pelo código, edite arquivos e leia o mapa de estrutura',
@@ -497,4 +533,8 @@ export const pt: Record<StudioKey, string> = {
   'generate.empty': 'Nenhuma solicitação ainda',
   'generate.clear': 'Limpar',
   'generate.remove': 'Remover',
+  'generate.emptyHint': 'Os prompts enviados aparecem aqui',
+  'image.galleryHint': 'Conecte uma área para visualizar imagens',
+  'code.pickFileHint': 'Escolha um arquivo à esquerda',
+  'code.mapEmptyHint': 'Abra um arquivo para ver a estrutura',
 }

@@ -151,6 +151,25 @@ const VIDEO_EXT = /\.(?:mp4|webm|mov|m4v|ogv)$/iu
  * generation itself still goes through the agent.
  */
 /**
+ * Empty state for a pane with nothing to show yet: a quiet glyph, the reason,
+ * and what to do next. A bare line of grey text leaves the pane reading as
+ * broken rather than empty.
+ */
+function EmptyState({ icon, title, hint }: {
+  icon: string
+  title: string
+  hint?: string
+}) {
+  return (
+    <div className={css.emptyState}>
+      <span className={css.emptyGlyph} aria-hidden="true">{icon}</span>
+      <p className={css.emptyTitle}>{title}</p>
+      {hint !== undefined && <p className={css.emptyHint}>{hint}</p>}
+    </div>
+  )
+}
+
+/**
  * Path breadcrumb shared by the code explorer and the image gallery.
  * The root crumb clears the path; each segment jumps to that prefix.
  */
@@ -195,7 +214,7 @@ function WorkSurface({ t, openConversation, recentSessions, openSession }: {
       </header>
       <p className={css.workHint}>{t('work.recent')}</p>
       {sessions.length === 0
-        ? <p className={css.mapEmpty}>{t('work.noSessions')}</p>
+        ? <EmptyState icon="◷" title={t('work.noSessions')} hint={t('work.noSessionsHint')} />
         : (
           <ul className={css.sessionList}>
             {sessions.map(session => (
@@ -277,7 +296,7 @@ function MediaBrowser({ t, code, accept, label, emptyLabel, children }: {
         </ul>
       )}
       {files.length === 0
-        ? <p className={css.mapEmpty}>{emptyLabel}</p>
+        ? <EmptyState icon="▤" title={emptyLabel} hint={t('image.galleryHint')} />
         : (
           <ul className={css.galleryGrid}>
             {files.map(entry => (
@@ -399,7 +418,7 @@ function HistoryPanel({ t, history, onClear, onRemove }: {
         )}
       </div>
       {history.length === 0
-        ? <p className={css.mapEmpty}>{t('generate.empty')}</p>
+        ? <EmptyState icon="✎" title={t('generate.empty')} hint={t('generate.emptyHint')} />
         : (
           <ul className={css.historyList}>
             {history.map(entry => (
