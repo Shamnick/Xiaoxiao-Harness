@@ -43,7 +43,10 @@ function makeContext() {
     layout: { selectPanel: (id: string | null) => { selected.push(id) } },
     uiWorkspace: { openSession: (_id: unknown) => {} },
     sessions: { list: { getSnapshot: () => ({ ids: [], byId: {} }) } },
-    get: (name: string) => (name === 'workspaces' ? { list: { getSnapshot: () => ({ items: [] }) } } : undefined),
+    // Only the services this plugin declares are present. Anything else must
+    // be reached through ctx.get and survive its absence — a mock that answers
+    // every name hides exactly the bug this shape is here to catch.
+    get: (_name: string) => undefined as unknown,
     remote: {
       workspaceFiles: {
         list: vi.fn(async () => ({ ok: false })),
@@ -303,5 +306,22 @@ describe('workspace projection', () => {
       { workspaceId: 'w1', title: 'harness', path: '/src/harness', sessionIds: ['s1', 's2'] },
       { workspaceId: 'w2', title: 'docs', path: '/src/docs', sessionIds: [] },
     ])
+  })
+})
+
+describe('optional services', () => {
+  it('registers every panel when no workspaces registry is mounted', () => {
+    const { ctx, registrations } = makeContext()
+    expect(() => { apply(ctx as never) }).not.toThrow()
+    const panels = registrations.filter(entry => entry.options.name === 'main')
+    expect(panels).toHaveLength(4)
+  })
+
+  it('reports an empty project list rather than failing', () => {
+    const { ctx, registrations } = makeContext()
+    apply(ctx as never)
+    const face = (registrations.find(entry => entry.options.name === 'main')
+      ?.options.inject as () => { workspaces: () => unknown[] })()
+    expect(face.workspaces()).toEqual([])
   })
 })
