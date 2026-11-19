@@ -130,12 +130,18 @@ export function apply(ctx: ClientContext): void {
         openSession: (id: string) => { ctx.layout.selectPanel(null); ctx.uiWorkspace.openSession(id as never) },
         // Workspace rows give the work surface something to switch between;
         // sessions alone leave it with no project context.
-        workspaces: () => ctx.workspaces.list.getSnapshot().items.map(row => ({
-          workspaceId: String(row.workspaceId),
-          title: row.title,
-          path: row.path,
-          sessionIds: row.sessionIds.map(id => String(id)),
-        })),
+        // The registry is a separate service; a composition without it keeps
+        // the panel working and simply shows no projects.
+        workspaces: () => {
+          const registry = ctx.get('workspaces')
+          if (registry === undefined) return []
+          return registry.list.getSnapshot().items.map(row => ({
+            workspaceId: String(row.workspaceId),
+            title: row.title,
+            path: row.path,
+            sessionIds: row.sessionIds.map(id => String(id)),
+          }))
+        },
       }),
     }, StudioRoot))
     ctx.slots.inject('sidebar.panellist', () => ctx.slots.register({

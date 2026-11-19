@@ -64,3 +64,28 @@ it('mounts the code surface with its three panes and the explorer search', async
   expect(await code.getByRole('searchbox').count(), 'explorer search missing').toBeGreaterThan(0)
   expect(await page.getByRole('separator').count(), 'expected two pane handles').toBe(2)
 })
+
+it('reaches the code surface by keyboard alone', async () => {
+  const scaffold: WebScaffold = await launchWebScaffold()
+  onTestFinished(() => scaffold.close())
+  const browser = await chromium.launch()
+  onTestFinished(() => browser.close())
+  const page = await browser.newPage({ viewport: { width: 1440, height: 900 } })
+  await page.goto(scaffold.authenticatedUrl, { waitUntil: 'load' })
+  await page.waitForSelector('[aria-label]', { timeout: 60_000 })
+
+  // A launcher that is not a real button cannot be reached without a mouse.
+  const launcher = page.getByRole('button', { name: /code/iu }).first()
+  await launcher.focus()
+  expect(await launcher.evaluate(node => node === document.activeElement)).toBe(true)
+  await page.keyboard.press('Enter')
+  await expect.poll(
+    () => page.locator('[data-surface="code"]').isVisible(),
+    { timeout: 30_000 },
+  ).toBe(true)
+
+  // Tab must stay inside the document and land on an operable element.
+  await page.keyboard.press('Tab')
+  const landed = await page.evaluate(() => document.activeElement?.tagName ?? '')
+  expect(landed).toBe('BUTTON')
+}, 180_000)
