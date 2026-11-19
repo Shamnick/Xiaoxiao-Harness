@@ -35,8 +35,11 @@ function makeContext() {
       },
       register: (options: Record<string, unknown>, component: unknown) => {
         registrations.push({ slot: String(options.name), options })
-        // Render the component so launcher-only factories (the glyph) execute.
-        if (typeof component === 'function' && options.name !== 'main') void (component as () => unknown)()
+        // Render only the launcher glyph factory. Panels and Views need real
+        // props; calling them here would exercise the mock, not the wiring.
+        if (typeof component === 'function' && options.name === 'sidebar.panellist') {
+          void (component as () => unknown)()
+        }
         return () => {}
       },
     },
