@@ -470,12 +470,12 @@ function GenerateForm({ mode, t, submitPrompt, onPush, draft, onDraftUsed }: {
   return (
     <>
       <label className={css.field}>
-        <span className={css.fieldLabel}>{t(`${mode}.prompt` as 'image.prompt')}</span>
+        <span className={css.fieldLabel}>{t(`${mode}.prompt`)}</span>
         <textarea
           className={css.textarea}
           rows={4}
           value={prompt}
-          placeholder={t(`${mode}.promptPlaceholder` as 'image.promptPlaceholder')}
+          placeholder={t(`${mode}.promptPlaceholder`)}
           onChange={(event) => { setPrompt(event.target.value) }}
           onKeyDown={(event) => {
             if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) { submit(); event.preventDefault() }
@@ -511,7 +511,7 @@ function GenerateForm({ mode, t, submitPrompt, onPush, draft, onDraftUsed }: {
         </div>
       </div>
       <button type="button" className={css.primaryAction} onClick={submit} disabled={prompt.trim() === ''}>
-        {t(`${mode}.generate` as 'image.generate')}
+        {t(`${mode}.generate`)}
       </button>
       <p className={css.hint}>{t('generate.hint')}</p>
     </>
@@ -592,8 +592,8 @@ function GenerateSurface({ mode, t, code, submitPrompt, history, onPush, onClear
           t={t}
           code={code}
           accept={mode === 'image' ? IMAGE_EXT : VIDEO_EXT}
-          label={t(`${mode}.gallery` as 'image.gallery')}
-          emptyLabel={t(`${mode}.galleryEmpty` as 'image.galleryEmpty')}
+          label={t(`${mode}.gallery`)}
+          emptyLabel={t(`${mode}.galleryEmpty`)}
         >
           {selected => (
             <figure className={css.preview}>

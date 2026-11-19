@@ -12,6 +12,7 @@ import type {} from '@deepseek-ai/dsh-client-ui-renderer/client'
 import type {} from '@deepseek-ai/dsh-client-locale/client'
 // Type-only: pulls the `main` keyed slot declaration.
 import type { MainPanelId } from '@deepseek-ai/dsh-client-ui-layout/client'
+import type { SessionId } from '@deepseek-ai/dsh-session/types'
 // Type-only: pulls the sidebar panel-list slot declaration.
 import type {} from '@deepseek-ai/dsh-client-ui-sidebar/client'
 // Type-only: pulls the ctx.uiWorkspace navigation capability.
@@ -134,13 +135,20 @@ export function apply(ctx: ClientContext): void {
         // Generation surfaces record the request and hand the reader to the
         // conversation, which owns submission; the studio never fabricates a result.
         submitPrompt: () => { ctx.layout.selectPanel(null) },
-        // The work surface lists what the reader was last in, newest first.
+        // The work surface lists what this mode was last in, newest first.
+        // The mode owns its list: sessions opened under another preset belong
+        // to that other working area, not this one.
+        //
+        // `agentPreset` arrives through the projection summary, so no extra
+        // round trip is needed; `work` carries the default composition and
+        // therefore matches sessions with no recorded preset.
         recentSessions: () => Object.values(ctx.sessions.list.getSnapshot().byId)
           .filter(row => row.origin !== 'subagent' && row.displayTitle !== '')
+          .filter(row => (row.projectionValues?.agentPreset ?? undefined) === PRESETS[surface])
           .sort((a, b) => b.updatedAt - a.updatedAt)
           .slice(0, 20)
           .map(row => ({ id: String(row.id), title: row.displayTitle, running: row.running })),
-        openSession: (id: string) => { ctx.layout.selectPanel(null); ctx.uiWorkspace.openSession(id as never) },
+        openSession: (id: string) => { ctx.layout.selectPanel(null); ctx.uiWorkspace.openSession(id as SessionId) },
         // Open a fresh session under this surface's preset, then hand the
         // reader to the conversation — the working mode is what the preset
         // carries, and the conversation is where the work happens.
@@ -149,7 +157,7 @@ export function apply(ctx: ClientContext): void {
           void ctx.sessions.create(preset === undefined ? {} : { agentPreset: preset })
             .then((id) => {
               ctx.layout.selectPanel(null)
-              ctx.uiWorkspace.openSession(id as never)
+              ctx.uiWorkspace.openSession(id as SessionId)
             })
             .catch(() => undefined)
         },

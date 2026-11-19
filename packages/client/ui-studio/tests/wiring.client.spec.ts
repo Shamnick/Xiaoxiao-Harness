@@ -325,3 +325,41 @@ describe('optional services', () => {
     expect(face.workspaces()).toEqual([])
   })
 })
+
+describe('mode-scoped session list', () => {
+  /** Build a context whose session rows carry projection presets. */
+  function withPresets(rows: { id: string; title: string; updatedAt: number; preset?: string }[]) {
+    const made = makeContext()
+    made.ctx.sessions.list.getSnapshot = (() => ({
+      ids: rows.map(row => row.id),
+      byId: Object.fromEntries(rows.map(row => [row.id, {
+        id: row.id,
+        displayTitle: row.title,
+        updatedAt: row.updatedAt,
+        running: false,
+        ...row.preset === undefined ? {} : { projectionValues: { agentPreset: row.preset } },
+      }])),
+    })) as never
+    return made
+  }
+
+  it('shows only the sessions this mode opened', () => {
+    const { ctx, registrations } = withPresets([
+      { id: 'a', title: 'plain', updatedAt: 1 },
+      { id: 'b', title: 'code work', updatedAt: 3, preset: 'coding' },
+      { id: 'c', title: 'image work', updatedAt: 2, preset: 'image' },
+    ])
+    apply(ctx as never)
+    const faces = registrations
+      .filter(entry => entry.options.name === 'main')
+      .map(entry => ({
+        preset: String(entry.options.key),
+        recent: (entry.options.inject as () => { recentSessions: () => { id: string }[] })().recentSessions(),
+      }))
+    const byKey = Object.fromEntries(faces.map(face => [face.preset, face.recent.map(row => row.id)]))
+    expect(byKey['studio.work']).toEqual(['a'])
+    expect(byKey['studio.code']).toEqual(['b'])
+    expect(byKey['studio.image']).toEqual(['c'])
+    expect(byKey['studio.video']).toEqual([])
+  })
+})
