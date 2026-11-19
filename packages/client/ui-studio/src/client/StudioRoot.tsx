@@ -736,6 +736,7 @@ function CodeSurface({ t, code, useStore, actions }: {
   /** Recompute which lines the editor is showing, so the minimap can mark them. */
   const syncViewport = useCallback(() => {
     const host = editorRef.current
+    /* v8 ignore next -- scroll events come from the editor this ref holds */
     if (host === null) return
     const top = host.scrollTop
     const bottom = top + host.clientHeight
@@ -876,7 +877,27 @@ function CodeSurface({ t, code, useStore, actions }: {
           </div>
         )}
         {tabs.length > 0 && (
-          <div className={css.tabBar} role="tablist" aria-label={t('code.tabs')}>
+          <div
+            className={css.tabBar}
+            role="tablist"
+            aria-label={t('code.tabs')}
+            onKeyDown={(event) => {
+              if (!(event.metaKey || event.ctrlKey)) return
+              if (event.key.toLowerCase() === 'w') {
+                /* v8 ignore next -- the strip only renders when a tab is open, so active is set */
+                if (active !== '') { actions.closeTab(active); event.preventDefault() }
+                return
+              }
+              if (event.key !== 'Tab') return
+              // Cycle in the order the strip shows, wrapping at both ends.
+              const index = tabs.indexOf(active)
+              /* v8 ignore next -- active is one of the rendered tabs */
+              if (index < 0) return
+              const step = event.shiftKey ? -1 : 1
+              const next = tabs[(index + step + tabs.length) % tabs.length]
+              if (next !== undefined) { actions.openTab(next); event.preventDefault() }
+            }}
+          >
             {tabs.map(tab => (
               <span key={tab} className={css.tab} data-active={tab === active || undefined}>
                 <button

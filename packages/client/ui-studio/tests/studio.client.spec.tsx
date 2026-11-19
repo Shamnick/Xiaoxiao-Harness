@@ -1262,3 +1262,42 @@ describe('minimap viewport', () => {
     expect(document.querySelectorAll('[class*="minimapLine"][data-visible]')).toHaveLength(0)
   })
 })
+
+describe('tab shortcuts', () => {
+  /** Mount three open tabs with the middle one active. */
+  async function mountTabs() {
+    const store = makeStore({ tabs: ['a.ts', 'b.ts', 'c.ts'], activeTab: 'b.ts' })
+    mount('code', store, makeCode({
+      list: vi.fn().mockResolvedValue({ entries: [file('a.ts'), file('b.ts'), file('c.ts')] }),
+      read: vi.fn().mockResolvedValue({ text: 'x' }),
+    }))
+    return { store, strip: await screen.findByRole('tablist') }
+  }
+
+  it('cycles forward on Cmd+Tab', async () => {
+    const { store, strip } = await mountTabs()
+    fireEvent.keyDown(strip, { key: 'Tab', metaKey: true })
+    expect(store.snapshot().activeTab).toBe('c.ts')
+  })
+
+  it('cycles backward on Cmd+Shift+Tab and wraps', async () => {
+    const { store, strip } = await mountTabs()
+    fireEvent.keyDown(strip, { key: 'Tab', metaKey: true, shiftKey: true })
+    expect(store.snapshot().activeTab).toBe('a.ts')
+    fireEvent.keyDown(strip, { key: 'Tab', metaKey: true, shiftKey: true })
+    expect(store.snapshot().activeTab).toBe('c.ts')
+  })
+
+  it('closes the active tab on Cmd+W', async () => {
+    const { store, strip } = await mountTabs()
+    fireEvent.keyDown(strip, { key: 'w', ctrlKey: true })
+    expect(store.snapshot().tabs).toEqual(['a.ts', 'c.ts'])
+    expect(store.snapshot().activeTab).toBe('c.ts')
+  })
+
+  it('ignores the same keys without a modifier', async () => {
+    const { store, strip } = await mountTabs()
+    fireEvent.keyDown(strip, { key: 'w' })
+    expect(store.snapshot().tabs).toHaveLength(3)
+  })
+})
