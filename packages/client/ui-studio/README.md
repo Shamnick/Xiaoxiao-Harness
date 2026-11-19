@@ -51,12 +51,16 @@ it on trust.
 | Claim | Evidence |
 |---|---|
 | Wiring registers four panels and four launchers | `tests/wiring.client.spec.ts` asserts the exact ids, orders, shared store, and per-panel surface |
-| Panes render, controls work | `tests/studio.client.spec.tsx`, 114 cases |
-| Store actions behave | `tests/store.client.spec.ts`, 15 cases |
-| Statement, function, and line coverage | 100% per file; branches 98% |
+| Optional services stay optional | same suite: `apply` succeeds and all four panels register when no `workspaces` registry is mounted |
+| Panes render, controls work | `tests/studio.client.spec.tsx` |
+| Store actions behave | `tests/store.client.spec.ts` |
+| Statement, function, and line coverage | 100% per file |
 | Sidebar launchers exist and open their panel | `apps/web/tests/studio-panels.e2e.ts` in Chromium against the real composition |
+| The four launchers share one container | same e2e: their parents collapse to a single panel-list node |
 | Code surface draws both side panes, the filter, and both handles | same e2e, second case |
+| The surface is reachable without a mouse | same e2e: focus, Enter, and Tab land on operable elements |
 | Empty panes explain themselves | each pane renders `EmptyState` with a glyph, the reason, and the next action |
+| No type escapes | `verify-no-unknown-casts` reports zero findings for this package |
 
 Screenshots taken through the same Chromium harness are how the visual
 defects below were found: a near-white selected chip, a duplicate
