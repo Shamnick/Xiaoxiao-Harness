@@ -1100,3 +1100,20 @@ describe('removing one history entry', () => {
     expect(store.snapshot().images.map(item => item.id)).toEqual(['b'])
   })
 })
+
+describe('history row age', () => {
+  const at = (minutesAgo: number) => Date.now() - minutesAgo * 60_000
+
+  it.each([
+    [0, 'now'],
+    [5, '5m'],
+    [90, '1h'],
+    [60 * 26, '1d'],
+  ])('reads %i minutes ago as %s', async (minutes, label) => {
+    const store = makeStore({
+      images: [{ id: 'a', prompt: 'p', variant: '1:1', count: 1, requestedAt: at(minutes) }],
+    })
+    mount('image', store, makeCode())
+    expect((await screen.findByText(new RegExp(`· ${label}$`, 'u'))).textContent).toContain(label)
+  })
+})

@@ -151,6 +151,21 @@ const VIDEO_EXT = /\.(?:mp4|webm|mov|m4v|ogv)$/iu
  * generation itself still goes through the agent.
  */
 /**
+ * Short relative age for a history row. Absolute clock times would force the
+ * reader to compare numbers; "4m" answers "is this the one I just sent".
+ * @param at - epoch milliseconds the request was recorded.
+ * @returns a compact age such as "now", "4m", "3h", or "2d".
+ */
+function ageOf(at: number): string {
+  const minutes = Math.floor((Date.now() - at) / 60_000)
+  if (minutes < 1) return 'now'
+  if (minutes < 60) return `${String(minutes)}m`
+  const hours = Math.floor(minutes / 60)
+  if (hours < 24) return `${String(hours)}h`
+  return `${String(Math.floor(hours / 24))}d`
+}
+
+/**
  * Empty state for a pane with nothing to show yet: a quiet glyph, the reason,
  * and what to do next. A bare line of grey text leaves the pane reading as
  * broken rather than empty.
@@ -424,7 +439,9 @@ function HistoryPanel({ t, history, onClear, onRemove }: {
             {history.map(entry => (
               <li key={entry.id} className={css.historyItem}>
                 <span className={css.historyPrompt}>{entry.prompt}</span>
-                <span className={css.historyMeta}>{entry.variant} · ×{String(entry.count)}</span>
+                <span className={css.historyMeta}>
+                  {entry.variant} · ×{String(entry.count)} · {ageOf(entry.requestedAt)}
+                </span>
                 <button
                   type="button"
                   className={css.historyRemove}
