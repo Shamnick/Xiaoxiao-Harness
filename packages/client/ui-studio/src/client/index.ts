@@ -193,29 +193,6 @@ export function apply(ctx: ClientContext): void {
         },
       }),
     }, StudioRoot))
-    // The same surface as a Conversation View. The sidebar launcher can only
-    // address a main panel — its icon has no click hook of its own — so the
-    // panel stays for navigation, and this view is what puts the working area
-    // inside the conversation, beside the transcript, with the input dock
-    // still there.
-    ctx.slots.inject('conversation.view', () => ctx.slots.register({
-      name: 'conversation.view',
-      id: `${panel}.view`,
-      order: ORDER[surface],
-      label: () => t(`rail.${surface}`),
-      locale: NS,
-      store: studioStore,
-      inject: () => ({
-        surface,
-        code,
-        openConversation: () => { ctx.layout.selectPanel(null) },
-        submitPrompt: () => { ctx.layout.selectPanel(null) },
-        recentSessions: () => [],
-        openSession: () => {},
-        workspaces: () => [],
-        newSession: () => {},
-      }),
-    }, StudioRoot))
     ctx.slots.inject('sidebar.panellist', () => ctx.slots.register({
       name: 'sidebar.panellist',
       id: panel,

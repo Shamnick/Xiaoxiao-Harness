@@ -162,6 +162,9 @@
 
 /* Primary action inside a placeholder surface. */
 .primaryAction {
+  /* Stretch is the flex default; a full-bleed pill this wide reads as a bar,
+     not a button. */
+  align-self: flex-start;
   margin-top: 12px;
   padding: 8px 20px;
   border: 0.5px solid var(--dsw-alias-border-l2);
@@ -411,6 +414,7 @@
   min-height: 0;
   padding: 16px;
   background: var(--dsw-alias-bg-layer-1);
+  border-left: 0.5px solid var(--dsw-alias-border-l1);
   /* Elevated surface: a revealed scrollbar takes the l2 pair. */
   --dsh-scrollbar-thumb: var(--dsw-alias-scrollbar-bg-l2);
   --dsh-scrollbar-thumb-hover: var(--dsw-alias-scrollbar-hover-l2);
@@ -1019,9 +1023,11 @@
   flex: 1;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  /* Top-aligned in a narrow column: centred text in a tall empty pane floats
+     with no relationship to the heading above it. */
+  justify-content: flex-start;
   gap: 6px;
-  padding: 32px 24px;
+  padding: 28px 12px;
   text-align: center;
 }
 
