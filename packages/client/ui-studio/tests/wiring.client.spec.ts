@@ -46,7 +46,7 @@ function makeContext() {
     // Only the services this plugin declares are present. Anything else must
     // be reached through ctx.get and survive its absence — a mock that answers
     // every name hides exactly the bug this shape is here to catch.
-    get: (_name: string) => undefined as unknown,
+    get: (_name: string): undefined => undefined,
     remote: {
       workspaceFiles: {
         list: vi.fn(async () => ({ ok: false })),
