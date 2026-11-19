@@ -471,10 +471,13 @@
   transition: background-color 0.13s ease, color 0.13s ease;
 }
 
+/* The selected chip needs a readable floor: brand-primary is near-white in the
+   dark theme, so using it for both fill and text left the label washed out.
+   The fill stays quiet and the label takes the primary ink. */
 .chip[data-active] {
-  background: color-mix(in srgb, var(--dsw-alias-brand-primary) 14%, transparent);
-  border-color: color-mix(in srgb, var(--dsw-alias-brand-primary) 40%, transparent);
-  color: var(--dsw-alias-brand-primary);
+  background: color-mix(in srgb, var(--dsw-alias-label-primary) 16%, transparent);
+  border-color: color-mix(in srgb, var(--dsw-alias-label-primary) 38%, transparent);
+  color: var(--dsw-alias-label-primary);
 }
 
 @media (hover: hover) {
