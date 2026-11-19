@@ -749,7 +749,18 @@ function CodeSurface({ t, code, useStore, actions }: {
           </div>
         )}
         {openFile === undefined
-          ? <p className={css.editorEmpty}>{t('code.pickFile')}</p>
+          ? (listing.state === 'idle' && listing.entries.length > 0
+            ? (
+              <div className={css.editorWelcome}>
+                <p className={css.editorWelcomeTitle}>{t('code.pickFile')}</p>
+                {/* Name the directory and its size; listing entries here would
+                    duplicate the explorer and give every name two homes. */}
+                <p className={css.editorWelcomeHint}>
+                  {`${String(listing.entries.length)} ${t('code.itemsHere')} · ${path === '' ? '/' : path}`}
+                </p>
+              </div>
+            )
+            : <p className={css.editorEmpty}>{t('code.pickFile')}</p>)
           : openFile.loading
             ? <p className={css.editorEmpty}>{t('code.loading')}</p>
             : (

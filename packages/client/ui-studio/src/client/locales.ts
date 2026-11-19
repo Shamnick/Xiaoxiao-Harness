@@ -65,6 +65,7 @@ export const zh = {
   'image.galleryHint': '连接工作区后，这里的图片可供预览',
   'code.pickFileHint': '从左侧选择一个文件开始阅读',
   'code.mapEmptyHint': '打开文件后，这里显示它的结构',
+  'code.itemsHere': '个项目',
 } satisfies Record<string, string>
 
 /** The studio namespace key union. */
@@ -135,6 +136,7 @@ export const en: Record<StudioKey, string> = {
   'image.galleryHint': 'Connect a workspace to preview its images here',
   'code.pickFileHint': 'Pick a file on the left to start reading',
   'code.mapEmptyHint': 'Open a file to see its structure',
+  'code.itemsHere': '个项目',
 }
 
 /** Japanese dictionary. */
@@ -202,6 +204,7 @@ export const ja: Record<StudioKey, string> = {
   'image.galleryHint': 'ワークスペースを接続すると画像をプレビューできます',
   'code.pickFileHint': '左からファイルを選んでください',
   'code.mapEmptyHint': 'ファイルを開くと構造が表示されます',
+  'code.itemsHere': 'items',
 }
 
 /** Spanish dictionary. */
@@ -269,6 +272,7 @@ export const es: Record<StudioKey, string> = {
   'image.galleryHint': 'Conecta un espacio para previsualizar imágenes',
   'code.pickFileHint': 'Elige un archivo a la izquierda',
   'code.mapEmptyHint': 'Abre un archivo para ver su estructura',
+  'code.itemsHere': '項目',
 }
 
 /** French dictionary. */
@@ -336,6 +340,7 @@ export const fr: Record<StudioKey, string> = {
   'image.galleryHint': 'Connectez un espace pour prévisualiser les images',
   'code.pickFileHint': 'Choisissez un fichier à gauche',
   'code.mapEmptyHint': 'Ouvrez un fichier pour voir sa structure',
+  'code.itemsHere': 'elementos',
 }
 
 /** German dictionary. */
@@ -403,6 +408,7 @@ export const de: Record<StudioKey, string> = {
   'image.galleryHint': 'Verbinde einen Arbeitsbereich zur Vorschau',
   'code.pickFileHint': 'Wähle links eine Datei',
   'code.mapEmptyHint': 'Öffne eine Datei für die Struktur',
+  'code.itemsHere': 'éléments',
 }
 
 /** Russian dictionary. */
@@ -470,6 +476,7 @@ export const ru: Record<StudioKey, string> = {
   'image.galleryHint': 'Подключите рабочую область для просмотра',
   'code.pickFileHint': 'Выберите файл слева',
   'code.mapEmptyHint': 'Откройте файл, чтобы увидеть структуру',
+  'code.itemsHere': 'Einträge',
 }
 
 /** Portuguese dictionary. */
@@ -537,4 +544,5 @@ export const pt: Record<StudioKey, string> = {
   'image.galleryHint': 'Conecte uma área para visualizar imagens',
   'code.pickFileHint': 'Escolha um arquivo à esquerda',
   'code.mapEmptyHint': 'Abra um arquivo para ver a estrutura',
+  'code.itemsHere': 'элементов',
 }

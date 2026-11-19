@@ -1046,3 +1046,73 @@
   font-size: 12px;
   line-height: 18px;
 }
+
+/* Editor welcome: names what is in this directory and offers the first few
+   entries, so an empty editor still says where you are. */
+.editorWelcome {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 32px 24px;
+  text-align: center;
+}
+
+.editorWelcomeTitle {
+  margin: 0;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.editorWelcomeHint {
+  margin: 0;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 12px;
+  line-height: 18px;
+  font-variant-numeric: tabular-nums;
+}
+
+.editorWelcomeList {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px;
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+  max-width: 60ch;
+}
+
+.editorWelcomeItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border: 0.5px solid var(--dsw-alias-border-l1);
+  border-radius: 999px;
+  corner-shape: round;
+  background: transparent;
+  color: var(--dsw-alias-label-secondary);
+  font-family: inherit;
+  font-size: 11.5px;
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .editorWelcomeItem:hover {
+    background: color-mix(in srgb, var(--dsw-alias-bg-layer-2) 80%, transparent);
+    color: var(--dsw-alias-label-primary);
+  }
+}
+
+.editorWelcomeItem:focus-visible {
+  outline: var(--dsw-focus-ring-width, 2px) solid var(--dsw-focus-ring-color, var(--dsw-alias-state-business-primary));
+  outline-offset: 1px;
+}
+
+.editorWelcomeGlyph {
+  color: var(--dsw-alias-label-tertiary);
+}
