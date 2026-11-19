@@ -95,6 +95,7 @@ function mount(surface: StudioRootProps['surface'], store = makeStore(), code = 
       openConversation={openConversation}
       submitPrompt={submitPrompt}
       recentSessions={sessions}
+      workspaces={() => []}
       openSession={openSession}
       code={code}
       useStore={store.useStore as StudioRootProps['useStore']}
@@ -481,6 +482,7 @@ describe('navigation edges', () => {
         openConversation={() => {}}
         submitPrompt={() => {}}
         recentSessions={() => []}
+        workspaces={() => []}
         openSession={() => {}}
         code={code}
         useStore={makeStore().useStore as StudioRootProps['useStore']}
@@ -518,6 +520,7 @@ describe('failure paths', () => {
         openConversation={() => {}}
         submitPrompt={() => {}}
         recentSessions={() => []}
+        workspaces={() => []}
         openSession={() => {}}
         code={code}
         useStore={store.useStore as StudioRootProps['useStore']}
@@ -706,6 +709,7 @@ describe('remaining branches', () => {
         openConversation={() => {}}
         submitPrompt={() => {}}
         recentSessions={() => []}
+        workspaces={() => []}
         openSession={() => {}}
         code={code}
         useStore={store.useStore as StudioRootProps['useStore']}
@@ -731,6 +735,7 @@ describe('remaining branches', () => {
         openConversation={() => {}}
         submitPrompt={() => {}}
         recentSessions={() => []}
+        workspaces={() => []}
         openSession={() => {}}
         code={code}
         useStore={store.useStore as StudioRootProps['useStore']}
@@ -755,6 +760,7 @@ describe('remaining branches', () => {
         openConversation={() => {}}
         submitPrompt={() => {}}
         recentSessions={() => []}
+        workspaces={() => []}
         openSession={() => {}}
         code={code}
         useStore={store.useStore as StudioRootProps['useStore']}
@@ -779,6 +785,7 @@ describe('remaining branches', () => {
         openConversation={() => {}}
         submitPrompt={() => {}}
         recentSessions={() => []}
+        workspaces={() => []}
         openSession={() => {}}
         code={code}
         useStore={store.useStore as StudioRootProps['useStore']}
@@ -1160,5 +1167,38 @@ describe('minimap navigation', () => {
     fireEvent.click(bars[2] as HTMLElement)
     // The jump flashes the target row; what must hold is that the bar was live.
     expect(bars).toHaveLength(3)
+  })
+})
+
+describe('work surface projects', () => {
+  it('lists the registry workspaces with their paths and session counts', async () => {
+    const store = makeStore()
+    render(
+      <StudioRoot
+        t={t}
+        surface="work"
+        openConversation={vi.fn()}
+        submitPrompt={vi.fn()}
+        recentSessions={() => []}
+        openSession={vi.fn()}
+        workspaces={() => [
+          { workspaceId: 'w1', title: 'harness', path: '/src/harness', sessionIds: ['a', 'b'] },
+          { workspaceId: 'w2', title: 'docs', path: '/src/docs', sessionIds: [] },
+        ]}
+        code={makeCode()}
+        useStore={store.useStore as StudioRootProps['useStore']}
+        actions={store.actions as StudioRootProps['actions']}
+      />,
+    )
+    expect(await screen.findByText('harness')).toBeTruthy()
+    expect(screen.getByText('/src/harness')).toBeTruthy()
+    expect(screen.getByText('2 work.sessionCount')).toBeTruthy()
+    expect(screen.getByText('0 work.sessionCount')).toBeTruthy()
+  })
+
+  it('omits the project block when the registry is empty', async () => {
+    mount('work', makeStore(), makeCode())
+    await screen.findByText('work.recent')
+    expect(screen.queryByText('work.projects')).toBeNull()
   })
 })

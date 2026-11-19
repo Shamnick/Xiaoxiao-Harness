@@ -128,6 +128,14 @@ export function apply(ctx: ClientContext): void {
           .slice(0, 20)
           .map(row => ({ id: String(row.id), title: row.displayTitle, running: row.running })),
         openSession: (id: string) => { ctx.layout.selectPanel(null); ctx.uiWorkspace.openSession(id as never) },
+        // Workspace rows give the work surface something to switch between;
+        // sessions alone leave it with no project context.
+        workspaces: () => ctx.workspaces.list.getSnapshot().items.map(row => ({
+          workspaceId: String(row.workspaceId),
+          title: row.title,
+          path: row.path,
+          sessionIds: row.sessionIds.map(id => String(id)),
+        })),
       }),
     }, StudioRoot))
     ctx.slots.inject('sidebar.panellist', () => ctx.slots.register({

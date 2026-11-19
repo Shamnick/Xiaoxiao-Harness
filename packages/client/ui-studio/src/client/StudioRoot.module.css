@@ -1160,3 +1160,46 @@
   outline: var(--dsw-focus-ring-width, 2px) solid var(--dsw-focus-ring-color, var(--dsw-alias-state-business-primary));
   outline-offset: 1px;
 }
+
+/* ── Workspace rows on the work surface ───────────────────────────────── */
+
+.projectList {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0 0 18px;
+  padding: 0;
+  list-style: none;
+}
+
+.projectRow {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 7px 10px;
+  border: 0.5px solid var(--dsw-alias-border-l1);
+  border-radius: var(--dsw-radius-sm);
+  background: var(--dsw-alias-bg-layer-1);
+}
+
+.projectTitle {
+  color: var(--dsw-alias-label-primary);
+  font-size: 12.5px;
+  line-height: 18px;
+}
+
+.projectPath {
+  overflow: hidden;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 11px;
+  line-height: 16px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.projectCount {
+  color: var(--dsw-alias-label-quaternary, var(--dsw-alias-label-tertiary));
+  font-size: 11px;
+  line-height: 16px;
+  font-variant-numeric: tabular-nums;
+}

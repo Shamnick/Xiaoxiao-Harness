@@ -15,6 +15,14 @@ export interface StudioEntry {
 }
 
 /** File access the code surface performs against the active Session workspace. */
+/** One Workspace as the work surface needs it. */
+export interface StudioWorkspace {
+  readonly workspaceId: string
+  readonly title: string
+  readonly path: string
+  readonly sessionIds: readonly string[]
+}
+
 export interface StudioCodeApi {
   /** Display title of the Session whose workspace is being browsed. */
   sessionTitle: () => string | undefined
@@ -57,6 +65,8 @@ export type StudioRootProps = PropsLocale<'ui-studio'>
     recentSessions: () => readonly { id: string; title: string; running: boolean }[]
     /** Open an existing session and return to the conversation. */
     openSession: (id: string) => void
+    /** The registry's Workspace rows, in Host order. */
+    workspaces: () => readonly StudioWorkspace[]
   }
 
 /** Narrowest a resizable pane may become, in pixels. */
@@ -115,7 +125,13 @@ export function StudioRoot(props: StudioRootProps) {
       <section className={css.surface} data-surface={surface}>
         {surface === 'code' && <CodeSurface t={t} code={code} useStore={useStore} actions={actions} />}
         {surface === 'work' && (
-          <WorkSurface t={t} openConversation={openConversation} recentSessions={props.recentSessions} openSession={props.openSession} />
+          <WorkSurface
+            t={t}
+            openConversation={openConversation}
+            recentSessions={props.recentSessions}
+            openSession={props.openSession}
+            workspaces={props.workspaces}
+          />
         )}
         {(surface === 'image' || surface === 'video') && (
           <GenerateSurface
@@ -255,19 +271,39 @@ function Breadcrumbs({ t, path, onNavigate }: {
  * conversation. The list is read once at mount; live session subscription
  * belongs to the conversation, which owns that projection.
  */
-function WorkSurface({ t, openConversation, recentSessions, openSession }: {
+function WorkSurface({ t, openConversation, recentSessions, openSession, workspaces }: {
   t: StudioRootProps['t']
   openConversation: () => void
   recentSessions: StudioRootProps['recentSessions']
   openSession: StudioRootProps['openSession']
+  workspaces: StudioRootProps['workspaces']
 }) {
   const sessions = useMemo(() => recentSessions(), [recentSessions])
+  const registry = useMemo(() => workspaces(), [workspaces])
   return (
     <div className={css.work}>
       <header className={css.workHead}>
         <h2 className={css.workTitle}>{t('work.title')}</h2>
         <button type="button" className={css.primaryAction} onClick={openConversation}>{t('work.open')}</button>
       </header>
+      {registry.length > 0 && (
+        <>
+          <p className={css.workHint}>{t('work.projects')}</p>
+          <ul className={css.projectList}>
+            {registry.map(entry => (
+              <li key={entry.workspaceId}>
+                <div className={css.projectRow}>
+                  <span className={css.projectTitle}>{entry.title}</span>
+                  <span className={css.projectPath}>{entry.path}</span>
+                  <span className={css.projectCount}>
+                    {`${String(entry.sessionIds.length)} ${t('work.sessionCount')}`}
+                  </span>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
       <p className={css.workHint}>{t('work.recent')}</p>
       {sessions.length === 0
         ? <EmptyState icon="◷" title={t('work.noSessions')} hint={t('work.noSessionsHint')} />
