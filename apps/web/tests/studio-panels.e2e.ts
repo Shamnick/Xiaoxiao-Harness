@@ -89,3 +89,31 @@ it('reaches the code surface by keyboard alone', async () => {
   const landed = await page.evaluate(() => document.activeElement?.tagName ?? '')
   expect(landed).toBe('BUTTON')
 }, 180_000)
+
+it('places its launchers inside the sidebar panel list', async () => {
+  const scaffold: WebScaffold = await launchWebScaffold()
+  onTestFinished(() => scaffold.close())
+  const browser = await chromium.launch()
+  onTestFinished(() => browser.close())
+  const page = await browser.newPage({ viewport: { width: 1440, height: 900 } })
+  await page.goto(scaffold.authenticatedUrl, { waitUntil: 'load' })
+  await page.waitForSelector('[aria-label]', { timeout: 60_000 })
+
+  // The four launchers must share one ancestor: that container is the panel
+  // list this plugin registered into. If they were scattered, the registration
+  // went somewhere else and the desktop sidebar would not show them.
+  const report = await page.evaluate(() => {
+    const names = ['work', 'code', 'image', 'video']
+    const found = names.map((name) => {
+      const all = Array.from(document.querySelectorAll('button'))
+        .filter(b => (b.textContent || '').trim().toLowerCase() === name)
+      const node = all[0]
+      if (node === undefined) return { name, found: false, parent: '' }
+      return { name, found: true, parent: node.parentElement?.parentElement?.className ?? '' }
+    })
+    const parents = new Set(found.filter(f => f.found).map(f => f.parent))
+    return { found, distinctParents: parents.size }
+  })
+  expect(report.found.every(f => f.found)).toBe(true)
+  expect(report.distinctParents).toBe(1)
+}, 180_000)
