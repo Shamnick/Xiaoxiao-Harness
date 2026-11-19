@@ -132,6 +132,40 @@ export function apply(ctx: ClientContext): void {
         // `conversation` is the layout's default entry rather than a keyed panel,
         // so returning to it means clearing the selected panel.
         openConversation: () => { ctx.layout.selectPanel(null) },
+        // The transcript behind this pane, so the working area can show the
+        // work happening instead of only the request that started it. Only
+        // text blocks are surfaced here; the full Conversation remains the
+        // place for tool cards and rich rendering.
+        thread: () => {
+          const rows = Object.values(ctx.sessions.list.getSnapshot().byId)
+            .filter(row => row.origin !== 'subagent')
+          const byRecency = [...rows].sort((a, b) => b.updatedAt - a.updatedAt)
+          const target = byRecency.find(row =>
+            (row.projectionValues?.agentPreset ?? undefined) === PRESETS[surface]) ?? byRecency[0]
+          if (target === undefined) return []
+          const binding = ctx.sessions.binding(target.id as SessionId)
+          if (binding === undefined) return []
+          const out: { id: string; role: string; text: string }[] = []
+          for (const entry of binding.eventSource.getSnapshot().entries) {
+            if (entry.type !== 'event') continue
+            const event = entry.event
+            // A user message carries its blocks directly; an assistant message
+            // nests them under `message`. The assistant data is a union of
+            // several record shapes, so the shape is read rather than narrowed.
+            const data = event.data as { content?: unknown; message?: { content?: unknown } }
+            const blocks = Array.isArray(data.content)
+              ? data.content
+              : Array.isArray(data.message?.content) ? data.message.content : []
+            const text = (blocks as readonly { type: string; text?: string }[])
+              .filter(part => part.type === 'text' && typeof part.text === 'string')
+              .map(part => part.text ?? '')
+              .join('')
+              .trim()
+            if (text === '') continue
+            out.push({ id: String(event.seq), role: event.type === 'user/message' ? 'user' : 'assistant', text })
+          }
+          return out.slice(-40)
+        },
         // Submit in place. Sending the reader to another surface to press a
         // second button is what made these panes feel like launchers rather
         // than working areas: the work happens here, so the request goes from

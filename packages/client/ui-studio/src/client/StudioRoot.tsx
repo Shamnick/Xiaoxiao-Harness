@@ -35,6 +35,16 @@ export interface StudioCodeApi {
 }
 
 /** One generation job, as the studio tracks it. */
+/** One text message of the session behind a working area. */
+export interface StudioMessage {
+  /** Durable event sequence, used as the list identity. */
+  id: string
+  /** Who spoke. */
+  role: string
+  /** Plain text of the message. */
+  text: string
+}
+
 export interface StudioGeneration {
   id: string
   prompt: string
@@ -69,6 +79,8 @@ export type StudioRootProps = PropsLocale<'ui-studio'>
     workspaces: () => readonly StudioWorkspace[]
     /** Open a new session under this surface's agent preset. */
     newSession: () => void
+    /** Text messages in the session behind this surface, oldest first. */
+    thread: () => readonly StudioMessage[]
   }
 
 /** Narrowest a resizable pane may become, in pixels. */
@@ -120,7 +132,7 @@ export function outlineSymbols(text: string): StudioSymbol[] {
  * @returns the studio shell.
  */
 export function StudioRoot(props: StudioRootProps) {
-  const { t, surface, openConversation, code, submitPrompt, useStore, actions } = props
+  const { t, surface, openConversation, code, submitPrompt, useStore, actions, thread } = props
   const state = useStore(snapshot => snapshot)
   return (
     <div className={css.root}>
@@ -135,6 +147,9 @@ export function StudioRoot(props: StudioRootProps) {
             workspaces={props.workspaces}
             newSession={props.newSession}
           />
+        )}
+        {(surface === 'image' || surface === 'video') && (
+          <Thread messages={thread()} t={t} />
         )}
         {(surface === 'image' || surface === 'video') && (
           <GenerateSurface
@@ -279,6 +294,29 @@ function Breadcrumbs({ t, path, onNavigate }: {
  * conversation. The list is read once at mount; live session subscription
  * belongs to the conversation, which owns that projection.
  */
+/** The transcript behind a working area, newest at the bottom. */
+function Thread({ messages, t }: { messages: readonly StudioMessage[]; t: StudioRootProps['t'] }) {
+  if (messages.length === 0) {
+    return (
+      <div className={css.thread}>
+        <p className={css.threadEmpty}>{t('thread.empty')}</p>
+      </div>
+    )
+  }
+  return (
+    <div className={css.thread} role="log" aria-label={t('thread.label')}>
+      {messages.map(message => (
+        <article key={message.id} className={css.message} data-role={message.role}>
+          <span className={css.messageRole}>
+            {message.role === 'user' ? t('thread.you') : t('thread.agent')}
+          </span>
+          <p className={css.messageText}>{message.text}</p>
+        </article>
+      ))}
+    </div>
+  )
+}
+
 function WorkSurface({ t, openConversation, recentSessions, openSession, workspaces, newSession }: {
   t: StudioRootProps['t']
   openConversation: () => void

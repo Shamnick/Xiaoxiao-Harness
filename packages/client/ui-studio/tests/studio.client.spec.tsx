@@ -97,6 +97,7 @@ function mount(surface: StudioRootProps['surface'], store = makeStore(), code = 
       recentSessions={sessions}
       workspaces={() => []}
       newSession={vi.fn()}
+      thread={() => []}
       openSession={openSession}
       code={code}
       useStore={store.useStore as StudioRootProps['useStore']}
@@ -485,6 +486,7 @@ describe('navigation edges', () => {
         recentSessions={() => []}
         workspaces={() => []}
         newSession={vi.fn()}
+        thread={() => []}
         openSession={() => {}}
         code={code}
         useStore={makeStore().useStore as StudioRootProps['useStore']}
@@ -524,6 +526,7 @@ describe('failure paths', () => {
         recentSessions={() => []}
         workspaces={() => []}
         newSession={vi.fn()}
+        thread={() => []}
         openSession={() => {}}
         code={code}
         useStore={store.useStore as StudioRootProps['useStore']}
@@ -714,6 +717,7 @@ describe('remaining branches', () => {
         recentSessions={() => []}
         workspaces={() => []}
         newSession={vi.fn()}
+        thread={() => []}
         openSession={() => {}}
         code={code}
         useStore={store.useStore as StudioRootProps['useStore']}
@@ -741,6 +745,7 @@ describe('remaining branches', () => {
         recentSessions={() => []}
         workspaces={() => []}
         newSession={vi.fn()}
+        thread={() => []}
         openSession={() => {}}
         code={code}
         useStore={store.useStore as StudioRootProps['useStore']}
@@ -767,6 +772,7 @@ describe('remaining branches', () => {
         recentSessions={() => []}
         workspaces={() => []}
         newSession={vi.fn()}
+        thread={() => []}
         openSession={() => {}}
         code={code}
         useStore={store.useStore as StudioRootProps['useStore']}
@@ -793,6 +799,7 @@ describe('remaining branches', () => {
         recentSessions={() => []}
         workspaces={() => []}
         newSession={vi.fn()}
+        thread={() => []}
         openSession={() => {}}
         code={code}
         useStore={store.useStore as StudioRootProps['useStore']}
@@ -1189,6 +1196,7 @@ describe('work surface projects', () => {
         recentSessions={() => []}
         openSession={vi.fn()}
         newSession={vi.fn()}
+        thread={() => []}
         workspaces={() => [
           { workspaceId: 'w1', title: 'harness', path: '/src/harness', sessionIds: ['a', 'b'] },
           { workspaceId: 'w2', title: 'docs', path: '/src/docs', sessionIds: [] },
@@ -1307,5 +1315,54 @@ describe('tab shortcuts', () => {
     const { store, strip } = await mountTabs()
     fireEvent.keyDown(strip, { key: 'w' })
     expect(store.snapshot().tabs).toHaveLength(3)
+  })
+})
+
+describe('working-area transcript', () => {
+  it('renders the messages behind the surface', () => {
+    const store = makeStore()
+    render(
+      <StudioRoot
+        t={t}
+        surface="image"
+        openConversation={vi.fn()}
+        submitPrompt={vi.fn()}
+        recentSessions={() => []}
+        workspaces={() => []}
+        newSession={vi.fn()}
+        thread={() => [
+          { id: '1', role: 'user', text: 'a red boat' },
+          { id: '2', role: 'assistant', text: 'here it is' },
+        ]}
+        openSession={vi.fn()}
+        code={makeCode()}
+        useStore={store.useStore as StudioRootProps['useStore']}
+        actions={store.actions as StudioRootProps['actions']}
+      />,
+    )
+    expect(screen.getByRole('log')).toBeDefined()
+    expect(screen.getByText('a red boat')).toBeDefined()
+    expect(screen.getByText('here it is')).toBeDefined()
+  })
+
+  it('explains an empty transcript instead of showing a blank band', () => {
+    const store = makeStore()
+    render(
+      <StudioRoot
+        t={t}
+        surface="video"
+        openConversation={vi.fn()}
+        submitPrompt={vi.fn()}
+        recentSessions={() => []}
+        workspaces={() => []}
+        newSession={vi.fn()}
+        thread={() => []}
+        openSession={vi.fn()}
+        code={makeCode()}
+        useStore={store.useStore as StudioRootProps['useStore']}
+        actions={store.actions as StudioRootProps['actions']}
+      />,
+    )
+    expect(screen.queryByRole('log')).toBeNull()
   })
 })

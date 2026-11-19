@@ -1272,3 +1272,50 @@
   outline: var(--dsw-focus-ring-width, 2px) solid var(--dsw-focus-ring-color, var(--dsw-alias-state-business-primary));
   outline-offset: 1px;
 }
+
+/* Transcript behind a working area: the work itself, not just the request. */
+.thread {
+  display: flex;
+  flex: 0 1 auto;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 34vh;
+  min-height: 0;
+  padding: 4px 0 14px;
+  overflow-y: auto;
+  border-bottom: 0.5px solid var(--dsw-alias-border-l1);
+  margin-bottom: 14px;
+}
+
+.threadEmpty {
+  margin: 0;
+  padding: 10px 0;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 12.5px;
+}
+
+.message {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.messageRole {
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+.messageText {
+  margin: 0;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 13px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.message[data-role='user'] .messageText {
+  color: var(--dsw-alias-label-primary);
+}
