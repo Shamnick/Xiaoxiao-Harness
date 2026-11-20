@@ -367,13 +367,9 @@ function Composer({ t, submitPrompt, placeholder }: {
 
 /** The transcript behind a working area, newest at the bottom. */
 function Thread({ messages, t }: { messages: readonly StudioMessage[]; t: StudioRootProps['t'] }) {
-  if (messages.length === 0) {
-    return (
-      <div className={css.thread}>
-        <p className={css.threadEmpty}>{t('thread.empty')}</p>
-      </div>
-    )
-  }
+  // Nothing to show yet: the composer directly below already says what to do,
+  // and a bordered "this is empty" strip above it reads as a second heading.
+  if (messages.length === 0) return null
   return (
     <div className={css.thread} role="log" aria-label={t('thread.label')}>
       {messages.map(message => (

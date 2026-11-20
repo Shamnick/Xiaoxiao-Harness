@@ -1289,9 +1289,15 @@
 
 .threadEmpty {
   margin: 0;
-  padding: 10px 0;
+  padding: 14px 16px;
+  /* A bordered, tinted strip: a bare line of grey text reads as a heading for
+     the form below rather than as an empty state of its own. */
+  border: 0.5px dashed var(--dsw-alias-border-l1);
+  border-radius: var(--dsw-radius-md);
+  background: color-mix(in srgb, var(--dsw-alias-bg-layer-2) 45%, transparent);
   color: var(--dsw-alias-label-tertiary);
   font-size: 12.5px;
+  line-height: 1.6;
 }
 
 .message {
