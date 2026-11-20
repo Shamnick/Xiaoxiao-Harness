@@ -446,13 +446,15 @@ function WorkSurface({ t, openConversation, recentSessions, openSession, workspa
 }
 
 /** Directory listing plus a preview, shared by the image and video galleries. */
-function MediaBrowser({ t, code, accept, label, emptyLabel, children }: {
+function MediaBrowser({ t, code, accept, label, emptyLabel, emptyHint, children }: {
   t: StudioRootProps['t']
   code: StudioCodeApi
   /** File extensions this gallery lists. */
   accept: RegExp
   label: string
   emptyLabel: string
+  /** What to do when the gallery finds nothing, phrased for its media type. */
+  emptyHint: string
   /** Renders the preview for the selected file. */
   children: (selected: { path: string; url: string }) => React.ReactNode
 }) {
@@ -510,7 +512,7 @@ function MediaBrowser({ t, code, accept, label, emptyLabel, children }: {
         </ul>
       )}
       {files.length === 0
-        ? <EmptyState icon="▤" title={emptyLabel} hint={t('image.galleryHint')} />
+        ? <EmptyState icon="▤" title={emptyLabel} hint={emptyHint} />
         : (
           <ul className={css.galleryGrid}>
             {files.map(entry => (
@@ -705,6 +707,7 @@ function GenerateSurface({ mode, t, code, submitPrompt, history, onPush, onClear
           accept={mode === 'image' ? IMAGE_EXT : VIDEO_EXT}
           label={t(`${mode}.gallery`)}
           emptyLabel={t(`${mode}.galleryEmpty`)}
+          emptyHint={t(mode === 'video' ? 'video.galleryHint' : 'image.galleryHint')}
         >
           {selected => (
             <figure className={css.preview}>
