@@ -76,6 +76,13 @@ defects below were found: a near-white selected chip, a duplicate
   driven face, but no browser scenario yet proves real workspace files appear.
   The attempt needed a seeded Session whose recorded `cwd` matches the
   connected workspace, and was dropped rather than left flaky.
+- **`duplication` reports one clone in `src/client/index.ts`.** `thread` and
+  `pictures` each re-derive the surface's target session from the same eight
+  lines. Both live inside one object literal returned by an arrow expression,
+  so a shared local binding cannot be declared without converting the inject
+  face from an expression to a statement body — a whole-file edit that was
+  started, broke the file's bracket structure, and was reverted rather than
+  shipped unverified.
 - **A half-typed prompt is lost when switching surfaces.** Each surface owns its
   draft in component state, and selecting another surface unmounts the pane.
   Moving the draft into the entry store was attempted twice: the first pass
