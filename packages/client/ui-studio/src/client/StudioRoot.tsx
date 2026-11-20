@@ -1054,7 +1054,9 @@ function CodeSurface({ t, code, useStore, actions }: {
                 </p>
               </div>
             )
-            : <p className={css.editorEmpty}>{t('code.pickFile')}</p>)
+            /* Nothing to click on the left: repeating "pick a file" points at
+               an empty pane. Say the same thing the explorer says. */
+            : <p className={css.editorEmpty}>{t('code.empty')}</p>)
           : openFile.loading
             ? <p className={css.editorEmpty}>{t('code.loading')}</p>
             : (
