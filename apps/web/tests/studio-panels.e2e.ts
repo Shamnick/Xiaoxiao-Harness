@@ -139,3 +139,28 @@ it('submits inside the surface without leaving it', async () => {
   expect(await page.locator('[data-surface]').first().getAttribute('data-surface')).toBe('image')
   expect(await textarea.inputValue()).toBe('')
 }, 180_000)
+
+it('exposes the selected aspect to assistive technology', async () => {
+  const scaffold: WebScaffold = await launchWebScaffold()
+  onTestFinished(() => scaffold.close())
+  const browser = await chromium.launch()
+  onTestFinished(() => browser.close())
+  const page = await browser.newPage({ viewport: { width: 1440, height: 900 } })
+  await page.goto(scaffold.authenticatedUrl, { waitUntil: 'load' })
+  await page.waitForSelector('[aria-label]', { timeout: 60_000 })
+
+  await page.locator('button:has-text("Image")').first().click()
+  await page.waitForTimeout(1200)
+
+  const read = async () => page.evaluate(() => Array.from(
+    document.querySelectorAll('[data-surface] button[aria-pressed]'),
+  ).map(b => `${(b.textContent ?? '').trim()}:${b.getAttribute('aria-pressed') ?? ''}`))
+
+  // Colour alone is not a selection: the pressed state has to be readable.
+  expect(await read()).toContain('1:1:true')
+  await page.locator('button:has-text("16:9")').first().click()
+  await page.waitForTimeout(400)
+  const after = await read()
+  expect(after).toContain('16:9:true')
+  expect(after).toContain('1:1:false')
+}, 180_000)
