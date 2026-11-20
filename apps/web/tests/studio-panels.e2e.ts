@@ -117,3 +117,25 @@ it('places its launchers inside the sidebar panel list', async () => {
   expect(report.found.every(f => f.found)).toBe(true)
   expect(report.distinctParents).toBe(1)
 }, 180_000)
+
+it('submits inside the surface without leaving it', async () => {
+  const scaffold: WebScaffold = await launchWebScaffold()
+  onTestFinished(() => scaffold.close())
+  const browser = await chromium.launch()
+  onTestFinished(() => browser.close())
+  const page = await browser.newPage({ viewport: { width: 1440, height: 900 } })
+  await page.goto(scaffold.authenticatedUrl, { waitUntil: 'load' })
+  await page.waitForSelector('[aria-label]', { timeout: 60_000 })
+
+  await page.locator('button:has-text("Image")').first().click()
+  await page.waitForTimeout(1200)
+
+  const textarea = page.locator('textarea').first()
+  await textarea.fill('a red boat at dusk')
+  await page.locator('button:has-text("Generate image")').first().click()
+  await page.waitForTimeout(2500)
+
+  // The work happens here: the surface stays selected and the draft clears.
+  expect(await page.locator('[data-surface]').first().getAttribute('data-surface')).toBe('image')
+  expect(await textarea.inputValue()).toBe('')
+}, 180_000)
