@@ -424,7 +424,11 @@ function WorkSurface({ t, openConversation, recentSessions, openSession, workspa
       )}
       <p className={css.workHint}>{t('work.recent')}</p>
       {sessions.length === 0
-        ? <EmptyState icon="◷" title={t('work.noSessions')} hint={t('work.noSessionsHint')} />
+        ? (registry.length > 0
+          /* Projects already fill the pane; a second boxed empty state below
+             them doubles the visual weight of "nothing here". */
+          ? <p className={css.workHint}>{t('work.noSessions')}</p>
+          : <EmptyState icon="◷" title={t('work.noSessions')} hint={t('work.noSessionsHint')} />)
         : (
           <ul className={css.sessionList}>
             {sessions.map(session => (
