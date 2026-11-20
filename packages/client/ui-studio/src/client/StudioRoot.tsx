@@ -612,6 +612,7 @@ function GenerateForm({ mode, t, submitPrompt, onPush, draft, onDraftUsed }: {
               type="button"
               className={css.chip}
               data-active={option === variant || undefined}
+              aria-pressed={option === variant}
               onClick={() => { setVariant(option) }}
             >{option}</button>
           ))}
@@ -626,6 +627,7 @@ function GenerateForm({ mode, t, submitPrompt, onPush, draft, onDraftUsed }: {
               type="button"
               className={css.chip}
               data-active={option === count || undefined}
+              aria-pressed={option === count}
               onClick={() => { setCount(option) }}
             >{option}</button>
           ))}
