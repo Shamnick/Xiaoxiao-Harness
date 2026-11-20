@@ -1419,3 +1419,14 @@
   color: var(--dsw-alias-label-tertiary);
   font-size: 12px;
 }
+
+/* Explorer empty state: a full sentence, so it needs to wrap rather than
+   stretch the pane's scroll width. */
+.treeEmpty {
+  margin: 0;
+  padding: 8px 2px;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 12px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}

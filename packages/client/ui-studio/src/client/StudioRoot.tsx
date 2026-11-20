@@ -925,7 +925,7 @@ function CodeSurface({ t, code, useStore, actions }: {
         </nav>
         {listing.state === 'loading' && <p className={css.mapEmpty}>{t('code.loading')}</p>}
         {listing.state === 'error' && <p className={css.mapEmpty}>{t('code.listFailed')}</p>}
-        {listing.state === 'idle' && listing.entries.length === 0 && <p className={css.mapEmpty}>{t('code.empty')}</p>}
+        {listing.state === 'idle' && listing.entries.length === 0 && <p className={css.treeEmpty}>{t('code.empty')}</p>}
         {listing.state === 'idle' && listing.entries.length > 0 && matched.length === 0 && (
           <p className={css.mapEmpty}>{t('code.noMatch')}</p>
         )}
