@@ -410,13 +410,21 @@ function WorkSurface({ t, openConversation, recentSessions, openSession, workspa
           <ul className={css.projectList}>
             {registry.map(entry => (
               <li key={entry.workspaceId}>
-                <div className={css.projectRow}>
+                {/* A project row is the obvious thing to click, so it is a
+                    button: it opens the project's most recent session, which
+                    is what selecting a project means. */}
+                <button
+                  type="button"
+                  className={css.projectRow}
+                  onClick={() => { openSession(entry.sessionIds[0] ?? '') }}
+                  disabled={entry.sessionIds.length === 0}
+                >
                   <span className={css.projectTitle}>{entry.title}</span>
                   <span className={css.projectPath}>{entry.path}</span>
                   <span className={css.projectCount}>
                     {`${String(entry.sessionIds.length)} ${t('work.sessionCount')}`}
                   </span>
-                </div>
+                </button>
               </li>
             ))}
           </ul>
