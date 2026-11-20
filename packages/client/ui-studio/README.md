@@ -76,6 +76,13 @@ defects below were found: a near-white selected chip, a duplicate
   driven face, but no browser scenario yet proves real workspace files appear.
   The attempt needed a seeded Session whose recorded `cwd` matches the
   connected workspace, and was dropped rather than left flaky.
+- **A half-typed prompt is lost when switching surfaces.** Each surface owns its
+  draft in component state, and selecting another surface unmounts the pane.
+  Moving the draft into the entry store was attempted twice: the first pass
+  broke 103 tests through the shared store shape, and after guarding for a
+  missing field 8 remained, all in the generation-submit path. The change was
+  reverted rather than shipped half-verified; a correct fix needs the store
+  change and its test fixtures landed together.
 - **The work surface shows a snapshot.** Its session list is read once at
   mount; live subscription belongs to the conversation, which owns that
   projection.
